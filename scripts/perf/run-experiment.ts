@@ -37,6 +37,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
   },
   {
@@ -52,6 +53,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
   },
   {
@@ -67,12 +69,14 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
   },
   {
     id: 'rust-fuzzy-find',
     label: 'Rust fuzzy find',
-    description: 'Experimental path that routes fuzzy matching through the Rust/WASM implementation with a TS fallback.',
+    description:
+      'Experimental path that routes fuzzy matching through the Rust/WASM implementation with a TS fallback.',
     flags: {
       deferDemangle: false,
       optimizedForEachCall: false,
@@ -82,6 +86,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
   },
   {
@@ -97,6 +102,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: true,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
   },
   {
@@ -113,6 +119,24 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: true,
+      rustInstrumentsDeepCopy: false,
+    },
+  },
+  {
+    id: 'rust-instruments-deep-copy',
+    label: 'Rust Instruments deep copy',
+    description:
+      'Experimental path that routes Instruments deep-copy parsing through Rust/WASM with a TS fallback and large-file guardrail.',
+    flags: {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: false,
+      rustInstrumentsDeepCopy: true,
     },
   },
 ]

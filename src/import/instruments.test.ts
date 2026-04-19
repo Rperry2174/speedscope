@@ -4,6 +4,13 @@ import {dumpProfile, checkProfileSnapshot} from '../lib/test-utils'
 
 import * as JSZip from 'jszip'
 import {importFromFileSystemDirectoryEntry} from '.'
+import {
+  importFromInstrumentsDeepCopy,
+  importFromInstrumentsDeepCopyLegacy,
+} from './instruments'
+import {BufferBackedTextFileContent} from './utils'
+import * as runtimeConfig from '../lib/runtime-config'
+import * as rustInstruments from './instruments-deep-copy-rust'
 
 describe('importFromInstrumentsDeepCopy', () => {
   test('time profile', async () => {
@@ -26,6 +33,41 @@ describe('importFromInstrumentsDeepCopy', () => {
 
   test('allocations profile', async () => {
     await checkProfileSnapshot('./sample/profiles/Instruments/13.4/cycles-example-deep-copy.txt')
+  })
+
+  test('rust parser matches legacy parser output', async () => {
+    const filePath = './sample/profiles/Instruments/16.0/simple-time-profile-deep-copy.txt'
+    const buffer = fs.readFileSync(filePath)
+    const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+    const contents = new BufferBackedTextFileContent(arrayBuffer)
+
+    jest.spyOn(runtimeConfig, 'isExperimentEnabled').mockImplementation(key =>
+      key === 'rustInstrumentsDeepCopy' ? true : false,
+    )
+
+    const experimental = await importFromInstrumentsDeepCopy(contents, arrayBuffer)
+    const legacy = importFromInstrumentsDeepCopyLegacy(contents)
+
+    expect(dumpProfile(experimental)).toEqual(dumpProfile(legacy))
+  })
+
+  test('falls back to legacy parser when rust parser fails', async () => {
+    const filePath = './sample/profiles/Instruments/16.0/simple-time-profile-deep-copy.txt'
+    const buffer = fs.readFileSync(filePath)
+    const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
+    const contents = new BufferBackedTextFileContent(arrayBuffer)
+
+    jest.spyOn(runtimeConfig, 'isExperimentEnabled').mockImplementation(key =>
+      key === 'rustInstrumentsDeepCopy' ? true : false,
+    )
+    jest
+      .spyOn(rustInstruments, 'importFromInstrumentsDeepCopyRust')
+      .mockRejectedValue(new Error('wasm init failed'))
+
+    const imported = await importFromInstrumentsDeepCopy(contents, arrayBuffer)
+    const legacy = importFromInstrumentsDeepCopyLegacy(contents)
+
+    expect(dumpProfile(imported)).toEqual(dumpProfile(legacy))
   })
 })
 

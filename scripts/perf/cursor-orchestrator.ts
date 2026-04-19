@@ -228,6 +228,7 @@ function toSummaryReport(
         rustTextUtils: false,
         rustPprofImport: false,
         rustHaskellImport: false,
+        rustInstrumentsDeepCopy: false,
       },
     },
     results: [],
@@ -243,6 +244,7 @@ function toSummaryReport(
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
     fixtures: [],
   }
@@ -285,6 +287,7 @@ async function main() {
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
     {
       deferDemangle: true,
@@ -295,6 +298,7 @@ async function main() {
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
     {
       deferDemangle: false,
@@ -305,6 +309,7 @@ async function main() {
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
     {
       deferDemangle: false,
@@ -315,6 +320,7 @@ async function main() {
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
     {
       deferDemangle: false,
@@ -325,6 +331,7 @@ async function main() {
       rustTextUtils: false,
       rustPprofImport: true,
       rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
     },
     {
       deferDemangle: false,
@@ -335,6 +342,18 @@ async function main() {
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: true,
+      rustInstrumentsDeepCopy: false,
+    },
+    {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: false,
+      rustInstrumentsDeepCopy: true,
     },
   ]
 

@@ -73,6 +73,8 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['rustProfileSearch', options.experiments.rustProfileSearch],
     ['rustTextUtils', options.experiments.rustTextUtils],
     ['rustPprofImport', options.experiments.rustPprofImport],
+    ['rustHaskellImport', options.experiments.rustHaskellImport],
+    ['rustInstrumentsDeepCopy', options.experiments.rustInstrumentsDeepCopy],
   ]
   for (const [name, enabled] of experimentEntries) {
     if (enabled) enabledExperiments.push(name)
@@ -359,6 +361,7 @@ async function main() {
       rustTextUtils: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TEXT_UTILS),
       rustPprofImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PPROF_IMPORT),
       rustHaskellImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_HASKELL_IMPORT),
+      rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
     },
   })
   writeMarkdown(artifactPaths.reportPath, renderBenchmarkReport(report))

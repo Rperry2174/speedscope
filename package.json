@@ -16,6 +16,7 @@
     "build:rust:pprof-import": "./scripts/build-rust-pprof-import.sh",
     "build:rust:import-parsers": "./scripts/build-rust-import-parsers.sh",
     "build:rust:haskell-import": "./scripts/build-rust-haskell-import.sh",
+    "build:rust:instruments-deep-copy": "./scripts/build-rust-instruments-deep-copy.sh",
     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
@@ -92,6 +93,7 @@
       "profile_search_bg\\.wasm$": "<rootDir>/src/lib/profile-search-rust.wasm.mock.ts",
       "pprof_import_bg\\.wasm$": "<rootDir>/src/import/pprof-rust.wasm.mock.ts",
       "import_parsers_bg\\.wasm$": "<rootDir>/src/import/import-parsers-rust.wasm.mock.ts",
+      "instruments_deep_copy_bg\\.wasm$": "<rootDir>/src/import/instruments-deep-copy.wasm.mock.ts",
       "haskell_import_bg\\.wasm$": "<rootDir>/src/import/haskell-rust.wasm.mock.ts"
     },
     "testRegex": "\\.test\\.tsx?$",

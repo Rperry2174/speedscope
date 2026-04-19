@@ -180,8 +180,10 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.instruments.txt')) {
     console.log('Importing as Instruments.app deep copy')
     annotatePerfRun('detected_format', 'instruments-deep-copy')
-    const result = timePerfSync('import_instruments_deep_copy', () =>
-      toGroup(importFromInstrumentsDeepCopy(contents)),
+    const result = toGroup(
+      await timePerfAsync('import_instruments_deep_copy', () =>
+        importFromInstrumentsDeepCopy(contents, buffer),
+      ),
     )
     notePerfMilestone('import_parse_finished')
     return result
@@ -352,8 +354,10 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     if (/^[\w \t\(\)]*\tSymbol Name/.exec(contents.firstChunk())) {
       console.log('Importing as Instruments.app deep copy')
       annotatePerfRun('detected_format', 'instruments-deep-copy')
-      const result = timePerfSync('import_instruments_deep_copy', () =>
-        toGroup(importFromInstrumentsDeepCopy(contents)),
+      const result = toGroup(
+        await timePerfAsync('import_instruments_deep_copy', () =>
+          importFromInstrumentsDeepCopy(contents, buffer),
+        ),
       )
       notePerfMilestone('import_parse_finished')
       return result

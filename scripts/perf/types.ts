@@ -15,6 +15,7 @@ export interface ExperimentFlags {
   rustTextUtils: boolean
   rustPprofImport: boolean
   rustHaskellImport: boolean
+  rustInstrumentsDeepCopy: boolean
 }
 
 export interface ExperimentRunOptions {
