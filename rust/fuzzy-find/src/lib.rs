@@ -252,7 +252,7 @@ mod tests {
     #[test]
     fn full_match() {
         let result = fuzzy_match_impl("hello", "hello").unwrap();
-        assert_eq!(result.0 > 0, true);
+        assert!(result.0 > 0);
         assert_eq!(result.1, vec![(0, 5)]);
     }
 

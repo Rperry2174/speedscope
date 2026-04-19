@@ -1,5 +1,6 @@
 import {fuzzyMatchStrings, fuzzyMatchStringsTs} from './fuzzy-find'
 import {loadRustFuzzyMatcher} from './fuzzy-find-rust'
+import {setExperimentOverridesForTesting} from './runtime-config'
 import {sortBy} from './utils'
 
 function assertMatches(texts: string[], pattern: string, expectedResults: string[]) {
@@ -82,6 +83,10 @@ describe('fuzzyMatchStrings', () => {
 })
 
 describe('rust fuzzy matcher parity', () => {
+  afterEach(() => {
+    setExperimentOverridesForTesting(null)
+  })
+
   test('matches TypeScript implementation for representative cases', async () => {
     const rustMatcher = await loadRustFuzzyMatcher()
     const cases: Array<{text: string; pattern: string}> = [
@@ -104,6 +109,17 @@ describe('rust fuzzy matcher parity', () => {
         fuzzyMatchStringsTs(testCase.text, testCase.pattern),
       )
     }
+  })
+
+  test('returns null for non-matches from the wasm boundary', async () => {
+    const rustMatcher = await loadRustFuzzyMatcher()
+    expect(rustMatcher('ca', 'ac')).toBeNull()
+  })
+
+  test('public API switches to rust matcher when experiment flag is enabled and loaded', async () => {
+    setExperimentOverridesForTesting({rustFuzzyFind: true})
+    const rustMatcher = await loadRustFuzzyMatcher()
+    expect(fuzzyMatchStrings('hello world', 'hw')).toEqual(rustMatcher('hello world', 'hw'))
   })
 
   test('public API stays aligned with the TypeScript fallback when rust flag is off', () => {
