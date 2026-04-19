@@ -1,3 +1,5 @@
+import {execFileSync} from 'child_process'
+
 export interface CursorModelResponse {
   items: string[]
 }
@@ -6,19 +8,42 @@ export interface CursorApiClient {
   listModels(): Promise<string[]>
 }
 
-export async function fetchCursorModels(apiKey: string): Promise<string[]> {
-  const response = await fetch('https://api.cursor.com/v1/models', {
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
-    },
-  })
+function parseCursorModelsResponse(raw: string): string[] {
+  const data = JSON.parse(raw) as CursorModelResponse
+  return data.items
+}
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Cursor models: ${response.status} ${response.statusText}`)
+function fetchCursorModelsWithCurl(apiKey: string): string[] {
+  const raw = execFileSync(
+    'curl',
+    ['-sS', '--fail', '-u', `${apiKey}:`, 'https://api.cursor.com/v1/models'],
+    {encoding: 'utf8'},
+  )
+  return parseCursorModelsResponse(raw)
+}
+
+export async function fetchCursorModels(apiKey: string): Promise<string[]> {
+  try {
+    return fetchCursorModelsWithCurl(apiKey)
+  } catch (curlError) {
+    // Fallback to fetch in environments where curl is unavailable.
   }
 
-  const data = (await response.json()) as CursorModelResponse
-  return data.items
+  try {
+    const response = await fetch('https://api.cursor.com/v1/models', {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Cursor models: ${response.status} ${response.statusText}`)
+    }
+
+    return parseCursorModelsResponse(await response.text())
+  } catch (error) {
+    throw error
+  }
 }
 
 export function createApiClient(apiKey: string): CursorApiClient {

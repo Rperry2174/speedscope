@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-04-19T04:14:34.862Z",
+  "specialists": [
+    {
+      "role": "conductor",
+      "modelId": "composer-2",
+      "runtime": "cloud",
+      "status": "error",
+      "text": "fetch failed"
+    },
+    {
+      "role": "analyst",
+      "modelId": "gpt-5.4-high",
+      "runtime": "cloud",
+      "status": "error",
+      "text": "fetch failed"
+    },
+    {
+      "role": "reviewer",
+      "modelId": "claude-4.6-opus-high-thinking-fast",
+      "runtime": "cloud",
+      "status": "error",
+      "text": "fetch failed"
+    }
+  ]
+}

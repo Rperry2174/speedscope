@@ -1,4 +1,5 @@
 import {mkdirSync, writeFileSync} from 'fs'
+import {execFileSync} from 'child_process'
 import * as path from 'path'
 import {Agent} from '@cursor/february'
 import {ensureRequestedModelFamilies, fetchCursorModels, selectCursorModel} from './cursor-api'
@@ -13,6 +14,8 @@ interface SpecialistDefinition {
   requestedFamily: 'composer-2' | 'gpt-5.4' | 'opus-4.6'
   prompt: string
 }
+
+type OrchestratorRuntime = 'local' | 'cloud'
 
 function requireApiKey() {
   const apiKey = process.env.CURSOR_API_KEY
@@ -51,6 +54,59 @@ function ensureOutputDir() {
   return dir
 }
 
+function getRequestedRuntime(): OrchestratorRuntime {
+  const raw = (process.env.SPEEDSCOPE_CURSOR_RUNTIME || 'cloud').toLowerCase()
+  return raw === 'local' ? 'local' : 'cloud'
+}
+
+function git(args: string[], cwd: string): string {
+  return execFileSync('git', args, {cwd, encoding: 'utf8'}).trim()
+}
+
+function normalizeGithubRemoteUrl(remoteUrl: string): string {
+  const sshMatch = remoteUrl.match(/^git@github\.com:(.+?)(?:\.git)?$/)
+  if (sshMatch) {
+    return `https://github.com/${sshMatch[1]}`
+  }
+
+  const httpsMatch = remoteUrl.match(/^https?:\/\/(?:[^@/]+@)?github\.com\/(.+?)(?:\.git)?$/)
+  if (httpsMatch) {
+    return `https://github.com/${httpsMatch[1]}`
+  }
+
+  return remoteUrl.replace(/\.git$/, '')
+}
+
+function createAgentForRuntime(args: {
+  apiKey: string
+  cwd: string
+  modelId: string
+  prompt: string
+}) {
+  const runtime = getRequestedRuntime()
+  if (runtime === 'local') {
+    return Agent.create({
+      apiKey: args.apiKey,
+      model: {id: args.modelId},
+      local: {cwd: args.cwd},
+      addedSystemInstruction: args.prompt,
+    })
+  }
+
+  const remoteUrl = normalizeGithubRemoteUrl(git(['config', '--get', 'remote.origin.url'], args.cwd))
+  const startingRef = git(['rev-parse', '--abbrev-ref', 'HEAD'], args.cwd)
+  return Agent.create({
+    apiKey: args.apiKey,
+    model: {id: args.modelId},
+    cloud: {
+      repos: [{url: remoteUrl, startingRef}],
+      autoGenerateBranch: true,
+      autoCreatePR: false,
+    },
+    addedSystemInstruction: args.prompt,
+  })
+}
+
 function buildPrompt(role: SpecialistRole, experimentFlags: ExperimentFlags[]) {
   const fixtures = FIXTURES
   return [
@@ -85,23 +141,36 @@ async function runSpecialist(
   experimentFlags: ExperimentFlags[],
 ) {
   const modelId = selectCursorModel(availableModels, specialist.requestedFamily)
-  const agent = Agent.create({
-    apiKey,
-    model: {id: modelId},
-    local: {cwd},
-    addedSystemInstruction: specialist.prompt,
-  })
+  const runtime = getRequestedRuntime()
+  let agent: ReturnType<typeof createAgentForRuntime> | null = null
   try {
+    agent = createAgentForRuntime({
+      apiKey,
+      cwd,
+      modelId,
+      prompt: specialist.prompt,
+    })
     const run = await agent.send(buildPrompt(specialist.role, experimentFlags))
     const result = await run.wait()
     return {
       role: specialist.role,
       modelId,
+      runtime,
       status: result.status,
       text: result.result || '',
     }
+  } catch (error) {
+    return {
+      role: specialist.role,
+      modelId,
+      runtime,
+      status: 'error' as const,
+      text: error instanceof Error ? error.message : `${error}`,
+    }
   } finally {
-    agent.close()
+    if (agent) {
+      agent.close()
+    }
   }
 }
 
@@ -109,7 +178,10 @@ function toSummaryReport(
   specialistOutputs: Awaited<ReturnType<typeof runSpecialist>>[],
 ): BuildPerfReportInput {
   const summaryLines = specialistOutputs.map(
-    output => `${output.role} (${output.modelId}, ${output.status}): ${output.text || 'no text output'}`,
+    output =>
+      `${output.role} (${output.modelId}, ${output.runtime}, ${output.status}): ${
+        output.text || 'no text output'
+      }`,
   )
   const emptyBenchmark: BrowserBenchmarkReport = {
     generatedAt: new Date().toISOString(),
