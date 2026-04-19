@@ -22,6 +22,7 @@ export interface ExperimentFlags {
   rustCallgrindImport: boolean
   rustV8ProfLog: boolean
   rustLinuxPerf: boolean
+  rustTraceEventImport: boolean
 }
 
 export interface ExperimentRunOptions {

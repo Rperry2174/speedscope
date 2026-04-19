@@ -69,6 +69,7 @@ function allExperimentsDisabled(experiments: ExperimentFlags): ExperimentFlags {
     rustV8ProfLog: false,
     rustLinuxPerf: false,
     rustImportParsers: false,
+    rustTraceEventImport: false,
   }
 }
 
@@ -101,6 +102,7 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['rustV8ProfLog', options.experiments.rustV8ProfLog],
     ['rustV8CpuFormatter', options.experiments.rustV8CpuFormatter],
     ['rustLinuxPerf', options.experiments.rustLinuxPerf],
+    ['rustTraceEventImport', options.experiments.rustTraceEventImport],
   ]
   for (const [name, enabled] of experimentEntries) {
     if (enabled) enabledExperiments.push(name)
@@ -395,6 +397,7 @@ async function main() {
         rustV8ProfLog: false,
         rustLinuxPerf: false,
         rustImportParsers: false,
+        rustTraceEventImport: false,
       }),
       deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
       optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
@@ -411,6 +414,7 @@ async function main() {
       rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
       rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),
       rustLinuxPerf: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_LINUX_PERF),
+      rustTraceEventImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TRACE_EVENT_IMPORT),
     },
   })
   writeMarkdown(artifactPaths.reportPath, renderBenchmarkReport(report))

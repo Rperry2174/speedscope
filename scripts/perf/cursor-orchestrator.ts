@@ -235,6 +235,7 @@ function toSummaryReport(
         rustV8ProfLog: false,
         rustLinuxPerf: false,
         rustImportParsers: false,
+        rustTraceEventImport: false,
       },
     },
     results: [],
@@ -257,6 +258,7 @@ function toSummaryReport(
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     fixtures: [],
   }
@@ -306,6 +308,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: true,
@@ -323,6 +326,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -340,6 +344,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -357,6 +362,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -374,6 +380,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -391,6 +398,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -408,6 +416,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -425,6 +434,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -442,6 +452,7 @@ async function main() {
       rustV8ProfLog: true,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -459,6 +470,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: true,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -476,6 +488,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -493,6 +506,7 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
     {
       deferDemangle: false,
@@ -510,6 +524,25 @@ async function main() {
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: true,
+      rustTraceEventImport: false,
+    },
+    {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustFirefoxImport: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustV8CpuFormatter: false,
+      rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
+      rustV8ProfLog: false,
+      rustLinuxPerf: false,
+      rustImportParsers: false,
+      rustTraceEventImport: true,
     },
   ]
 

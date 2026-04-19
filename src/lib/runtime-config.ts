@@ -14,6 +14,7 @@ export interface ExperimentFlags {
   rustV8ProfLog: boolean
   rustV8CpuFormatter: boolean
   rustLinuxPerf: boolean
+  rustTraceEventImport: boolean
 }
 
 const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
@@ -32,6 +33,7 @@ const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   rustV8ProfLog: false,
   rustV8CpuFormatter: false,
   rustLinuxPerf: false,
+  rustTraceEventImport: false,
 }
 
 let experimentOverrides: Partial<ExperimentFlags> | null = null

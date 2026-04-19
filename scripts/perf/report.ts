@@ -51,6 +51,7 @@ Flags:
 - rustCallgrindImport: ${report.experiment.experiments.rustCallgrindImport}
 - rustV8ProfLog: ${report.experiment.experiments.rustV8ProfLog}
 - rustLinuxPerf: ${report.experiment.experiments.rustLinuxPerf}
+- rustTraceEventImport: ${report.experiment.experiments.rustTraceEventImport}
 
 ## Fixture results
 

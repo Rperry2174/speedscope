@@ -27,6 +27,7 @@ function getExperimentFlags(): ExperimentFlags {
     rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
     rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),
     rustLinuxPerf: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_LINUX_PERF),
+    rustTraceEventImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TRACE_EVENT_IMPORT),
   }
 }
 

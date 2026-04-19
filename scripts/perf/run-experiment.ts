@@ -44,6 +44,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -66,6 +67,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -88,6 +90,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -111,6 +114,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8CpuFormatter: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -134,6 +138,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -157,6 +162,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -179,6 +185,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -202,6 +209,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: true,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -225,6 +233,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -248,6 +257,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -271,6 +281,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: false,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
   {
@@ -294,6 +305,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustV8ProfLog: false,
       rustLinuxPerf: true,
       rustImportParsers: false,
+      rustTraceEventImport: false,
     },
   },
 ]

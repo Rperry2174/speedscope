@@ -7,6 +7,10 @@ import {
   StackListProfileBuilder,
 } from '../lib/profile'
 import {TimeFormatter} from '../lib/value-formatters'
+import {
+  getRustTraceEventImporter,
+  RustImportableTraceEvent,
+} from './trace-event-rust'
 
 // This file concerns import from the "Trace Event Format", authored by Google
 // and used for Google's own chrome://trace.
@@ -139,6 +143,55 @@ interface TraceEventObject {
 }
 
 type Trace = TraceEvent[] | TraceEventObject | TraceWithSamples
+
+interface RustReplayFrame {
+  key: string
+  name: string
+}
+
+type RustReplayOp =
+  | {
+      kind: 'enter'
+      ts: number
+      frame: RustReplayFrame
+    }
+  | {
+      kind: 'leave'
+      ts: number
+      frame: RustReplayFrame
+    }
+  | {
+      kind: 'warn-unmatched-end'
+      ts: number
+      key: string
+    }
+  | {
+      kind: 'warn-mismatched-name'
+      ts: number
+      expected_key: string
+      actual_key: string
+    }
+  | {
+      kind: 'warn-mismatched-key'
+      ts: number
+      expected_key: string
+      actual_key: string
+      ended_key: string
+    }
+  | {
+      kind: 'warn-auto-close'
+      key: string
+    }
+
+interface RustThreadProfile {
+  pid: number
+  tid: number
+  ops: RustReplayOp[]
+}
+
+interface RustImportResponse {
+  profiles: RustThreadProfile[]
+}
 
 function pidTidKey(pid: number, tid: number): string {
   // We zero-pad the PID and TID to make sorting them by pid/tid pair later easier.
@@ -636,10 +689,124 @@ function sampleListToProfile(contents: TraceWithSamples, samples: Sample[], name
   return profileBuilder.build()
 }
 
+function toRustImportableEvent(
+  event: ImportableTraceEvent,
+  ordinal: number,
+): RustImportableTraceEvent {
+  return {
+    pid: event.pid,
+    tid: event.tid,
+    ph: event.ph,
+    ts: event.ts,
+    name: event.name,
+    args_json: event.args ? JSON.stringify(event.args) : undefined,
+    dur: event.ph === 'X' ? event.dur : undefined,
+    tdur: event.ph === 'X' ? event.tdur : undefined,
+    ordinal,
+  }
+}
+
+function replayRustThreadProfile(thread: RustThreadProfile, name: string): Profile {
+  const profileBuilder = new CallTreeProfileBuilder()
+  profileBuilder.setValueFormatter(new TimeFormatter('microseconds'))
+  profileBuilder.setName(name)
+
+  for (const op of thread.ops) {
+    switch (op.kind) {
+      case 'enter':
+        profileBuilder.enterFrame(op.frame, op.ts)
+        break
+      case 'leave':
+        profileBuilder.leaveFrame(op.frame, op.ts)
+        break
+      case 'warn-unmatched-end':
+        console.warn(`Tried to end frame "${op.key}", but the stack was empty. Doing nothing instead.`)
+        break
+      case 'warn-mismatched-name':
+        console.warn(
+          `ts=${op.ts}: Tried to end "${op.expected_key}" when "${op.actual_key}" was on the top of the stack. Doing nothing instead.`,
+        )
+        break
+      case 'warn-mismatched-key':
+        console.warn(
+          `ts=${op.ts}: Tried to end "${op.expected_key}" when "${op.actual_key}" was on the top of the stack. Ending ${op.ended_key} instead.`,
+        )
+        break
+      case 'warn-auto-close':
+        console.warn(`Frame "${op.key}" was still open at end of profile. Closing automatically.`)
+        break
+      default: {
+        const _exhaustiveCheck: never = op
+        return _exhaustiveCheck
+      }
+    }
+  }
+
+  return profileBuilder.build()
+}
+
+function eventListToProfileGroupRust(
+  events: TraceEvent[],
+  exporterSource: ExporterSource = ExporterSource.UNKNOWN,
+): ProfileGroup | null {
+  if (exporterSource !== ExporterSource.UNKNOWN) {
+    return null
+  }
+
+  const rustImporter = getRustTraceEventImporter()
+  if (!rustImporter) {
+    return null
+  }
+
+  const importableEvents = filterIgnoredEventTypes(events)
+  const partitionedTraceEvents = partitionByPidTid(importableEvents)
+  const profileNamesByPidTid = getProfileNamesFromTraceEvents(events, partitionedTraceEvents)
+
+  const rustEvents = importableEvents.map((event, ordinal) => toRustImportableEvent(event, ordinal))
+  const parsed = JSON.parse(rustImporter(rustEvents)) as RustImportResponse
+  const rustProfilesByKey = new Map<string, RustThreadProfile>()
+  for (const profile of parsed.profiles) {
+    rustProfilesByKey.set(pidTidKey(profile.pid, profile.tid), profile)
+  }
+
+  const profilePairs: [string, Profile][] = []
+  profileNamesByPidTid.forEach((name, profileKey) => {
+    const rustThreadProfile = rustProfilesByKey.get(profileKey)
+    const importableEventsForPidTid = partitionedTraceEvents.get(profileKey)
+
+    if (!importableEventsForPidTid) {
+      throw new Error(`Could not find events for key: ${importableEventsForPidTid}`)
+    }
+
+    if (!rustThreadProfile) {
+      profilePairs.push([
+        profileKey,
+        eventListToProfile(importableEventsForPidTid, name, exporterSource),
+      ])
+      return
+    }
+
+    profilePairs.push([profileKey, replayRustThreadProfile(rustThreadProfile, name)])
+  })
+
+  sortBy(profilePairs, p => p[0])
+
+  return {
+    name: '',
+    indexToView: 0,
+    profiles: profilePairs.map(p => p[1]),
+  }
+}
+
 function eventListToProfileGroup(
   events: TraceEvent[],
   exporterSource: ExporterSource = ExporterSource.UNKNOWN,
 ): ProfileGroup {
+  const rustProfileGroup = eventListToProfileGroupRust(events, exporterSource)
+  if (rustProfileGroup) {
+    return rustProfileGroup
+  }
+
   const importableEvents = filterIgnoredEventTypes(events)
   const partitionedTraceEvents = partitionByPidTid(importableEvents)
   const profileNamesByPidTid = getProfileNamesFromTraceEvents(events, partitionedTraceEvents)
