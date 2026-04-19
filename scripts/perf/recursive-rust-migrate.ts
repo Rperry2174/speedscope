@@ -1,11 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import {execFileSync, execFile} from 'child_process'
-import {promisify} from 'util'
-
+import {execFileSync, spawnSync} from 'child_process'
 import {fetchCursorModels, selectCursorModel} from './cursor-api'
-
-const execFileAsync = promisify(execFile)
 
 type ModelFamily = 'composer-2' | 'gpt-5.4' | 'opus-4.6'
 type TaskMode = 'migrate-rust' | 'keep-ts-review' | 'proof-point'
@@ -188,9 +184,10 @@ function chunk<T>(items: T[], size: number): T[][] {
 }
 
 function buildRecursiveTasks(repoRoot: string): RecursiveTask[] {
-  const allFiles = ROOTS.flatMap(root =>
-    collectTsFilesRecursive(path.join(repoRoot, root), repoRoot),
-  )
+  const allFiles: string[] = []
+  for (const root of ROOTS) {
+    allFiles.push(...collectTsFilesRecursive(path.join(repoRoot, root), repoRoot))
+  }
 
   const groupedByDirectory = new Map<string, string[]>()
   for (const filePath of allFiles) {
@@ -252,11 +249,16 @@ function buildRecursiveTasks(repoRoot: string): RecursiveTask[] {
 }
 
 async function curlJson(args: string[], stdin?: string): Promise<any> {
-  const {stdout} = await execFileAsync('curl', args, {
-    maxBuffer: 8 * 1024 * 1024,
+  const result = spawnSync('curl', args, {
     input: stdin,
-  } as any)
-  return JSON.parse(stdout)
+    maxBuffer: 8 * 1024 * 1024,
+    encoding: 'utf8',
+  })
+  if (result.error) throw result.error
+  if (result.status !== 0) {
+    throw new Error((result.stderr || '').trim() || `curl exited with status ${result.status}`)
+  }
+  return JSON.parse(result.stdout)
 }
 
 async function createCloudAgentRun(args: {
