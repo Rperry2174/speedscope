@@ -1,0 +1,123 @@
+{
+  "generatedAt": "2026-04-19T02:58:01.412Z",
+  "experiment": {
+    "experimentName": "legacy",
+    "experiments": {
+      "deferDemangle": false,
+      "optimizedForEachCall": false
+    }
+  },
+  "results": [
+    {
+      "fixtureId": "chrome-timeline-large",
+      "fixturePath": "sample/profiles/Chrome/65/timeline.json",
+      "format": "chrome-timeline",
+      "experiment": "legacy",
+      "runs": [
+        {
+          "fixtureId": "chrome-timeline-large",
+          "runIndex": 0,
+          "warm": false,
+          "wallClockMs": 324,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 19.69999998807907,
+            "importParseFinishedMs": 78.30000001192093,
+            "profileStateAppliedMs": 78.90000003576279,
+            "firstMeaningfulPaintMs": 256.30000001192093,
+            "totalWallClockMs": 256.30000001192093
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 135,
+            "finishedAt": 391.30000001192093,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "timeline.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 19.69999998807907,
+              "import_parse_finished": 78.30000001192093,
+              "loader_finished": 78.30000001192093,
+              "profile_demangle_finished": 78.60000002384186,
+              "before_profile_group_set": 78.80000001192093,
+              "profile_state_applied": 78.90000003576279,
+              "loading_indicator_cleared": 79,
+              "first_meaningful_paint": 256.30000001192093,
+              "run_complete": 256.30000001192093
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                17.899999976158142
+              ],
+              "inflate_if_needed": [
+                0.7999999523162842
+              ],
+              "read_array_buffer": [
+                18.399999976158142
+              ],
+              "import_pprof_probe": [
+                1.100000023841858
+              ],
+              "read_text": [
+                12.099999964237213
+              ],
+              "json_parse_string": [
+                20.899999976158142
+              ],
+              "parse_json_dispatch": [
+                24.80000001192093
+              ],
+              "import_chrome_timeline": [
+                19.299999952316284
+              ],
+              "import_profile_group_total": [
+                77.10000002384186
+              ],
+              "application_loader": [
+                78.10000002384186
+              ],
+              "profile_demangle": [
+                0.10000002384185791
+              ],
+              "build_chrono_flamechart": [
+                1.7999999523162842
+              ],
+              "build_flamechart_renderer": [
+                2.100000023841858
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 6036746,
+              "input_file_type": "application/json",
+              "file_name": "timeline.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 6036746,
+              "byte_length": 6036746,
+              "detected_format": "chrome-timeline",
+              "profile_count_loaded": 1,
+              "profile_group_name": "timeline.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 57,
+              "first_painted_root_frame_count": 181
+            }
+          }
+        }
+      ],
+      "coldSummary": {
+        "firstMeaningfulPaintMs": 256.30000001192093,
+        "totalWallClockMs": 256.30000001192093
+      },
+      "warmSummary": null
+    }
+  ]
+}

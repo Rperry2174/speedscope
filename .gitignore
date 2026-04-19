@@ -1,6 +1,9 @@
 node_modules
+rust/**/target
 .cache
 dist
 .idea
 coverage
 .vscode
+.env
+.env.*

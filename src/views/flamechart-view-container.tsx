@@ -19,6 +19,7 @@ import {FlamechartSearchContextProvider} from './flamechart-search-view'
 import {Theme, useTheme} from './themes/theme'
 import {FlamechartID, FlamechartViewState} from '../app-state/profile-group'
 import {profileGroupAtom} from '../app-state'
+import {annotatePerfRun, timePerfSync} from '../lib/perf'
 
 interface FlamechartSetters {
   setLogicalSpaceViewportSize: (logicalSpaceViewportSize: Vec2) => void
@@ -74,12 +75,14 @@ export const getChronoViewFlamechart = memoizeByShallowEquality(
     profile: Profile
     getColorBucketForFrame: (frame: Frame) => number
   }): Flamechart => {
-    return new Flamechart({
-      getTotalWeight: profile.getTotalWeight.bind(profile),
-      forEachCall: profile.forEachCall.bind(profile),
-      formatValue: profile.formatValue.bind(profile),
-      getColorBucketForFrame,
-    })
+    return timePerfSync('build_chrono_flamechart', () =>
+      new Flamechart({
+        getTotalWeight: profile.getTotalWeight.bind(profile),
+        forEachCall: profile.forEachCall.bind(profile),
+        formatValue: profile.formatValue.bind(profile),
+        getColorBucketForFrame,
+      }),
+    )
   },
 )
 
@@ -92,13 +95,15 @@ export const createMemoizedFlamechartRenderer = (options?: FlamechartRendererOpt
       canvasContext: CanvasContext
       flamechart: Flamechart
     }): FlamechartRenderer => {
-      return new FlamechartRenderer(
-        canvasContext.gl,
-        getRowAtlas(canvasContext),
-        flamechart,
-        canvasContext.rectangleBatchRenderer,
-        canvasContext.flamechartColorPassRenderer,
-        options,
+      return timePerfSync('build_flamechart_renderer', () =>
+        new FlamechartRenderer(
+          canvasContext.gl,
+          getRowAtlas(canvasContext),
+          flamechart,
+          canvasContext.rectangleBatchRenderer,
+          canvasContext.flamechartColorPassRenderer,
+          options,
+        ),
       )
     },
   )
@@ -126,6 +131,8 @@ export const ChronoFlamechartView = memo((props: FlamechartViewContainerProps) =
     canvasContext,
     flamechart,
   })
+
+  annotatePerfRun('active_view', 'chrono')
 
   const setters = useFlamechartSetters(FlamechartID.CHRONO)
 
@@ -159,12 +166,14 @@ export const getLeftHeavyFlamechart = memoizeByShallowEquality(
     profile: Profile
     getColorBucketForFrame: (frame: Frame) => number
   }): Flamechart => {
-    return new Flamechart({
-      getTotalWeight: profile.getTotalNonIdleWeight.bind(profile),
-      forEachCall: profile.forEachCallGrouped.bind(profile),
-      formatValue: profile.formatValue.bind(profile),
-      getColorBucketForFrame,
-    })
+    return timePerfSync('build_left_heavy_flamechart', () =>
+      new Flamechart({
+        getTotalWeight: profile.getTotalNonIdleWeight.bind(profile),
+        forEachCall: profile.forEachCallGrouped.bind(profile),
+        formatValue: profile.formatValue.bind(profile),
+        getColorBucketForFrame,
+      }),
+    )
   },
 )
 
@@ -190,6 +199,8 @@ export const LeftHeavyFlamechartView = memo((ownProps: FlamechartViewContainerPr
     canvasContext,
     flamechart,
   })
+
+  annotatePerfRun('active_view', 'left-heavy')
 
   const setters = useFlamechartSetters(FlamechartID.LEFT_HEAVY)
 

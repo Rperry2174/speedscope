@@ -1,5 +1,6 @@
 import * as pako from 'pako'
 import {JSON_parse} from 'uint8array-json-parser'
+import {annotatePerfRun, notePerfMilestone, timePerfAsync, timePerfSync} from '../lib/perf'
 
 export interface ProfileDataSource {
   name(): Promise<string>
@@ -10,6 +11,7 @@ export interface ProfileDataSource {
 export interface TextFileContent {
   splitLines(): Iterable<string>
   firstChunk(): string
+  fullText(): string
   parseAsJSON(): any
 }
 
@@ -60,7 +62,7 @@ function permissivelyParseJSONString(content: string) {
       content += ']'
     }
   }
-  return JSON.parse(content)
+  return timePerfSync('json_parse_string', () => JSON.parse(content))
 }
 
 function permissivelyParseJSONUint8Array(byteArray: Uint8Array) {
@@ -98,7 +100,7 @@ function permissivelyParseJSONUint8Array(byteArray: Uint8Array) {
       byteArray = newByteArray
     }
   }
-  return JSON_parse(byteArray)
+  return timePerfSync('json_parse_uint8array', () => JSON_parse(byteArray))
 }
 
 export class BufferBackedTextFileContent implements TextFileContent {
@@ -177,6 +179,10 @@ export class BufferBackedTextFileContent implements TextFileContent {
     return this.chunks[0] || ''
   }
 
+  fullText(): string {
+    return this.chunks.join('')
+  }
+
   parseAsJSON(): any {
     // We only use the Uint8Array version of JSON.parse when necessary, because
     // it's around 4x slower than native.
@@ -195,6 +201,10 @@ export class StringBackedTextFileContent implements TextFileContent {
   }
 
   firstChunk(): string {
+    return this.s
+  }
+
+  fullText(): string {
     return this.s
   }
 
@@ -229,12 +239,17 @@ export class MaybeCompressedDataReader implements ProfileDataSource {
     maybeCompressedDataPromise: Promise<ArrayBuffer>,
   ) {
     this.uncompressedData = maybeCompressedDataPromise.then(async (fileData: ArrayBuffer) => {
-      try {
-        const result = pako.inflate(new Uint8Array(fileData)).buffer as ArrayBuffer
-        return result
-      } catch (e) {
-        return fileData
-      }
+      annotatePerfRun('compressed_byte_length', fileData.byteLength)
+      const result = await timePerfAsync('inflate_if_needed', async () => {
+        try {
+          return pako.inflate(new Uint8Array(fileData)).buffer as ArrayBuffer
+        } catch (e) {
+          return fileData
+        }
+      })
+      annotatePerfRun('byte_length', result.byteLength)
+      notePerfMilestone('bytes_available')
+      return result
     })
   }
 
@@ -252,16 +267,20 @@ export class MaybeCompressedDataReader implements ProfileDataSource {
   }
 
   static fromFile(file: File): MaybeCompressedDataReader {
-    const maybeCompressedDataPromise: Promise<ArrayBuffer> = new Promise(resolve => {
-      const reader = new FileReader()
-      reader.addEventListener('loadend', () => {
-        if (!(reader.result instanceof ArrayBuffer)) {
-          throw new Error('Expected reader.result to be an instance of ArrayBuffer')
-        }
-        resolve(reader.result)
-      })
-      reader.readAsArrayBuffer(file)
-    })
+    const maybeCompressedDataPromise: Promise<ArrayBuffer> = timePerfAsync(
+      'file_reader_array_buffer',
+      () =>
+        new Promise(resolve => {
+          const reader = new FileReader()
+          reader.addEventListener('loadend', () => {
+            if (!(reader.result instanceof ArrayBuffer)) {
+              throw new Error('Expected reader.result to be an instance of ArrayBuffer')
+            }
+            resolve(reader.result)
+          })
+          reader.readAsArrayBuffer(file)
+        }),
+    )
 
     return new MaybeCompressedDataReader(Promise.resolve(file.name), maybeCompressedDataPromise)
   }

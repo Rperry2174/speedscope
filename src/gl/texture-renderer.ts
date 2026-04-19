@@ -33,12 +33,6 @@ const frag = `
   }
 `
 
-export interface TextureRendererProps {
-  texture: Graphics.Texture
-  srcRect: Rect
-  dstRect: Rect
-}
-
 export class TextureRenderer {
   private buffer: Graphics.VertexBuffer
   private material: Graphics.Material

@@ -1,4 +1,6 @@
 import {findValueBisect} from './utils'
+import {isExperimentEnabled} from './runtime-config'
+import {getRustTextUtilsRemapper, preloadRustTextUtilsRemapper} from './text-utils-rust'
 
 export const ELLIPSIS = '\u2026'
 
@@ -18,7 +20,7 @@ export function cachedMeasureTextWidth(ctx: CanvasRenderingContext2D, text: stri
   return measureTextCache.get(text)!
 }
 
-interface TrimmedTextResult {
+export interface TrimmedTextResult {
   trimmedString: string
   trimmedLength: number
   prefixLength: number
@@ -27,6 +29,9 @@ interface TrimmedTextResult {
   originalString: string
 }
 
+// Keep trimming in TypeScript so we preserve JavaScript's UTF-16 string slicing
+// behavior in the canvas label pipeline. The Rust path only handles the numeric
+// range remapping that consumes this result.
 // Trim text, placing an ellipsis in the middle, with a slight bias towards
 // keeping text from the beginning rather than the end
 export function buildTrimmedText(text: string, length: number): TrimmedTextResult {
@@ -92,7 +97,7 @@ function getIndexTypeInTrimmed(result: TrimmedTextResult, index: number): IndexT
   }
 }
 
-export function remapRangesToTrimmedText(
+function remapRangesToTrimmedTextTs(
   trimmedText: TrimmedTextResult,
   ranges: [number, number][],
 ): [number, number][] {
@@ -199,4 +204,18 @@ export function remapRangesToTrimmedText(
     }
   }
   return rangesToHighlightInTrimmedText
+}
+
+export function remapRangesToTrimmedText(
+  trimmedText: TrimmedTextResult,
+  ranges: [number, number][],
+): [number, number][] {
+  if (isExperimentEnabled('rustTextUtils')) {
+    preloadRustTextUtilsRemapper()
+    const rustRemapper = getRustTextUtilsRemapper()
+    if (rustRemapper) {
+      return rustRemapper(trimmedText, ranges)
+    }
+  }
+  return remapRangesToTrimmedTextTs(trimmedText, ranges)
 }

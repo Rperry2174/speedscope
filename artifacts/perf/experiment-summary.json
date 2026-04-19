@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-04-19T03:45:44.671Z",
+  "outputDir": "/workspace/artifacts/perf",
+  "experiments": [
+    {
+      "experimentId": "legacy",
+      "benchmarkPath": "/workspace/artifacts/perf/legacy/browser-benchmark.json",
+      "parityPath": "/workspace/artifacts/perf/legacy/parity.json",
+      "reportPath": "/workspace/artifacts/perf/legacy/report.md",
+      "recommendation": "keep-experimental",
+      "findings": [
+        "No baseline timing was available, so this result remains experimental."
+      ]
+    },
+    {
+      "experimentId": "optimized-for-each-call",
+      "benchmarkPath": "/workspace/artifacts/perf/optimized-for-each-call/browser-benchmark.json",
+      "parityPath": "/workspace/artifacts/perf/optimized-for-each-call/parity.json",
+      "reportPath": "/workspace/artifacts/perf/optimized-for-each-call/report.md",
+      "recommendation": "keep-experimental",
+      "findings": [
+        "Median total wall-clock time changed by 5.80ms (3.4%).",
+        "Candidate was not materially faster than baseline."
+      ]
+    },
+    {
+      "experimentId": "defer-demangle",
+      "benchmarkPath": "/workspace/artifacts/perf/defer-demangle/browser-benchmark.json",
+      "parityPath": "/workspace/artifacts/perf/defer-demangle/parity.json",
+      "reportPath": "/workspace/artifacts/perf/defer-demangle/report.md",
+      "recommendation": "keep-experimental",
+      "findings": [
+        "Median total wall-clock time changed by 16.70ms (9.7%).",
+        "Representative fixture regressions detected: instruments-random-allocations (+47.60ms, +44.2%)"
+      ]
+    }
+  ]
+}

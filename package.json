@@ -9,6 +9,17 @@
   },
   "scripts": {
     "deploy": "./scripts/deploy.sh",
+    "build:rust:base64-decoder": "./scripts/build-rust-base64-decoder.sh",
+    "build:rust:callgrind-import": "./scripts/build-rust-callgrind-import.sh",
+    "build:rust:fuzzy-find": "./scripts/build-rust-fuzzy-find.sh",
+    "build:rust:text-utils": "./scripts/build-rust-text-utils.sh",
+    "build:rust:profile-search": "./scripts/build-rust-profile-search.sh",
+    "build:rust:pprof-import": "./scripts/build-rust-pprof-import.sh",
+    "build:rust:import-parsers": "./scripts/build-rust-import-parsers.sh",
+    "build:rust:haskell-import": "./scripts/build-rust-haskell-import.sh",
+    "build:rust:instruments-deep-copy": "./scripts/build-rust-instruments-deep-copy.sh",
+    "build:rust:v8-prof-log": "./scripts/build-rust-v8-prof-log.sh",
+    "build:rust:v8-cpu-formatter": "./scripts/build-rust-v8-cpu-formatter.sh",
     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
@@ -16,7 +27,14 @@
     "coverage": "npm run jest -- --coverage",
     "typecheck": "tsc --noEmit",
     "test": "./scripts/ci.sh",
-    "serve": "tsx scripts/dev-server.ts"
+    "serve": "tsx scripts/dev-server.ts",
+    "perf:bench": "tsx scripts/perf/benchmark.ts",
+    "perf:delegate-migration": "tsx scripts/perf/delegate-migration.ts",
+    "perf:migration-status": "tsx scripts/perf/migration-status.ts",
+    "perf:recursive-rust-migrate": "tsx scripts/perf/recursive-rust-migrate.ts",
+    "perf:parity": "tsx scripts/perf/parity.ts",
+    "perf:run": "tsx scripts/perf/run-experiment.ts",
+    "perf:orchestrate": "tsx scripts/perf/cursor-orchestrator.ts"
   },
   "files": [
     "bin/cli.mjs",
@@ -71,7 +89,19 @@
       "./src/jest-setup.js"
     ],
     "moduleNameMapper": {
-      "\\jfrview_bg.wasm$": "<rootDir>/src/import/java-flight-record.mock.ts"
+      "\\jfrview_bg.wasm$": "<rootDir>/src/import/java-flight-record.mock.ts",
+      "callgrind_import_bg\\.wasm$": "<rootDir>/src/import/callgrind-rust.wasm.mock.ts",
+      "fuzzy_find_bg\\.wasm$": "<rootDir>/src/lib/fuzzy-find-rust.wasm.mock.ts",
+      "base64_decoder_bg\\.wasm$": "<rootDir>/src/lib/base64-decoder-rust.wasm.mock.ts",
+      "text_utils_bg\\.wasm$": "<rootDir>/src/lib/text-utils-rust.wasm.mock.ts",
+      "profile_search_bg\\.wasm$": "<rootDir>/src/lib/profile-search-rust.wasm.mock.ts",
+      "pprof_import_bg\\.wasm$": "<rootDir>/src/import/pprof-rust.wasm.mock.ts",
+      "import_parsers_bg\\.wasm$": "<rootDir>/src/import/import-parsers-rust.wasm.mock.ts",
+      "instruments_deep_copy_bg\\.wasm$": "<rootDir>/src/import/instruments-deep-copy.wasm.mock.ts",
+      "haskell_import_bg\\.wasm$": "<rootDir>/src/import/haskell-rust.wasm.mock.ts",
+      "v8_prof_log_bg\\.wasm$": "<rootDir>/src/import/v8-prof-log-rust.wasm.mock.ts",
+      "v8_cpu_formatter_bg\\.wasm$": "<rootDir>/src/import/v8cpuFormatterRust.wasm.mock.ts",
+      "trace_event_import_bg\\.wasm$": "<rootDir>/src/import/trace-event-rust.wasm.mock.ts"
     },
     "testRegex": "\\.test\\.tsx?$",
     "collectCoverageFrom": [
@@ -87,6 +117,8 @@
     ]
   },
   "dependencies": {
-    "open": "10.1.0"
+    "@cursor/february": "^1.0.1",
+    "open": "10.1.0",
+    "playwright": "^1.59.1"
   }
 }

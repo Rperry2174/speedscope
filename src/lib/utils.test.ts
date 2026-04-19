@@ -16,6 +16,8 @@ import {
   decodeBase64,
   findIndexBisect,
 } from './utils'
+import {decodeBase64WithFallback, loadRustBase64Decoder} from './base64-decoder-rust'
+import {setExperimentOverridesForTesting} from './runtime-config'
 
 import {TextEncoder} from 'util'
 
@@ -237,6 +239,34 @@ test('decodeBase64', () => {
 
     // If the above expect(...) assertion fails, we won't reach here.
     return true
+  })
+})
+
+describe('rust base64 decoder parity', () => {
+  test('matches TypeScript implementation for representative cases', async () => {
+    const rustDecoder = await loadRustBase64Decoder()
+    const cases = [
+      '',
+      'aGVsbG8=',
+      'Zm9vYmFy',
+      'AQIDBAUGBwgJ',
+      'c3BlZWRzY29wZQ==',
+      'AA==',
+      '//8=',
+    ]
+
+    for (const encoded of cases) {
+      expect(rustDecoder(encoded)).toEqual(decodeBase64(encoded))
+    }
+  })
+
+  test('fallback stays aligned with the TypeScript implementation when rust flag is off', async () => {
+    setExperimentOverridesForTesting({rustBase64Decode: false})
+    try {
+      expect(await decodeBase64WithFallback('aGVsbG8=')).toEqual(decodeBase64('aGVsbG8='))
+    } finally {
+      setExperimentOverridesForTesting(null)
+    }
   })
 })
 

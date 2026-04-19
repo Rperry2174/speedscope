@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-04-19T08:35:44.920Z",
+  "experiment": {
+    "deferDemangle": false,
+    "optimizedForEachCall": false,
+    "rustFuzzyFind": false
+  },
+  "fixtures": [
+    {
+      "fixtureId": "chrome-timeline-large",
+      "fixturePath": "sample/profiles/Chrome/65/timeline.json",
+      "equal": true,
+      "reason": null
+    },
+    {
+      "fixtureId": "firefox-large",
+      "fixturePath": "sample/profiles/Firefox/59/firefox.json",
+      "equal": true,
+      "reason": null
+    },
+    {
+      "fixtureId": "instruments-random-allocations",
+      "fixturePath": "sample/profiles/Instruments/16.0/simple-time-profile-deep-copy.txt",
+      "equal": true,
+      "reason": null
+    },
+    {
+      "fixtureId": "stackprof-ruby-large",
+      "fixturePath": "sample/profiles/stackprof/ruby-stackprof.json",
+      "equal": true,
+      "reason": null
+    },
+    {
+      "fixtureId": "chrome-cpuprofile-sucrase",
+      "fixturePath": "sample/profiles/Chrome/65/sucrase.cpuprofile",
+      "equal": true,
+      "reason": null
+    },
+    {
+      "fixtureId": "chrome-trace-116",
+      "fixturePath": "sample/profiles/Chrome/116/Trace-20230603T221323.json",
+      "equal": true,
+      "reason": null
+    }
+  ]
+}

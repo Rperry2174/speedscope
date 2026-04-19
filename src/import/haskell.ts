@@ -1,5 +1,7 @@
 import {ProfileGroup, FrameInfo, CallTreeProfileBuilder} from '../lib/profile'
 import {TimeFormatter, ByteFormatter} from '../lib/value-formatters'
+import {isExperimentEnabled} from '../lib/runtime-config'
+import {loadRustHaskellImporter, RustImportedHaskellProfile} from './haskell-rust'
 
 // See https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/profiling.html#json-profile-format
 // for information on the GHC profiler JSON output format.
@@ -62,7 +64,27 @@ function addToProfile(
   return curVal
 }
 
-export function importFromHaskell(haskellProfile: HaskellProfile): ProfileGroup {
+function buildProfileFromEvents(
+  totalWeight: number,
+  frames: Map<number, FrameInfo>,
+  events: RustImportedHaskellProfile['time_events'],
+) {
+  const profile = new CallTreeProfileBuilder(totalWeight)
+  for (const event of events) {
+    const frameInfo = frames.get(event.frame)
+    if (!frameInfo) {
+      throw new Error(`Unknown Haskell frame ${event.frame}`)
+    }
+    if (event.open) {
+      profile.enterFrame(frameInfo, event.at)
+    } else {
+      profile.leaveFrame(frameInfo, event.at)
+    }
+  }
+  return profile
+}
+
+function importFromHaskellTs(haskellProfile: HaskellProfile): ProfileGroup {
   const idToFrameInfo = new Map<number, FrameInfo>()
   for (let centre of haskellProfile.cost_centres) {
     const frameInfo: FrameInfo = {
@@ -94,5 +116,40 @@ export function importFromHaskell(haskellProfile: HaskellProfile): ProfileGroup 
     name: haskellProfile.program,
     indexToView: 0,
     profiles: [timeProfile.build(), allocProfile.build()],
+  }
+}
+
+function profileGroupFromRustImport(imported: RustImportedHaskellProfile): ProfileGroup {
+  const idToFrameInfo = new Map<number, FrameInfo>()
+  for (const frame of imported.frames) {
+    idToFrameInfo.set(frame.key, frame)
+  }
+
+  const timeProfile = buildProfileFromEvents(imported.total_ticks, idToFrameInfo, imported.time_events)
+  timeProfile.setValueFormatter(new TimeFormatter('milliseconds'))
+  timeProfile.setName(`${imported.program} time`)
+
+  const allocProfile = buildProfileFromEvents(imported.total_ticks, idToFrameInfo, imported.alloc_events)
+  allocProfile.setValueFormatter(new ByteFormatter())
+  allocProfile.setName(`${imported.program} allocation`)
+
+  return {
+    name: imported.program,
+    indexToView: 0,
+    profiles: [timeProfile.build(), allocProfile.build()],
+  }
+}
+
+export async function importFromHaskell(haskellProfile: HaskellProfile): Promise<ProfileGroup> {
+  if (!isExperimentEnabled('rustHaskellImport')) {
+    return importFromHaskellTs(haskellProfile)
+  }
+
+  try {
+    const importer = await loadRustHaskellImporter()
+    return profileGroupFromRustImport(importer(haskellProfile))
+  } catch (error) {
+    console.warn('Falling back to TypeScript Haskell importer', error)
+    return importFromHaskellTs(haskellProfile)
   }
 }

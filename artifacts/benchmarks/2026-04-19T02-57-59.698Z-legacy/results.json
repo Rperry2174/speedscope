@@ -1,0 +1,123 @@
+{
+  "generatedAt": "2026-04-19T02:58:00.652Z",
+  "experiment": {
+    "experimentName": "legacy",
+    "experiments": {
+      "deferDemangle": false,
+      "optimizedForEachCall": false
+    }
+  },
+  "results": [
+    {
+      "fixtureId": "firefox-large",
+      "fixturePath": "sample/profiles/Firefox/59/firefox.json",
+      "format": "firefox",
+      "experiment": "legacy",
+      "runs": [
+        {
+          "fixtureId": "firefox-large",
+          "runIndex": 0,
+          "warm": false,
+          "wallClockMs": 286,
+          "summary": {
+            "loadStartMs": 0,
+            "bytesAvailableMs": 14.900000035762787,
+            "importParseFinishedMs": 51.90000003576279,
+            "profileStateAppliedMs": 52.60000002384186,
+            "firstMeaningfulPaintMs": 199.9000000357628,
+            "totalWallClockMs": 200
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 153.39999997615814,
+            "finishedAt": 353.39999997615814,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "firefox.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0,
+              "bytes_available": 14.900000035762787,
+              "import_parse_finished": 51.90000003576279,
+              "loader_finished": 52,
+              "profile_demangle_finished": 52.30000001192093,
+              "before_profile_group_set": 52.40000003576279,
+              "profile_state_applied": 52.60000002384186,
+              "loading_indicator_cleared": 52.60000002384186,
+              "first_meaningful_paint": 199.9000000357628,
+              "run_complete": 199.9000000357628
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                12.699999988079071
+              ],
+              "inflate_if_needed": [
+                1
+              ],
+              "read_array_buffer": [
+                13.200000047683716
+              ],
+              "import_pprof_probe": [
+                0.699999988079071
+              ],
+              "read_text": [
+                1.199999988079071
+              ],
+              "json_parse_string": [
+                7.799999952316284
+              ],
+              "parse_json_dispatch": [
+                7.799999952316284
+              ],
+              "import_firefox": [
+                27.100000023841858
+              ],
+              "import_profile_group_total": [
+                50.5
+              ],
+              "application_loader": [
+                51.60000002384186
+              ],
+              "profile_demangle": [
+                0
+              ],
+              "build_chrono_flamechart": [
+                1.7000000476837158
+              ],
+              "build_flamechart_renderer": [
+                1.5
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 2376576,
+              "input_file_type": "application/json",
+              "file_name": "firefox.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 2376576,
+              "byte_length": 2376576,
+              "detected_format": "firefox",
+              "profile_count_loaded": 1,
+              "profile_group_name": "firefox.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 85,
+              "first_painted_root_frame_count": 14
+            }
+          }
+        }
+      ],
+      "coldSummary": {
+        "firstMeaningfulPaintMs": 199.9000000357628,
+        "totalWallClockMs": 200
+      },
+      "warmSummary": null
+    }
+  ]
+}

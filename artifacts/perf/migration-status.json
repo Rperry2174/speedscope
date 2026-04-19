@@ -1,0 +1,249 @@
+{
+  "generatedAt": "2026-04-19T14:21:46.271Z",
+  "counts": {
+    "ts": 157,
+    "tsx": 23,
+    "rs": 10,
+    "wasm": 9
+  },
+  "lineCounts": {
+    "ts": 20930,
+    "tsx": 5531,
+    "rs": 1961
+  },
+  "rustMigratedPaths": [
+    "src/lib/fuzzy-find.ts",
+    "rust/fuzzy-find/src/lib.rs",
+    "rust/fuzzy-find/pkg/fuzzy_find.js",
+    "rust/fuzzy-find/pkg/fuzzy_find_bg.wasm",
+    "src/lib/profile-search.ts",
+    "src/lib/profile-search-rust.ts",
+    "rust/profile-search/src/lib.rs",
+    "rust/profile-search/pkg/profile_search.js",
+    "rust/profile-search/pkg/profile_search_bg.wasm"
+  ],
+  "shardSummary": [
+    {
+      "shardId": "core-algorithms",
+      "label": "Core algorithms and data structures",
+      "keepInTypeScript": false,
+      "suggestedModelFamily": "opus-4.6",
+      "paths": [
+        "src/lib/profile.ts",
+        "src/lib/flamechart.ts",
+        "src/lib/fuzzy-find.ts",
+        "src/lib/math.ts"
+      ]
+    },
+    {
+      "shardId": "importers",
+      "label": "Importer pipeline",
+      "keepInTypeScript": false,
+      "suggestedModelFamily": "gpt-5.4",
+      "paths": [
+        "src/import/*.ts",
+        "src/import/utils.ts",
+        "src/lib/file-format.ts"
+      ]
+    },
+    {
+      "shardId": "search-and-indexing",
+      "label": "Search and indexing",
+      "keepInTypeScript": false,
+      "suggestedModelFamily": "gpt-5.4",
+      "paths": [
+        "src/lib/profile-search.ts",
+        "src/lib/fuzzy-find.ts",
+        "src/views/profile-select.tsx"
+      ]
+    },
+    {
+      "shardId": "render-prep",
+      "label": "Render preparation and geometry",
+      "keepInTypeScript": false,
+      "suggestedModelFamily": "opus-4.6",
+      "paths": [
+        "src/lib/flamechart.ts",
+        "src/gl/flamechart-renderer.ts",
+        "src/app-state/getters.ts"
+      ]
+    },
+    {
+      "shardId": "browser-ui",
+      "label": "UI, DOM, and browser integration",
+      "keepInTypeScript": true,
+      "suggestedModelFamily": "composer-2",
+      "paths": [
+        "src/views/**/*.tsx",
+        "src/views/**/*.ts",
+        "src/speedscope.tsx",
+        "src/app-state/**/*.ts"
+      ]
+    },
+    {
+      "shardId": "webgl-and-canvas",
+      "label": "WebGL and canvas bindings",
+      "keepInTypeScript": true,
+      "suggestedModelFamily": "composer-2",
+      "paths": [
+        "src/gl/**/*.ts",
+        "src/lib/canvas-2d-batch-renderers.ts",
+        "src/lib/text-utils.ts"
+      ]
+    },
+    {
+      "shardId": "tooling-and-orchestration",
+      "label": "Tooling and orchestrator",
+      "keepInTypeScript": true,
+      "suggestedModelFamily": "composer-2",
+      "paths": [
+        "scripts/perf/*.ts",
+        "scripts/*.ts",
+        "package.json"
+      ]
+    }
+  ],
+  "migrationTasks": [
+    {
+      "id": "proof-point-fuzzy-find",
+      "title": "Validate fuzzy-find Rust proof point",
+      "shardId": "proof-point",
+      "modelFamily": "gpt-5.4",
+      "executionMode": "proof-point",
+      "files": [
+        "src/lib/fuzzy-find.ts",
+        "src/lib/fuzzy-find-rust.ts",
+        "rust/fuzzy-find/**"
+      ]
+    },
+    {
+      "id": "migrate-profile-core",
+      "title": "Migrate profile core",
+      "shardId": "migrate-rust",
+      "modelFamily": "opus-4.6",
+      "executionMode": "migrate-rust",
+      "files": [
+        "src/lib/profile.ts"
+      ]
+    },
+    {
+      "id": "migrate-flamechart-core",
+      "title": "Migrate flamechart core",
+      "shardId": "migrate-rust",
+      "modelFamily": "opus-4.6",
+      "executionMode": "migrate-rust",
+      "files": [
+        "src/lib/flamechart.ts"
+      ]
+    },
+    {
+      "id": "migrate-profile-search",
+      "title": "Migrate profile search",
+      "shardId": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "executionMode": "migrate-rust",
+      "files": [
+        "src/lib/profile-search.ts"
+      ]
+    },
+    {
+      "id": "migrate-import-chrome-trace",
+      "title": "Migrate Chrome and trace-event importers",
+      "shardId": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "executionMode": "migrate-rust",
+      "files": [
+        "src/import/chrome.ts",
+        "src/import/trace-event.ts",
+        "src/import/utils.ts"
+      ]
+    },
+    {
+      "id": "migrate-import-firefox-safari",
+      "title": "Migrate Firefox and Safari importers",
+      "shardId": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "executionMode": "migrate-rust",
+      "files": [
+        "src/import/firefox.ts",
+        "src/import/safari.ts"
+      ]
+    },
+    {
+      "id": "migrate-import-pprof-jfr",
+      "title": "Migrate pprof and JFR importers",
+      "shardId": "migrate-rust",
+      "modelFamily": "opus-4.6",
+      "executionMode": "migrate-rust",
+      "files": [
+        "src/import/pprof.ts",
+        "src/import/java-flight-recorder.ts"
+      ]
+    },
+    {
+      "id": "migrate-import-stackprof-v8",
+      "title": "Migrate stackprof and V8-family importers",
+      "shardId": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "executionMode": "migrate-rust",
+      "files": [
+        "src/import/stackprof.ts",
+        "src/import/v8proflog.ts",
+        "src/import/v8heapalloc.ts",
+        "src/import/callgrind.ts"
+      ]
+    },
+    {
+      "id": "migrate-import-text-family",
+      "title": "Migrate text-based importer family",
+      "shardId": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "executionMode": "migrate-rust",
+      "files": [
+        "src/import/linux-tools-perf.ts",
+        "src/import/bg-flamegraph.ts",
+        "src/import/papyrus.ts",
+        "src/import/pmcstat-callgraph.ts",
+        "src/import/haskell.ts",
+        "src/lib/file-format.ts"
+      ]
+    },
+    {
+      "id": "keep-ts-browser-ui",
+      "title": "Review browser UI retention",
+      "shardId": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "executionMode": "keep-ts-review",
+      "files": [
+        "src/views/**/*.tsx",
+        "src/views/**/*.ts",
+        "src/speedscope.tsx",
+        "src/app-state/**/*.ts"
+      ]
+    },
+    {
+      "id": "keep-ts-webgl-canvas",
+      "title": "Review WebGL and canvas retention",
+      "shardId": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "executionMode": "keep-ts-review",
+      "files": [
+        "src/gl/**/*.ts",
+        "src/lib/canvas-2d-batch-renderers.ts",
+        "src/lib/text-utils.ts"
+      ]
+    },
+    {
+      "id": "keep-ts-tooling-control-plane",
+      "title": "Review tooling and control plane retention",
+      "shardId": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "executionMode": "keep-ts-review",
+      "files": [
+        "scripts/perf/*.ts",
+        "scripts/*.ts",
+        "package.json"
+      ]
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 import {StackListProfileBuilder, ProfileGroup} from '../lib/profile'
+import {isExperimentEnabled} from '../lib/runtime-config'
 import {itMap, getOrInsert} from '../lib/utils'
 import {TimeFormatter} from '../lib/value-formatters'
-import {TextFileContent} from './utils'
+import {MaybeCompressedDataReader, TextFileContent} from './utils'
+import {parseLinuxPerfEventsWithRust, RustPerfEvent} from './linux-tools-perf-rust'
 
 // This imports the output of the "perf script" command on linux.
 //
@@ -94,12 +96,12 @@ function parseEvent(rawEvent: string[]): PerfEvent | null {
   return event
 }
 
-export function importFromLinuxPerf(contents: TextFileContent): ProfileGroup | null {
+function buildProfileGroup(events: Iterable<PerfEvent | RustPerfEvent | null>): ProfileGroup | null {
   const profiles = new Map<string, StackListProfileBuilder>()
 
   let eventType: string | null = null
 
-  for (let event of parseEvents(contents)) {
+  for (let event of events) {
     if (event == null) continue
     if (eventType != null && eventType != event.eventType) continue
     if (event.time == null) continue
@@ -140,4 +142,39 @@ export function importFromLinuxPerf(contents: TextFileContent): ProfileGroup | n
     indexToView: 0,
     profiles: Array.from(itMap(profiles.values(), builder => builder.build())),
   }
+}
+
+export function importFromLinuxPerfLegacy(contents: TextFileContent): ProfileGroup | null {
+  return buildProfileGroup(parseEvents(contents))
+}
+
+export async function importFromLinuxPerf(
+  contents: TextFileContent,
+  buffer?: ArrayBuffer,
+): Promise<ProfileGroup | null> {
+  if (isExperimentEnabled('rustLinuxPerf')) {
+    try {
+      if (buffer) {
+        const rustEvents = await parseLinuxPerfEventsWithRust(buffer)
+        return buildProfileGroup(rustEvents)
+      }
+    } catch (error) {
+      console.warn('Rust linux perf importer failed, falling back to TypeScript parser.', error)
+    }
+  }
+
+  return importFromLinuxPerfLegacy(contents)
+}
+
+export async function importFromLinuxPerfArrayBuffer(buffer: ArrayBuffer): Promise<ProfileGroup | null> {
+  if (isExperimentEnabled('rustLinuxPerf')) {
+    try {
+      const rustEvents = await parseLinuxPerfEventsWithRust(buffer)
+      return buildProfileGroup(rustEvents)
+    } catch (error) {
+      console.warn('Rust linux perf importer failed, falling back to TypeScript parser.', error)
+    }
+  }
+
+  return importFromLinuxPerfLegacy(await MaybeCompressedDataReader.fromArrayBuffer('linux-perf', buffer).readAsText())
 }

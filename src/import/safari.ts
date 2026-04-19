@@ -1,5 +1,7 @@
-import {Profile, FrameInfo, StackListProfileBuilder} from '../lib/profile'
+import {Profile, StackListProfileBuilder} from '../lib/profile'
+import {isExperimentEnabled} from '../lib/runtime-config'
 import {TimeFormatter} from '../lib/value-formatters'
+import type {RustWeightedStack} from './import-parsers-rust'
 
 interface Record {
   type: string
@@ -65,19 +67,23 @@ interface SafariProfile {
   overview: Overview
 }
 
-function makeStack(frames: StackFrame[]): FrameInfo[] {
-  return frames
-    .map(({name, url, line, column}) => ({
-      key: `${name}:${url}:${line}:${column}`,
-      file: url,
-      line,
-      col: column,
-      name: name || (url ? `(anonymous ${url.split('/').pop()}:${line})` : '(anonymous)'),
-    }))
-    .reverse()
+function buildProfileFromWeightedStacks(
+  profileDuration: number,
+  displayName: string,
+  samples: RustWeightedStack[],
+): Profile {
+  const profile = new StackListProfileBuilder(profileDuration)
+
+  for (const sample of samples) {
+    profile.appendSampleWithWeight(sample.frames, sample.weight)
+  }
+
+  profile.setValueFormatter(new TimeFormatter('seconds'))
+  profile.setName(displayName)
+  return profile.build()
 }
 
-export function importFromSafari(contents: SafariProfile): Profile | null {
+function importFromSafariWithTsFallback(contents: SafariProfile): Profile | null {
   if (contents.version !== 1) {
     console.warn(`Unknown Safari profile version ${contents.version}... Might be incompatible.`)
   }
@@ -91,9 +97,9 @@ export function importFromSafari(contents: SafariProfile): Profile | null {
     return null
   }
 
+  const weightedSamples: RustWeightedStack[] = []
   const profileDuration =
     sampleStackTraces[count - 1].timestamp - sampleStackTraces[0].timestamp + sampleDurations[0]
-  const profile = new StackListProfileBuilder(profileDuration)
 
   let previousEndTime = Number.MAX_VALUE
 
@@ -106,15 +112,49 @@ export function importFromSafari(contents: SafariProfile): Profile | null {
     // FIXME: 2ms is a lot, but Safari's timestamps and durations don't line up very well and will create
     // phantom idle time
     if (idleDurationBefore > 0.002) {
-      profile.appendSampleWithWeight([], idleDurationBefore)
+      weightedSamples.push({frames: [], weight: idleDurationBefore})
     }
 
-    profile.appendSampleWithWeight(makeStack(sample.stackFrames), duration)
+    weightedSamples.push({
+      frames: sample.stackFrames
+        .map(({name, url, line, column}) => ({
+          key: `${name}:${url}:${line}:${column}`,
+          file: url,
+          line,
+          col: column,
+          name: name || (url ? `(anonymous ${url.split('/').pop()}:${line})` : '(anonymous)'),
+        }))
+        .reverse(),
+      weight: duration,
+    })
 
     previousEndTime = endTime
   })
 
-  profile.setValueFormatter(new TimeFormatter('seconds'))
-  profile.setName(recording.displayName)
-  return profile.build()
+  return buildProfileFromWeightedStacks(profileDuration, recording.displayName, weightedSamples)
+}
+
+export async function importFromSafari(contents: SafariProfile): Promise<Profile | null> {
+  if (contents.version !== 1) {
+    console.warn(`Unknown Safari profile version ${contents.version}... Might be incompatible.`)
+  }
+
+  if (contents.recording.sampleStackTraces.length < 1) {
+    console.warn('Empty profile')
+    return null
+  }
+
+  if (isExperimentEnabled('rustImportParsers')) {
+    const {normalizeSafariProfileWithRust} = await import('./import-parsers-rust')
+    const rustProfile = await normalizeSafariProfileWithRust(contents)
+    if (rustProfile) {
+      return buildProfileFromWeightedStacks(
+        rustProfile.profile_duration,
+        rustProfile.display_name,
+        rustProfile.samples,
+      )
+    }
+  }
+
+  return importFromSafariWithTsFallback(contents)
 }

@@ -1,18 +1,18 @@
 /**
- * This file contains an implementation of fuzzy string matching.
+ * This file contains a pure TypeScript implementation of fuzzy string matching.
  */
 
-export interface FuzzyMatch {
-  // List of [start, end] indices in the haystack string that match the needle string
-  matchedRanges: [number, number][]
+import {FuzzyMatch} from './fuzzy-find-types'
+import {getFuzzyMatcher} from './fuzzy-find-rust'
 
-  // The score of the match for relative ranking. Higher scores indicate
-  // "better" matches.
-  score: number
+export {FuzzyMatch} from './fuzzy-find-types'
+
+export function fuzzyMatchStringsTs(text: string, pattern: string): FuzzyMatch | null {
+  return fzfFuzzyMatchV1(text, pattern)
 }
 
 export function fuzzyMatchStrings(text: string, pattern: string): FuzzyMatch | null {
-  return fzfFuzzyMatchV1(text, pattern)
+  return getFuzzyMatcher()(text, pattern)
 }
 
 // The implementation here is based on FuzzyMatchV1, as described here:

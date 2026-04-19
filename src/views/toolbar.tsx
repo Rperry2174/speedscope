@@ -115,19 +115,6 @@ function ToolbarCenterContent(props: ToolbarProps): JSX.Element {
     }
   }, [setProfileSelectShown])
 
-  useEffect(() => {
-    const onWindowKeyPress = (ev: KeyboardEvent) => {
-      if (ev.key === 't') {
-        ev.preventDefault()
-        setProfileSelectShown(true)
-      }
-    }
-    window.addEventListener('keypress', onWindowKeyPress)
-    return () => {
-      window.removeEventListener('keypress', onWindowKeyPress)
-    }
-  }, [setProfileSelectShown])
-
   if (activeProfileState && profileGroup && profiles) {
     if (profileGroup.profiles.length === 1) {
       return <Fragment>{activeProfileState.profile.getName()}</Fragment>

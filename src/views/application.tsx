@@ -20,6 +20,15 @@ import {ProfileGroupState} from '../app-state/profile-group'
 import {HashParams} from '../lib/hash-params'
 import {StatelessComponent} from '../lib/preact-helpers'
 import {SandwichViewContainer} from './sandwich-view'
+import {
+  annotatePerfRun,
+  completePerfRun,
+  notePerfMilestone,
+  startPerfRun,
+  timePerfAsync,
+  updatePerfMetadata,
+} from '../lib/perf'
+import {isExperimentEnabled} from '../lib/runtime-config'
 
 const importModule = import('../import')
 
@@ -170,34 +179,59 @@ export type ApplicationProps = {
 }
 
 export class Application extends StatelessComponent<ApplicationProps> {
-  private async loadProfile(loader: () => Promise<ProfileGroup | null>) {
+  private async loadProfile(
+    loader: () => Promise<ProfileGroup | null>,
+    metadata: {loadSource: string; fileName?: string},
+  ) {
     this.props.setError(false)
     this.props.setLoading(true)
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    if (!this.props.glCanvas) return
+    if (!this.props.glCanvas) {
+      this.props.setLoading(false)
+      return
+    }
+
+    startPerfRun({
+      route: 'browser-open-profile',
+      loadSource: metadata.loadSource,
+      fileName: metadata.fileName,
+    })
 
     console.time('import')
 
     let profileGroup: ProfileGroup | null = null
     try {
-      profileGroup = await loader()
+      profileGroup = await timePerfAsync('application_loader', loader)
+      notePerfMilestone('loader_finished')
     } catch (e) {
       console.log('Failed to load format', e)
+      annotatePerfRun('error_message', e instanceof Error ? e.message : `${e}`)
+      completePerfRun('error')
       this.props.setError(true)
       return
     }
 
     // TODO(jlfwong): Make these into nicer overlays
     if (profileGroup == null) {
+      annotatePerfRun('load_result', 'unrecognized-format')
+      completePerfRun('error')
       alert('Unrecognized format! See documentation about supported formats.')
       this.props.setLoading(false)
       return
     } else if (profileGroup.profiles.length === 0) {
+      annotatePerfRun('load_result', 'empty-profile')
+      completePerfRun('error')
       alert("Successfully imported profile, but it's empty!")
       this.props.setLoading(false)
       return
     }
+
+    updatePerfMetadata({
+      fileName: metadata.fileName || profileGroup.name,
+      loadSource: metadata.loadSource,
+    })
+    annotatePerfRun('profile_count_loaded', profileGroup.profiles.length)
 
     if (this.props.hashParams.title) {
       profileGroup = {
@@ -211,8 +245,15 @@ export class Application extends StatelessComponent<ApplicationProps> {
       this.props.setViewMode(this.props.hashParams.viewMode)
     }
 
-    for (let profile of profileGroup.profiles) {
-      await profile.demangle()
+    if (!isExperimentEnabled('deferDemangle')) {
+      await timePerfAsync('profile_demangle', async () => {
+        for (let profile of profileGroup!.profiles) {
+          await profile.demangle()
+        }
+      })
+      notePerfMilestone('profile_demangle_finished')
+    } else {
+      notePerfMilestone('profile_demangle_deferred')
     }
 
     for (let profile of profileGroup.profiles) {
@@ -222,8 +263,10 @@ export class Application extends StatelessComponent<ApplicationProps> {
 
     console.timeEnd('import')
 
+    notePerfMilestone('before_profile_group_set')
     this.props.setProfileGroup(profileGroup)
     this.props.setLoading(false)
+    notePerfMilestone('loading_indicator_cleared')
   }
 
   getStyle(): ReturnType<typeof getStyle> {
@@ -231,78 +274,100 @@ export class Application extends StatelessComponent<ApplicationProps> {
   }
 
   loadFromFile(file: File) {
-    this.loadProfile(async () => {
-      const profiles = await importProfilesFromFile(file)
-      if (profiles) {
-        for (let profile of profiles.profiles) {
-          if (!profile.getName()) {
-            profile.setName(file.name)
-          }
-        }
-        return profiles
-      }
-
-      if (this.props.profileGroup && this.props.activeProfileState) {
-        // If a profile is already loaded, it's possible the file being imported is
-        // a symbol map. If that's the case, we want to parse it, and apply the symbol
-        // mapping to the already loaded profile. This can be use to take an opaque
-        // profile and make it readable.
-        const reader = new FileReader()
-        const fileContentsPromise = new Promise<string>(resolve => {
-          reader.addEventListener('loadend', () => {
-            if (typeof reader.result !== 'string') {
-              throw new Error('Expected reader.result to be a string')
-            }
-            resolve(reader.result)
-          })
+    this.loadProfile(
+      async () => {
+        annotatePerfRun('input_file_size', file.size)
+        annotatePerfRun('input_file_type', file.type || null)
+        updatePerfMetadata({
+          fileName: file.name,
         })
-        reader.readAsText(file)
-        const fileContents = await fileContentsPromise
-
-        let symbolRemapper: SymbolRemapper | null = null
-
-        const emscriptenSymbolRemapper = importEmscriptenSymbolRemapper(fileContents)
-        if (emscriptenSymbolRemapper) {
-          console.log('Importing as emscripten symbol map')
-          symbolRemapper = emscriptenSymbolRemapper
+        const profiles = await importProfilesFromFile(file)
+        if (profiles) {
+          for (let profile of profiles.profiles) {
+            if (!profile.getName()) {
+              profile.setName(file.name)
+            }
+          }
+          return profiles
         }
 
-        const jsSourceMapRemapper = await importJavaScriptSourceMapSymbolRemapper(
-          fileContents,
-          file.name,
-        )
-        if (!symbolRemapper && jsSourceMapRemapper) {
-          console.log('Importing as JavaScript source map')
-          symbolRemapper = jsSourceMapRemapper
-        }
+        if (this.props.profileGroup && this.props.activeProfileState) {
+          // If a profile is already loaded, it's possible the file being imported is
+          // a symbol map. If that's the case, we want to parse it, and apply the symbol
+          // mapping to the already loaded profile. This can be use to take an opaque
+          // profile and make it readable.
+          const reader = new FileReader()
+          const fileContentsPromise = new Promise<string>(resolve => {
+            reader.addEventListener('loadend', () => {
+              if (typeof reader.result !== 'string') {
+                throw new Error('Expected reader.result to be a string')
+              }
+              resolve(reader.result)
+            })
+          })
+          reader.readAsText(file)
+          const fileContents = await timePerfAsync('read_symbol_map_text', async () => {
+            return await fileContentsPromise
+          })
+          notePerfMilestone('bytes_available')
 
-        if (symbolRemapper != null) {
-          return {
-            name: this.props.profileGroup.name || 'profile',
-            indexToView: this.props.profileGroup.indexToView,
-            profiles: this.props.profileGroup.profiles.map(profileState => {
-              // We do a shallow clone here to invalidate certain caches keyed
-              // on a reference to the profile group under the assumption that
-              // profiles are immutable. Symbol remapping is (at time of
-              // writing) the only exception to that immutability.
-              const p = profileState.profile.shallowClone()
-              p.remapSymbols(symbolRemapper!)
-              return p
-            }),
+          let symbolRemapper: SymbolRemapper | null = null
+
+          const emscriptenSymbolRemapper = importEmscriptenSymbolRemapper(fileContents)
+          if (emscriptenSymbolRemapper) {
+            console.log('Importing as emscripten symbol map')
+            annotatePerfRun('detected_format', 'emscripten-symbol-map')
+            symbolRemapper = emscriptenSymbolRemapper
+          }
+
+          const jsSourceMapRemapper = await timePerfAsync('import_js_source_map_symbol_remapper', () =>
+            importJavaScriptSourceMapSymbolRemapper(fileContents, file.name),
+          )
+          if (!symbolRemapper && jsSourceMapRemapper) {
+            console.log('Importing as JavaScript source map')
+            annotatePerfRun('detected_format', 'javascript-source-map')
+            symbolRemapper = jsSourceMapRemapper
+          }
+
+          if (symbolRemapper != null) {
+            notePerfMilestone('import_parse_finished')
+            return {
+              name: this.props.profileGroup.name || 'profile',
+              indexToView: this.props.profileGroup.indexToView,
+              profiles: this.props.profileGroup.profiles.map(profileState => {
+                // We do a shallow clone here to invalidate certain caches keyed
+                // on a reference to the profile group under the assumption that
+                // profiles are immutable. Symbol remapping is (at time of
+                // writing) the only exception to that immutability.
+                const p = profileState.profile.shallowClone()
+                p.remapSymbols(symbolRemapper!)
+                return p
+              }),
+            }
           }
         }
-      }
 
-      return null
-    })
+        return null
+      },
+      {loadSource: 'file-input', fileName: file.name},
+    )
   }
 
   loadExample = () => {
-    this.loadProfile(async () => {
-      const filename = 'perf-vertx-stacks-01-collapsed-all.txt'
-      const data = await fetch(exampleProfileURL).then(resp => resp.text())
-      return await importProfilesFromText(filename, data)
-    })
+    const filename = 'perf-vertx-stacks-01-collapsed-all.txt'
+    this.loadProfile(
+      async () => {
+        updatePerfMetadata({
+          fileName: filename,
+        })
+        const data = await timePerfAsync('load_example_fetch_text', async () =>
+          fetch(exampleProfileURL).then(resp => resp.text()),
+        )
+        notePerfMilestone('bytes_available')
+        return await importProfilesFromText(filename, data)
+      },
+      {loadSource: 'example-link', fileName: filename},
+    )
   }
 
   onDrop = (ev: DragEvent) => {
@@ -323,9 +388,15 @@ export class Application extends StatelessComponent<ApplicationProps> {
       ) {
         console.log('Importing as Instruments.app .trace file')
         const webkitDirectoryEntry: FileSystemDirectoryEntry = webkitEntry
-        this.loadProfile(async () => {
-          return await importFromFileSystemDirectoryEntry(webkitDirectoryEntry)
-        })
+        this.loadProfile(
+          async () => {
+            updatePerfMetadata({
+              fileName: webkitDirectoryEntry.name,
+            })
+            return await importFromFileSystemDirectoryEntry(webkitDirectoryEntry)
+          },
+          {loadSource: 'drag-drop-trace-directory', fileName: webkitDirectoryEntry.name},
+        )
         return
       }
     }
@@ -409,9 +480,17 @@ export class Application extends StatelessComponent<ApplicationProps> {
     const clipboardData = (ev as ClipboardEvent).clipboardData
     if (!clipboardData) return
     const pasted = clipboardData.getData('text')
-    this.loadProfile(async () => {
-      return await importProfilesFromText('From Clipboard', pasted)
-    })
+    this.loadProfile(
+      async () => {
+        updatePerfMetadata({
+          fileName: 'From Clipboard',
+        })
+        notePerfMilestone('bytes_available')
+        annotatePerfRun('clipboard_text_length', pasted.length)
+        return await importProfilesFromText('From Clipboard', pasted)
+      },
+      {loadSource: 'clipboard-text', fileName: 'From Clipboard'},
+    )
   }
 
   componentDidMount() {
@@ -436,21 +515,42 @@ export class Application extends StatelessComponent<ApplicationProps> {
         )
         return
       }
-      this.loadProfile(async () => {
-        const response: Response = await fetch(profileURL)
-        let filename = new URL(profileURL, window.location.href).pathname
-        if (filename.includes('/')) {
-          filename = filename.slice(filename.lastIndexOf('/') + 1)
-        }
-        return await importProfilesFromArrayBuffer(filename, await response.arrayBuffer())
-      })
+      let filename = new URL(profileURL, window.location.href).pathname
+      if (filename.includes('/')) {
+        filename = filename.slice(filename.lastIndexOf('/') + 1)
+      }
+      this.loadProfile(
+        async () => {
+          updatePerfMetadata({
+            fileName: filename,
+          })
+          const response: Response = await timePerfAsync('fetch_profile_url_response', async () =>
+            fetch(profileURL),
+          )
+          const arrayBuffer = await timePerfAsync('fetch_profile_url_array_buffer', async () =>
+            response.arrayBuffer(),
+          )
+          notePerfMilestone('bytes_available')
+          annotatePerfRun('fetched_byte_length', arrayBuffer.byteLength)
+          return await importProfilesFromArrayBuffer(filename, arrayBuffer)
+        },
+        {loadSource: 'profile-url', fileName: filename},
+      )
     } else if (this.props.hashParams.localProfilePath) {
       // There isn't good cross-browser support for XHR of local files, even from
       // other local files. To work around this restriction, we load the local profile
       // as a JavaScript file which will invoke a global function.
       ;(window as any)['speedscope'] = {
         loadFileFromBase64: (filename: string, base64source: string) => {
-          this.loadProfile(() => importProfilesFromBase64(filename, base64source))
+          this.loadProfile(
+            () => {
+              updatePerfMetadata({
+                fileName: filename,
+              })
+              return importProfilesFromBase64(filename, base64source)
+            },
+            {loadSource: 'local-base64-script', fileName: filename},
+          )
         },
       }
 
