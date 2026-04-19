@@ -9,6 +9,12 @@ export interface PerfFixture {
 
 export const FIXTURES: PerfFixture[] = [
   {
+    id: 'v8-log-small',
+    label: 'V8 --prof-process log (small)',
+    relativePath: 'sample/profiles/node/fixture.v8log.json',
+    format: 'v8log',
+  },
+  {
     id: 'chrome-timeline-large',
     label: 'Chrome timeline (65 large)',
     relativePath: 'sample/profiles/Chrome/65/timeline.json',

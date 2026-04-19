@@ -230,6 +230,7 @@ function toSummaryReport(
         rustHaskellImport: false,
         rustInstrumentsDeepCopy: false,
         rustCallgrindImport: false,
+        rustV8ProfLog: false,
       },
     },
     results: [],
@@ -247,6 +248,7 @@ function toSummaryReport(
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
     fixtures: [],
   }
@@ -291,6 +293,7 @@ async function main() {
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
     {
       deferDemangle: true,
@@ -303,6 +306,7 @@ async function main() {
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
     {
       deferDemangle: false,
@@ -315,6 +319,7 @@ async function main() {
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
     {
       deferDemangle: false,
@@ -327,6 +332,7 @@ async function main() {
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
     {
       deferDemangle: false,
@@ -339,6 +345,7 @@ async function main() {
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
     {
       deferDemangle: false,
@@ -351,6 +358,20 @@ async function main() {
       rustHaskellImport: true,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
+    },
+    {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: true,
+      rustV8ProfLog: false,
     },
     {
       deferDemangle: false,
@@ -362,7 +383,21 @@ async function main() {
       rustPprofImport: false,
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: true,
-      rustCallgrindImport: true,
+      rustCallgrindImport: false,
+      rustV8ProfLog: false,
+    },
+    {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
+      rustV8ProfLog: true,
     },
   ]
 

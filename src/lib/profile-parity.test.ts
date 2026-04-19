@@ -34,9 +34,15 @@ describe('profile parity', () => {
   for (const fixturePath of fixtures) {
     test(`optimized forEachCall preserves profile parity for ${fixturePath}`, async () => {
       const legacy = await importFixtureWithOverrides(fixturePath, {
+        deferDemangle: false,
+        rustFuzzyFind: false,
+        rustV8ProfLog: false,
         optimizedForEachCall: false,
       })
       const experimental = await importFixtureWithOverrides(fixturePath, {
+        deferDemangle: false,
+        rustFuzzyFind: false,
+        rustV8ProfLog: false,
         optimizedForEachCall: true,
       })
 

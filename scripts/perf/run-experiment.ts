@@ -39,6 +39,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
   },
   {
@@ -56,6 +57,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
   },
   {
@@ -73,6 +75,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
   },
   {
@@ -91,6 +94,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
   },
   {
@@ -108,6 +112,26 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
+    },
+  },
+  {
+    id: 'rust-v8-prof-log',
+    label: 'Rust v8 prof log',
+    description:
+      'Experimental path that routes .v8log.json parsing through the Rust/WASM importer with a TypeScript fallback.',
+    flags: {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
+      rustV8ProfLog: true,
     },
   },
   {
@@ -126,6 +150,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustHaskellImport: true,
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
   },
   {
@@ -142,8 +167,9 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
-      rustCallgrindImport: true,
       rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: true,
+      rustV8ProfLog: false,
     },
   },
   {
@@ -160,8 +186,9 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
-      rustCallgrindImport: false,
       rustInstrumentsDeepCopy: true,
+      rustCallgrindImport: false,
+      rustV8ProfLog: false,
     },
   },
 ]

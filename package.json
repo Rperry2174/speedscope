@@ -18,6 +18,7 @@
     "build:rust:import-parsers": "./scripts/build-rust-import-parsers.sh",
     "build:rust:haskell-import": "./scripts/build-rust-haskell-import.sh",
     "build:rust:instruments-deep-copy": "./scripts/build-rust-instruments-deep-copy.sh",
+    "build:rust:v8-prof-log": "./scripts/build-rust-v8-prof-log.sh",
     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
@@ -96,7 +97,8 @@
       "pprof_import_bg\\.wasm$": "<rootDir>/src/import/pprof-rust.wasm.mock.ts",
       "import_parsers_bg\\.wasm$": "<rootDir>/src/import/import-parsers-rust.wasm.mock.ts",
       "instruments_deep_copy_bg\\.wasm$": "<rootDir>/src/import/instruments-deep-copy.wasm.mock.ts",
-      "haskell_import_bg\\.wasm$": "<rootDir>/src/import/haskell-rust.wasm.mock.ts"
+      "haskell_import_bg\\.wasm$": "<rootDir>/src/import/haskell-rust.wasm.mock.ts",
+      "v8_prof_log_bg\\.wasm$": "<rootDir>/src/import/v8-prof-log-rust.wasm.mock.ts"
     },
     "testRegex": "\\.test\\.tsx?$",
     "collectCoverageFrom": [

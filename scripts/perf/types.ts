@@ -17,6 +17,7 @@ export interface ExperimentFlags {
   rustHaskellImport: boolean
   rustInstrumentsDeepCopy: boolean
   rustCallgrindImport: boolean
+  rustV8ProfLog: boolean
 }
 
 export interface ExperimentRunOptions {

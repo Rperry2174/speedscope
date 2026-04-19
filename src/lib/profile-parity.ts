@@ -53,7 +53,15 @@ export async function compareFixtureParity(
   const legacy = await importFixtureWithExperiment(fixturePath, {
     optimizedForEachCall: false,
     deferDemangle: false,
+    rustFuzzyFind: false,
+    rustBase64Decode: false,
+    rustProfileSearch: false,
+    rustTextUtils: false,
+    rustPprofImport: false,
+    rustHaskellImport: false,
+    rustInstrumentsDeepCopy: false,
     rustCallgrindImport: false,
+    rustV8ProfLog: false,
   })
   const experimental = await importFixtureWithExperiment(fixturePath, overrides)
 

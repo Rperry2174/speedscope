@@ -13,7 +13,7 @@ import {TimeFormatter} from '../lib/value-formatters'
 // - https://github.com/nodejs/node/blob/2db2857c72c219e5ba1642a345e52cfdd8c44a66/deps/v8/tools/logreader.js#L147
 // - https://github.com/mapbox/flamebearer/blob/a8d4d5c0061ed439660783c613c43ab28b751219/index.js#L53
 
-interface Code {
+export interface Code {
   name: string
   type: 'CODE' | 'CPP' | 'JS' | 'SHARED_LIB'
   timestamp?: number
@@ -40,7 +40,7 @@ interface Function {
   codes: number[]
 }
 
-interface Tick {
+export interface Tick {
   // Timestamp
   tm: number
 
@@ -51,13 +51,23 @@ interface Tick {
   s: number[]
 }
 
-interface V8LogProfile {
+export interface V8LogProfile {
   code: Code[]
   functions: Function[]
   ticks: Tick[]
 }
 
-function codeToFrameInfo(code: Code, v8log: V8LogProfile): FrameInfo {
+export interface ImportedV8ProfLogSample {
+  frames: number[]
+  weight: number
+}
+
+export interface ImportedV8ProfLogProfile {
+  frames: FrameInfo[]
+  samples: ImportedV8ProfLogSample[]
+}
+
+function codeToFrameInfo(code: Code | undefined): FrameInfo {
   if (!code || !code.type) {
     return {
       key: '(unknown type)',
@@ -136,14 +146,14 @@ function codeToFrameInfo(code: Code, v8log: V8LogProfile): FrameInfo {
   return {key: name, name}
 }
 
-export function importFromV8ProfLog(v8log: V8LogProfile): Profile {
+export function importFromV8ProfLogTs(v8log: V8LogProfile): Profile {
   const profile = new StackListProfileBuilder()
 
   const sToFrameInfo = new Map<number, FrameInfo>()
   function getFrameInfo(t: number) {
     return getOrInsert(sToFrameInfo, t, t => {
       const code = v8log.code[t]
-      return codeToFrameInfo(code, v8log)
+      return codeToFrameInfo(code)
     })
   }
 
@@ -186,6 +196,27 @@ export function importFromV8ProfLog(v8log: V8LogProfile): Profile {
     lastTm = tick.tm
   }
 
+  return finalizeV8ProfLogProfile(profile)
+}
+
+export function buildProfileFromImportedV8ProfLog(imported: ImportedV8ProfLogProfile): Profile {
+  const profile = new StackListProfileBuilder()
+
+  for (const sample of imported.samples) {
+    profile.appendSampleWithWeight(
+      sample.frames.map(frameIndex => imported.frames[frameIndex]),
+      sample.weight,
+    )
+  }
+
+  return finalizeV8ProfLogProfile(profile)
+}
+
+export function importFromV8ProfLog(v8log: V8LogProfile): Profile {
+  return importFromV8ProfLogTs(v8log)
+}
+
+function finalizeV8ProfLogProfile(profile: StackListProfileBuilder): Profile {
   // Despite the code in the v8 processing library indicating that the
   // timestamps come from a variable called "time_ns", from making empirical
   // recordings, it really seems like these profiles are recording timestamps in

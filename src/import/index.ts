@@ -13,6 +13,7 @@ import {importFromBGFlameGraph} from './bg-flamegraph'
 import {importFromFirefox} from './firefox'
 import {importSpeedscopeProfiles} from '../lib/file-format'
 import {importFromV8ProfLog} from './v8proflog'
+import {importFromV8ProfLogBuffer} from './v8-prof-log-rust'
 import {importFromLinuxPerf} from './linux-tools-perf'
 import {importFromHaskell} from './haskell'
 import {importFromSafari} from './safari'
@@ -35,6 +36,7 @@ async function loadJfrModule(): Promise<JfrModule> {
   return jfrModulePromise
 }
 import {annotatePerfRun, notePerfMilestone, timePerfAsync, timePerfSync} from '../lib/perf'
+import {isExperimentEnabled} from '../lib/runtime-config'
 
 export async function importProfileGroupFromText(
   fileName: string,
@@ -92,6 +94,22 @@ async function importProfileGroup(dataSource: ProfileDataSource): Promise<Profil
 function toGroup(profile: Profile | null): ProfileGroup | null {
   if (!profile) return null
   return {name: profile.getName(), indexToView: 0, profiles: [profile]}
+}
+
+async function importV8ProfLogWithBestAvailablePath(
+  buffer: ArrayBuffer,
+  parsed?: ReturnType<typeof parseJSON>,
+) {
+  if (isExperimentEnabled('rustV8ProfLog')) {
+    return await importFromV8ProfLogBuffer(
+      buffer,
+      parsed || (() => parseJSON(new TextProfileDataSource('unknown.v8log.json', '').readAsText as never))(),
+    )
+  }
+  if (!parsed) {
+    throw new Error('Expected parsed V8 prof log when Rust importer is disabled')
+  }
+  return importFromV8ProfLog(parsed)
 }
 
 function updateFormatGuess(fileName: string) {
@@ -204,7 +222,10 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.v8log.json')) {
     console.log('Importing as --prof-process v8 log')
     annotatePerfRun('detected_format', 'v8log')
-    const result = timePerfSync('import_v8log', () => toGroup(importFromV8ProfLog(parseJSON(contents))))
+    const parsed = parseJSON(contents)
+    const result = await timePerfAsync('import_v8log', async () =>
+      toGroup(await importV8ProfLogWithBestAvailablePath(buffer, parsed)),
+    )
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.heapprofile')) {
@@ -311,7 +332,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if ('code' in parsed && 'functions' in parsed && 'ticks' in parsed) {
       console.log('Importing as --prof-process v8 log')
       annotatePerfRun('detected_format', 'v8log')
-      const result = timePerfSync('import_v8log', () => toGroup(importFromV8ProfLog(parsed)))
+      const result = await timePerfAsync('import_v8log', async () =>
+        toGroup(await importV8ProfLogWithBestAvailablePath(buffer, parsed)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     } else if ('head' in parsed && 'selfSize' in parsed['head']) {
