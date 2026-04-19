@@ -10,7 +10,7 @@ import {
 import {importFromStackprof} from './stackprof'
 import {importFromInstrumentsDeepCopy, importFromInstrumentsTrace} from './instruments'
 import {importFromBGFlameGraph} from './bg-flamegraph'
-import {importFromFirefoxBuffer} from './firefox'
+import {importFromFirefox} from './firefox'
 import {importSpeedscopeProfiles} from '../lib/file-format'
 import {importFromV8ProfLog} from './v8proflog'
 import {importFromV8ProfLogBuffer} from './v8-prof-log-rust'
@@ -22,6 +22,7 @@ import {importAsPprofProfile} from './pprof'
 import {decodeBase64WithBestAvailableImplementation} from '../lib/base64-decoder-rust'
 import {importFromChromeHeapProfile} from './v8heapalloc'
 import {isTraceEventFormatted, importTraceEvents} from './trace-event'
+import {loadRustTraceEventImporter, shouldUseRustTraceEventImporter} from './trace-event-rust'
 import {importFromCallgrind} from './callgrind'
 import {importFromPapyrus} from './papyrus'
 import {importFromPMCStatCallGraph, importFromPMCStatCallGraphTs} from './pmcstat-callgraph'
@@ -208,7 +209,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.linux-perf.txt')) {
     console.log('Importing as output of linux perf script')
     annotatePerfRun('detected_format', 'linux-perf')
-    const result = await timePerfAsync('import_linux_perf', () => importFromLinuxPerf(contents, buffer))
+    const result = timePerfSync('import_linux_perf', () => importFromLinuxPerf(contents))
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.collapsedstack.txt')) {
@@ -284,9 +285,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if (parsed['systemHost'] && parsed['systemHost']['name'] == 'Firefox') {
       console.log('Importing as Firefox profile')
       annotatePerfRun('detected_format', 'firefox')
-      const result = await timePerfAsync('import_firefox', () =>
-        importFromFirefoxBuffer(parsed, buffer).then(profile => toGroup(profile)),
-      )
+      const result = timePerfSync('import_firefox', () => toGroup(importFromFirefox(parsed)))
       notePerfMilestone('import_parse_finished')
       return result
     } else if (isChromeTimeline(parsed)) {
@@ -316,6 +315,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if (isTraceEventFormatted(parsed)) {
       console.log('Importing as Trace Event Format profile')
       annotatePerfRun('detected_format', 'trace-event')
+      if (shouldUseRustTraceEventImporter()) {
+        await loadRustTraceEventImporter().catch(() => {})
+      }
       const result = timePerfSync('import_trace_event', () => importTraceEvents(parsed))
       notePerfMilestone('import_parse_finished')
       return result
@@ -413,9 +415,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
       return result
     }
 
-    const fromLinuxPerf = await timePerfAsync('import_linux_perf_probe', () =>
-      importFromLinuxPerf(contents, buffer),
-    )
+    const fromLinuxPerf = timePerfSync('import_linux_perf_probe', () => importFromLinuxPerf(contents))
     if (fromLinuxPerf) {
       console.log('Importing from linux perf script output')
       annotatePerfRun('detected_format', 'linux-perf')

@@ -66,6 +66,7 @@ function allExperimentsDisabled(experiments: ExperimentFlags): ExperimentFlags {
     rustInstrumentsDeepCopy: false,
     rustCallgrindImport: false,
     rustV8ProfLog: false,
+    rustTraceEventImport: false,
   }
 }
 
@@ -86,7 +87,6 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['deferDemangle', options.experiments.deferDemangle],
     ['optimizedForEachCall', options.experiments.optimizedForEachCall],
     ['rustFuzzyFind', options.experiments.rustFuzzyFind],
-    ['rustFirefoxImport', options.experiments.rustFirefoxImport],
     ['rustBase64Decode', options.experiments.rustBase64Decode],
     ['rustProfileSearch', options.experiments.rustProfileSearch],
     ['rustTextUtils', options.experiments.rustTextUtils],
@@ -96,7 +96,7 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['rustInstrumentsDeepCopy', options.experiments.rustInstrumentsDeepCopy],
     ['rustV8ProfLog', options.experiments.rustV8ProfLog],
     ['rustV8CpuFormatter', options.experiments.rustV8CpuFormatter],
-    ['rustLinuxPerf', options.experiments.rustLinuxPerf],
+    ['rustTraceEventImport', options.experiments.rustTraceEventImport],
   ]
   for (const [name, enabled] of experimentEntries) {
     if (enabled) enabledExperiments.push(name)
@@ -388,11 +388,11 @@ async function main() {
         rustInstrumentsDeepCopy: false,
         rustCallgrindImport: false,
         rustV8ProfLog: false,
+        rustTraceEventImport: false,
       }),
       deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
       optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
       rustFuzzyFind: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FUZZY_FIND),
-      rustFirefoxImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FIREFOX_IMPORT),
       rustBase64Decode: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_BASE64_DECODE),
       rustProfileSearch: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PROFILE_SEARCH),
       rustTextUtils: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TEXT_UTILS),
@@ -402,7 +402,7 @@ async function main() {
       rustHaskellImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_HASKELL_IMPORT),
       rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
       rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),
-      rustLinuxPerf: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_LINUX_PERF),
+      rustTraceEventImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TRACE_EVENT_IMPORT),
     },
   })
   writeMarkdown(artifactPaths.reportPath, renderBenchmarkReport(report))

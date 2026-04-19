@@ -46,6 +46,9 @@ The browser app reads the following query parameters and environment variables:
 - `rustFuzzyFind=1`
   - Enables the Rust/WASM fuzzy matcher when it has been built
   - Enables one or more experiment flags
+- `rustTraceEventImport=1`
+  - Enables the Rust/WASM trace-event queue/replay planner when it has been built
+  - Falls back to the TypeScript importer if the module is unavailable
 - `deferDemangle=1`
   - Defers demangling until after first meaningful paint
 - `optimizedForEachCall=1`

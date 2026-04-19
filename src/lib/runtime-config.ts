@@ -2,7 +2,6 @@ export interface ExperimentFlags {
   deferDemangle: boolean
   optimizedForEachCall: boolean
   rustFuzzyFind: boolean
-  rustFirefoxImport: boolean
   rustBase64Decode: boolean
   rustProfileSearch: boolean
   rustTextUtils: boolean
@@ -12,14 +11,13 @@ export interface ExperimentFlags {
   rustCallgrindImport: boolean
   rustV8ProfLog: boolean
   rustV8CpuFormatter: boolean
-  rustLinuxPerf: boolean
+  rustTraceEventImport: boolean
 }
 
 const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   deferDemangle: false,
   optimizedForEachCall: false,
   rustFuzzyFind: false,
-  rustFirefoxImport: false,
   rustBase64Decode: false,
   rustProfileSearch: false,
   rustTextUtils: false,
@@ -29,7 +27,7 @@ const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   rustCallgrindImport: false,
   rustV8ProfLog: false,
   rustV8CpuFormatter: false,
-  rustLinuxPerf: false,
+  rustTraceEventImport: false,
 }
 
 let experimentOverrides: Partial<ExperimentFlags> | null = null

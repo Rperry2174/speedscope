@@ -10,7 +10,6 @@ export interface ExperimentFlags {
   deferDemangle: boolean
   optimizedForEachCall: boolean
   rustFuzzyFind: boolean
-  rustFirefoxImport: boolean
   rustBase64Decode: boolean
   rustProfileSearch: boolean
   rustTextUtils: boolean
@@ -20,7 +19,7 @@ export interface ExperimentFlags {
   rustInstrumentsDeepCopy: boolean
   rustCallgrindImport: boolean
   rustV8ProfLog: boolean
-  rustLinuxPerf: boolean
+  rustTraceEventImport: boolean
 }
 
 export interface ExperimentRunOptions {
