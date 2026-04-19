@@ -49,4 +49,16 @@ describe('profile parity', () => {
       expect(compareProfileGroups(legacy, experimental)).toEqual([])
     })
   }
+
+  test('rust V8 CPU formatter preserves profile parity for old-format V8 profiles', async () => {
+    const fixturePath = './sample/profiles/node/10.11.0/example.cpuprofile'
+    const legacy = await importFixtureWithOverrides(fixturePath, {
+      rustV8CpuFormatter: false,
+    })
+    const experimental = await importFixtureWithOverrides(fixturePath, {
+      rustV8CpuFormatter: true,
+    })
+
+    expect(compareProfileGroups(legacy, experimental)).toEqual([])
+  })
 })

@@ -320,8 +320,8 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if ('head' in parsed && 'samples' in parsed && 'timestamps' in parsed) {
       console.log('Importing as Chrome CPU Profile (old format)')
       annotatePerfRun('detected_format', 'chrome-cpu-profile-old')
-      const result = timePerfSync('import_old_v8_cpu_profile', () =>
-        toGroup(importFromOldV8CPUProfile(parsed)),
+      const result = await timePerfAsync('import_old_v8_cpu_profile', () =>
+        importFromOldV8CPUProfile(parsed).then(toGroup),
       )
       notePerfMilestone('import_parse_finished')
       return result

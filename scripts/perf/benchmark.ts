@@ -52,6 +52,23 @@ interface RunBrowserBenchmarkArgs {
 
 const PERF_TIMEOUT_MS = 180000
 
+function allExperimentsDisabled(experiments: ExperimentFlags): ExperimentFlags {
+  return {
+    deferDemangle: false,
+    optimizedForEachCall: false,
+    rustFuzzyFind: false,
+    rustBase64Decode: false,
+    rustProfileSearch: false,
+    rustTextUtils: false,
+    rustPprofImport: false,
+    rustV8CpuFormatter: false,
+    rustHaskellImport: false,
+    rustInstrumentsDeepCopy: false,
+    rustCallgrindImport: false,
+    rustV8ProfLog: false,
+  }
+}
+
 function parseBooleanFlag(value: string | undefined): boolean {
   if (!value) return false
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase())
@@ -77,6 +94,7 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['rustHaskellImport', options.experiments.rustHaskellImport],
     ['rustInstrumentsDeepCopy', options.experiments.rustInstrumentsDeepCopy],
     ['rustV8ProfLog', options.experiments.rustV8ProfLog],
+    ['rustV8CpuFormatter', options.experiments.rustV8CpuFormatter],
   ]
   for (const [name, enabled] of experimentEntries) {
     if (enabled) enabledExperiments.push(name)
@@ -355,6 +373,20 @@ async function main() {
     warmRuns,
     experimentName,
     experiments: {
+      ...allExperimentsDisabled({
+        deferDemangle: false,
+        optimizedForEachCall: false,
+        rustFuzzyFind: false,
+        rustBase64Decode: false,
+        rustProfileSearch: false,
+        rustTextUtils: false,
+        rustPprofImport: false,
+        rustV8CpuFormatter: false,
+        rustHaskellImport: false,
+        rustInstrumentsDeepCopy: false,
+        rustCallgrindImport: false,
+        rustV8ProfLog: false,
+      }),
       deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
       optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
       rustFuzzyFind: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FUZZY_FIND),
@@ -363,6 +395,7 @@ async function main() {
       rustTextUtils: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TEXT_UTILS),
       rustPprofImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PPROF_IMPORT),
       rustCallgrindImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_CALLGRIND_IMPORT),
+      rustV8CpuFormatter: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_CPU_FORMATTER),
       rustHaskellImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_HASKELL_IMPORT),
       rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
       rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),

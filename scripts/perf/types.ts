@@ -13,6 +13,7 @@ export interface ExperimentFlags {
   rustBase64Decode: boolean
   rustProfileSearch: boolean
   rustTextUtils: boolean
+  rustV8CpuFormatter: boolean
   rustPprofImport: boolean
   rustHaskellImport: boolean
   rustInstrumentsDeepCopy: boolean

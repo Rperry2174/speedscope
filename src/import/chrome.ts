@@ -350,6 +350,6 @@ export function importFromChromeCPUProfile(chromeProfile: CPUProfile): Profile {
   return profile.build()
 }
 
-export function importFromOldV8CPUProfile(content: OldCPUProfile): Profile {
-  return importFromChromeCPUProfile(chromeTreeToNodes(content))
+export async function importFromOldV8CPUProfile(content: OldCPUProfile): Promise<Profile> {
+  return importFromChromeCPUProfile(await chromeTreeToNodes(content))
 }
