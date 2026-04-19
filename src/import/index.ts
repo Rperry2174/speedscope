@@ -10,7 +10,7 @@ import {
 import {importFromStackprof} from './stackprof'
 import {importFromInstrumentsDeepCopy, importFromInstrumentsTrace} from './instruments'
 import {importFromBGFlameGraph} from './bg-flamegraph'
-import {importFromFirefox} from './firefox'
+import {importFromFirefoxBuffer} from './firefox'
 import {importSpeedscopeProfiles} from '../lib/file-format'
 import {importFromV8ProfLog} from './v8proflog'
 import {importFromV8ProfLogBuffer} from './v8-prof-log-rust'
@@ -284,7 +284,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if (parsed['systemHost'] && parsed['systemHost']['name'] == 'Firefox') {
       console.log('Importing as Firefox profile')
       annotatePerfRun('detected_format', 'firefox')
-      const result = timePerfSync('import_firefox', () => toGroup(importFromFirefox(parsed)))
+      const result = await timePerfAsync('import_firefox', () =>
+        importFromFirefoxBuffer(parsed, buffer).then(profile => toGroup(profile)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     } else if (isChromeTimeline(parsed)) {

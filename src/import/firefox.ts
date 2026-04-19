@@ -1,6 +1,8 @@
 import {Profile, FrameInfo, CallTreeProfileBuilder} from '../lib/profile'
+import {isExperimentEnabled} from '../lib/runtime-config'
 import {getOrInsert} from '../lib/utils'
 import {TimeFormatter} from '../lib/value-formatters'
+import {loadRustFirefoxImporter} from './firefox-rust'
 
 interface Allocations {
   frames: any[]
@@ -150,7 +152,55 @@ export interface FirefoxProfile {
   version: number
 }
 
-export function importFromFirefox(firefoxProfile: FirefoxProfile): Profile {
+export interface FirefoxImportFrame {
+  key: string
+  name: string
+  file?: string
+  line?: number
+  col?: number
+}
+
+export interface FirefoxImportSample {
+  stack: number[]
+  value: number
+}
+
+export interface FirefoxImportPayload {
+  duration: number
+  frames: FirefoxImportFrame[]
+  samples: FirefoxImportSample[]
+}
+
+function parseFirefoxFrameLocation(
+  location: string,
+  frameKeyToFrameInfo: Map<string, FrameInfo>,
+): FrameInfo | null {
+  const match = /(.*)\s+\((.*?)(?::(\d+))?(?::(\d+))?\)$/.exec(location)
+
+  if (!match) return null
+
+  if (
+    match[2].startsWith('resource:') ||
+    match[2] === 'self-hosted' ||
+    match[2].startsWith('self-hosted:')
+  ) {
+    // Ignore Firefox-internals stuff
+    return null
+  }
+
+  return getOrInsert(frameKeyToFrameInfo, location, () => ({
+    key: location,
+    name: match[1]!,
+    file: match[2]!,
+
+    // In Firefox profiles, line numbers are 1-based, but columns are
+    // 0-based. Let's normalize both to be 1-based.
+    line: match[3] ? parseInt(match[3]) : undefined,
+    col: match[4] ? parseInt(match[4]) + 1 : undefined,
+  }))
+}
+
+export function extractFirefoxImportPayload(firefoxProfile: FirefoxProfile): FirefoxImportPayload {
   const cpuProfile = firefoxProfile.profile
 
   const thread =
@@ -159,8 +209,10 @@ export function importFromFirefox(firefoxProfile: FirefoxProfile): Profile {
       : cpuProfile.threads.filter(t => t.name === 'GeckoMain')[0]
 
   const frameKeyToFrameInfo = new Map<string, FrameInfo>()
+  const frameKeyToPayloadIndex = new Map<string, number>()
+  const payloadFrames: FirefoxImportFrame[] = []
 
-  function extractStack(sample: Sample): FrameInfo[] {
+  function extractStack(sample: Sample): number[] {
     let stackFrameId: number | null = sample[0]
     const ret: number[] = []
 
@@ -172,43 +224,45 @@ export function importFromFirefox(firefoxProfile: FirefoxProfile): Profile {
     }
     ret.reverse()
     return ret
-      .map(f => {
-        const frameData = thread.frameTable.data[f]
-        const location = thread.stringTable[frameData[0]]
-
-        const match = /(.*)\s+\((.*?)(?::(\d+))?(?::(\d+))?\)$/.exec(location)
-
-        if (!match) return null
-
-        if (
-          match[2].startsWith('resource:') ||
-          match[2] === 'self-hosted' ||
-          match[2].startsWith('self-hosted:')
-        ) {
-          // Ignore Firefox-internals stuff
-          return null
-        }
-
-        return getOrInsert(frameKeyToFrameInfo, location, () => ({
-          key: location,
-          name: match[1]!,
-          file: match[2]!,
-
-          // In Firefox profiles, line numbers are 1-based, but columns are
-          // 0-based. Let's normalize both to be 1-based.
-          line: match[3] ? parseInt(match[3]) : undefined,
-          col: match[4] ? parseInt(match[4]) + 1 : undefined,
-        }))
+      .map(frameId => {
+        const frameData = thread.frameTable.data[frameId]
+        const location = thread.stringTable[frameData[0] as number]
+        const frameInfo = parseFirefoxFrameLocation(location, frameKeyToFrameInfo)
+        if (!frameInfo) return null
+        return getOrInsert(frameKeyToPayloadIndex, frameInfo.key, () => {
+          payloadFrames.push({
+            key: `${frameInfo.key}`,
+            name: frameInfo.name,
+            file: frameInfo.file,
+            line: frameInfo.line,
+            col: frameInfo.col,
+          })
+          return payloadFrames.length - 1
+        })
       })
-      .filter(f => f != null) as FrameInfo[]
+      .filter(frameIndex => frameIndex != null) as number[]
   }
 
-  const profile = new CallTreeProfileBuilder(firefoxProfile.duration)
+  const samples = thread.samples.data.map(sample => ({
+    stack: extractStack(sample),
+    value: sample[1],
+  }))
 
-  let prevStack: FrameInfo[] = []
-  for (let sample of thread.samples.data) {
-    const stack = extractStack(sample)
-    const value = sample[1]
+  return {
+    duration: firefoxProfile.duration,
+    frames: payloadFrames,
+    samples,
+  }
+}
+
+export function buildFirefoxProfileFromPayload(payload: FirefoxImportPayload): Profile {
+  const profile = new CallTreeProfileBuilder(payload.duration)
+  const frames: FrameInfo[] = payload.frames.map(frame => ({...frame}))
+
+  let prevStack: number[] = []
+  for (let sample of payload.samples) {
+    const stack = sample.stack
+    const value = sample.value
 
     // Find lowest common ancestor of the current stack and the previous one
     let lcaIndex = -1
@@ -222,11 +276,11 @@ export function importFromFirefox(firefoxProfile: FirefoxProfile): Profile {
 
     // Close frames that are no longer open
     for (let i = prevStack.length - 1; i > lcaIndex; i--) {
-      profile.leaveFrame(prevStack[i], value)
+      profile.leaveFrame(frames[prevStack[i]], value)
     }
 
     for (let i = lcaIndex + 1; i < stack.length; i++) {
-      profile.enterFrame(stack[i], value)
+      profile.enterFrame(frames[stack[i]], value)
     }
 
     prevStack = stack
@@ -234,4 +288,30 @@ export function importFromFirefox(firefoxProfile: FirefoxProfile): Profile {
 
   profile.setValueFormatter(new TimeFormatter('milliseconds'))
   return profile.build()
+}
+
+export function importFromFirefox(firefoxProfile: FirefoxProfile): Profile {
+  return buildFirefoxProfileFromPayload(extractFirefoxImportPayload(firefoxProfile))
+}
+
+export async function importFromFirefoxBuffer(
+  firefoxProfile: FirefoxProfile,
+  buffer: ArrayBuffer,
+): Promise<Profile> {
+  if (!isExperimentEnabled('rustFirefoxImport')) {
+    return importFromFirefox(firefoxProfile)
+  }
+
+  try {
+    const importFromRust = await loadRustFirefoxImporter()
+    const payload = importFromRust(buffer)
+    if (payload) {
+      return buildFirefoxProfileFromPayload(payload)
+    }
+  } catch (_error) {
+    // Fall back to the TypeScript importer if the optional WASM path fails to
+    // initialize or can't parse this particular fixture shape.
+  }
+
+  return importFromFirefox(firefoxProfile)
 }

@@ -11,6 +11,7 @@
     "deploy": "./scripts/deploy.sh",
     "build:rust:base64-decoder": "./scripts/build-rust-base64-decoder.sh",
     "build:rust:callgrind-import": "./scripts/build-rust-callgrind-import.sh",
+    "build:rust:firefox-import": "bash ./scripts/build-rust-firefox-import.sh",
     "build:rust:fuzzy-find": "./scripts/build-rust-fuzzy-find.sh",
     "build:rust:text-utils": "./scripts/build-rust-text-utils.sh",
     "build:rust:profile-search": "./scripts/build-rust-profile-search.sh",
@@ -92,6 +93,7 @@
     "moduleNameMapper": {
       "\\jfrview_bg.wasm$": "<rootDir>/src/import/java-flight-record.mock.ts",
       "callgrind_import_bg\\.wasm$": "<rootDir>/src/import/callgrind-rust.wasm.mock.ts",
+      "firefox_import_bg\\.wasm$": "<rootDir>/src/import/firefox-rust.wasm.mock.ts",
       "fuzzy_find_bg\\.wasm$": "<rootDir>/src/lib/fuzzy-find-rust.wasm.mock.ts",
       "base64_decoder_bg\\.wasm$": "<rootDir>/src/lib/base64-decoder-rust.wasm.mock.ts",
       "text_utils_bg\\.wasm$": "<rootDir>/src/lib/text-utils-rust.wasm.mock.ts",

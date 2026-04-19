@@ -2,6 +2,7 @@ export interface ExperimentFlags {
   deferDemangle: boolean
   optimizedForEachCall: boolean
   rustFuzzyFind: boolean
+  rustFirefoxImport: boolean
   rustBase64Decode: boolean
   rustProfileSearch: boolean
   rustTextUtils: boolean
@@ -18,6 +19,7 @@ const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   deferDemangle: false,
   optimizedForEachCall: false,
   rustFuzzyFind: false,
+  rustFirefoxImport: false,
   rustBase64Decode: false,
   rustProfileSearch: false,
   rustTextUtils: false,
