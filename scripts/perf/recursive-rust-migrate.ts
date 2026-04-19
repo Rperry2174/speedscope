@@ -1,7 +1,10 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import {execFileSync, spawnSync} from 'child_process'
+import {execFileSync, execFile} from 'child_process'
+import {promisify} from 'util'
 import {fetchCursorModels, selectCursorModel} from './cursor-api'
+
+const execFileAsync = promisify(execFile)
 
 type ModelFamily = 'composer-2' | 'gpt-5.4' | 'opus-4.6'
 type TaskMode = 'migrate-rust' | 'keep-ts-review' | 'proof-point'

@@ -22,24 +22,23 @@ interface FrameInfoWithWeight extends FrameInfo {
   endValue: number
 }
 
-let modulePromise: Promise<void> | null = null
+let modulePromise: Promise<unknown> | null = null
 
-function isNodeLikeEnvironment(): boolean {
-  return typeof process !== 'undefined' && !!process.versions?.node
-}
-
-async function initializeModule(): Promise<void> {
-  if (isNodeLikeEnvironment()) {
-    const fs = await import('fs')
-    const path = await import('path')
-    const wasmBinary = fs.readFileSync(
-      path.join(process.cwd(), 'rust', 'instruments-deep-copy', 'pkg', 'instruments_deep_copy_bg.wasm'),
+async function initializeModule(): Promise<unknown> {
+  if (typeof window === 'undefined') {
+    const {readFile} = await import('fs/promises')
+    const {join} = await import('path')
+    return initRustInstrumentsDeepCopy(
+      await readFile(
+        join(process.cwd(), 'rust', 'instruments-deep-copy', 'pkg', 'instruments_deep_copy_bg.wasm'),
+      ),
     )
-    await initRustInstrumentsDeepCopy(new Uint8Array(wasmBinary))
-    return
   }
 
-  await initRustInstrumentsDeepCopy()
+  const wasmModule = (await import(
+    '../../rust/instruments-deep-copy/pkg/instruments_deep_copy_bg.wasm'
+  )) as unknown as {default: string}
+  return initRustInstrumentsDeepCopy(wasmModule.default)
 }
 
 async function ensureModuleReady() {
