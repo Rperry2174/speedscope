@@ -97,6 +97,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustPprofImport: false,
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
     },
   },
   {
@@ -189,6 +190,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustBase64Decode: false,
       rustProfileSearch: false,
       rustTextUtils: false,
+      rustV8CpuFormatter: false,
       rustPprofImport: false,
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
