@@ -1,10 +1,12 @@
 export interface ExperimentFlags {
   deferDemangle: boolean
   optimizedForEachCall: boolean
+  rustFirefoxImport: boolean
   rustFuzzyFind: boolean
   rustBase64Decode: boolean
   rustProfileSearch: boolean
   rustTextUtils: boolean
+  rustLinuxPerf: boolean
   rustPprofImport: boolean
   rustHaskellImport: boolean
   rustInstrumentsDeepCopy: boolean
@@ -17,10 +19,12 @@ export interface ExperimentFlags {
 const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   deferDemangle: false,
   optimizedForEachCall: false,
+  rustFirefoxImport: false,
   rustFuzzyFind: false,
   rustBase64Decode: false,
   rustProfileSearch: false,
   rustTextUtils: false,
+  rustLinuxPerf: false,
   rustPprofImport: false,
   rustHaskellImport: false,
   rustInstrumentsDeepCopy: false,

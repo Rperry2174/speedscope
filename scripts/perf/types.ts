@@ -9,11 +9,13 @@ export interface BenchmarkArtifactPaths {
 export interface ExperimentFlags {
   deferDemangle: boolean
   optimizedForEachCall: boolean
+  rustFirefoxImport: boolean
   rustFuzzyFind: boolean
   rustBase64Decode: boolean
   rustProfileSearch: boolean
   rustTextUtils: boolean
   rustV8CpuFormatter: boolean
+  rustLinuxPerf: boolean
   rustPprofImport: boolean
   rustHaskellImport: boolean
   rustInstrumentsDeepCopy: boolean
