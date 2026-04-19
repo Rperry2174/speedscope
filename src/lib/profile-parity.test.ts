@@ -51,6 +51,18 @@ describe('profile parity', () => {
     })
   }
 
+  test('rust V8 CPU formatter preserves profile parity for old-format V8 profiles', async () => {
+    const fixturePath = './sample/profiles/node/10.11.0/example.cpuprofile'
+    const legacy = await importFixtureWithOverrides(fixturePath, {
+      rustV8CpuFormatter: false,
+    })
+    const experimental = await importFixtureWithOverrides(fixturePath, {
+      rustV8CpuFormatter: true,
+    })
+
+    expect(compareProfileGroups(legacy, experimental)).toEqual([])
+  })
+
   const rustImporterFixtures = [
     './sample/profiles/Safari/13.1/simple.html-recording.json',
     './sample/profiles/stackprof/ruby-stackprof.json',
@@ -59,11 +71,9 @@ describe('profile parity', () => {
   for (const fixturePath of rustImporterFixtures) {
     test(`rust import parsers preserve profile parity for ${fixturePath}`, async () => {
       const legacy = await importFixtureWithOverrides(fixturePath, {
-        optimizedForEachCall: false,
         rustImportParsers: false,
       })
       const experimental = await importFixtureWithOverrides(fixturePath, {
-        optimizedForEachCall: false,
         rustImportParsers: true,
       })
 

@@ -11,6 +11,7 @@ export interface ProfileDataSource {
 export interface TextFileContent {
   splitLines(): Iterable<string>
   firstChunk(): string
+  fullText(): string
   parseAsJSON(): any
 }
 
@@ -178,6 +179,10 @@ export class BufferBackedTextFileContent implements TextFileContent {
     return this.chunks[0] || ''
   }
 
+  fullText(): string {
+    return this.chunks.join('')
+  }
+
   parseAsJSON(): any {
     // We only use the Uint8Array version of JSON.parse when necessary, because
     // it's around 4x slower than native.
@@ -196,6 +201,10 @@ export class StringBackedTextFileContent implements TextFileContent {
   }
 
   firstChunk(): string {
+    return this.s
+  }
+
+  fullText(): string {
     return this.s
   }
 

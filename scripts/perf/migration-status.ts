@@ -79,6 +79,11 @@ function buildStatusSummary(): StatusSummary {
     'rust/fuzzy-find/src/lib.rs',
     'rust/fuzzy-find/pkg/fuzzy_find.js',
     'rust/fuzzy-find/pkg/fuzzy_find_bg.wasm',
+    'src/lib/profile-search.ts',
+    'src/lib/profile-search-rust.ts',
+    'rust/profile-search/src/lib.rs',
+    'rust/profile-search/pkg/profile_search.js',
+    'rust/profile-search/pkg/profile_search_bg.wasm',
   ]
 
   return {

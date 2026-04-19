@@ -41,6 +41,10 @@ Reason:
   - a Rust/WASM implementation now exists in `rust/fuzzy-find`
   - the TS path remains as the safe fallback
   - parity is covered in `src/lib/fuzzy-find.test.ts`
+- `src/lib/profile-search.ts` (exact substring match core)
+  - a Rust/WASM implementation now exists in `rust/profile-search`
+  - the TS path remains as the safe fallback
+  - parity is covered in `src/lib/profile-search.test.ts`
 
 ### Best next candidates
 

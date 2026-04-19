@@ -1,4 +1,6 @@
+import fs from 'fs'
 import initRustInstrumentsDeepCopy, {
+  initSync as initRustInstrumentsDeepCopySync,
   parse_instruments_deep_copy_json as parseInstrumentsDeepCopyJson,
 } from '../../rust/instruments-deep-copy/pkg/instruments_deep_copy.js'
 import {CallTreeProfileBuilder, FrameInfo, Profile} from '../lib/profile'
@@ -24,21 +26,13 @@ interface FrameInfoWithWeight extends FrameInfo {
 
 let modulePromise: Promise<void> | null = null
 
-function isNodeLikeEnvironment(): boolean {
-  return typeof process !== 'undefined' && !!process.versions?.node
-}
-
 async function initializeModule(): Promise<void> {
-  if (isNodeLikeEnvironment()) {
-    const fs = await import('fs')
-    const path = await import('path')
-    const wasmBinary = fs.readFileSync(
-      path.join(process.cwd(), 'rust', 'instruments-deep-copy', 'pkg', 'instruments_deep_copy_bg.wasm'),
+  if (typeof window === 'undefined') {
+    initRustInstrumentsDeepCopySync(
+      fs.readFileSync('rust/instruments-deep-copy/pkg/instruments_deep_copy_bg.wasm'),
     )
-    await initRustInstrumentsDeepCopy(new Uint8Array(wasmBinary))
     return
   }
-
   await initRustInstrumentsDeepCopy()
 }
 

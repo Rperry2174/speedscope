@@ -5,18 +5,25 @@ export function normalize_safari_profile(profile: any): any;
 
 export function normalize_stackprof_profile(profile: any): any;
 
+export function parse_papyrus_json(contents: string): string;
+
+export function parse_pmcstat_json(contents: string): string;
+
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
     readonly normalize_safari_profile: (a: any) => [number, number, number];
     readonly normalize_stackprof_profile: (a: any) => [number, number, number];
+    readonly parse_papyrus_json: (a: number, b: number) => [number, number];
+    readonly parse_pmcstat_json: (a: number, b: number) => [number, number];
     readonly __wbindgen_malloc: (a: number, b: number) => number;
     readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
     readonly __wbindgen_exn_store: (a: number) => void;
     readonly __externref_table_alloc: () => number;
     readonly __wbindgen_externrefs: WebAssembly.Table;
     readonly __externref_table_dealloc: (a: number) => void;
+    readonly __wbindgen_free: (a: number, b: number, c: number) => void;
     readonly __wbindgen_start: () => void;
 }
 

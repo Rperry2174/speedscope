@@ -10,7 +10,7 @@ import {
 import {importFromStackprof} from './stackprof'
 import {importFromInstrumentsDeepCopy, importFromInstrumentsTrace} from './instruments'
 import {importFromBGFlameGraph} from './bg-flamegraph'
-import {importFromFirefox} from './firefox'
+import {importFromFirefoxBuffer} from './firefox'
 import {importSpeedscopeProfiles} from '../lib/file-format'
 import {importFromV8ProfLog} from './v8proflog'
 import {importFromV8ProfLogBuffer} from './v8-prof-log-rust'
@@ -24,7 +24,7 @@ import {importFromChromeHeapProfile} from './v8heapalloc'
 import {isTraceEventFormatted, importTraceEvents} from './trace-event'
 import {importFromCallgrind} from './callgrind'
 import {importFromPapyrus} from './papyrus'
-import {importFromPMCStatCallGraph} from './pmcstat-callgraph'
+import {importFromPMCStatCallGraph, importFromPMCStatCallGraphTs} from './pmcstat-callgraph'
 type JfrModule = typeof import('./java-flight-recorder')
 
 let jfrModulePromise: Promise<JfrModule> | null = null
@@ -210,7 +210,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.linux-perf.txt')) {
     console.log('Importing as output of linux perf script')
     annotatePerfRun('detected_format', 'linux-perf')
-    const result = timePerfSync('import_linux_perf', () => importFromLinuxPerf(contents))
+    const result = await timePerfAsync('import_linux_perf', () => importFromLinuxPerf(contents, buffer))
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.collapsedstack.txt')) {
@@ -257,7 +257,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.pmcstat.graph')) {
     console.log('Importing as pmcstat callgraph format')
     annotatePerfRun('detected_format', 'pmcstat')
-    const result = timePerfSync('import_pmcstat', () => toGroup(importFromPMCStatCallGraph(contents)))
+    const result = await timePerfAsync('import_pmcstat', async () =>
+      toGroup(await importFromPMCStatCallGraph(contents)),
+    )
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.jfr')) {
@@ -286,7 +288,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if (parsed['systemHost'] && parsed['systemHost']['name'] == 'Firefox') {
       console.log('Importing as Firefox profile')
       annotatePerfRun('detected_format', 'firefox')
-      const result = timePerfSync('import_firefox', () => toGroup(importFromFirefox(parsed)))
+      const result = await timePerfAsync('import_firefox', () =>
+        importFromFirefoxBuffer(parsed, buffer).then(profile => toGroup(profile)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     } else if (isChromeTimeline(parsed)) {
@@ -322,8 +326,8 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if ('head' in parsed && 'samples' in parsed && 'timestamps' in parsed) {
       console.log('Importing as Chrome CPU Profile (old format)')
       annotatePerfRun('detected_format', 'chrome-cpu-profile-old')
-      const result = timePerfSync('import_old_v8_cpu_profile', () =>
-        toGroup(importFromOldV8CPUProfile(parsed)),
+      const result = await timePerfAsync('import_old_v8_cpu_profile', () =>
+        importFromOldV8CPUProfile(parsed).then(toGroup),
       )
       notePerfMilestone('import_parse_finished')
       return result
@@ -401,7 +405,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     if (/^(Stack_|Script_|Obj_)\S+ log opened \(PC\)\n/.exec(contents.firstChunk())) {
       console.log('Importing as Papyrus profile')
       annotatePerfRun('detected_format', 'papyrus')
-      const result = timePerfSync('import_papyrus', () => toGroup(importFromPapyrus(contents)))
+      const result = await timePerfAsync('import_papyrus', async () =>
+        toGroup(await importFromPapyrus(contents)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     }
@@ -415,7 +421,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
       return result
     }
 
-    const fromLinuxPerf = timePerfSync('import_linux_perf_probe', () => importFromLinuxPerf(contents))
+    const fromLinuxPerf = await timePerfAsync('import_linux_perf_probe', () =>
+      importFromLinuxPerf(contents, buffer),
+    )
     if (fromLinuxPerf) {
       console.log('Importing from linux perf script output')
       annotatePerfRun('detected_format', 'linux-perf')
@@ -434,7 +442,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     }
 
     const fromPMCStatCallGraph = timePerfSync('import_pmcstat_probe', () =>
-      importFromPMCStatCallGraph(contents),
+      importFromPMCStatCallGraphTs(contents),
     )
     if (fromPMCStatCallGraph) {
       console.log('Importing as pmcstat callgraph format')

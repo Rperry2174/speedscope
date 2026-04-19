@@ -25,32 +25,87 @@
 import {CallTreeProfileBuilder, Frame, Profile} from '../lib/profile'
 import {KeyedSet, lastOf} from '../lib/utils'
 import {TimeFormatter} from '../lib/value-formatters'
+import {parsePapyrusWithRust, type RustPapyrusParsedLine} from './import-parsers-rust'
 import {TextFileContent} from './utils'
 
-type ParsedLine = {
+export type ParsedLine = {
   at: number
   event: string
   stackInt: number
   name: string
 }
 
-export function importFromPapyrus(papyrusProfile: TextFileContent): Profile {
-  const profile = new CallTreeProfileBuilder()
-  profile.setValueFormatter(new TimeFormatter('milliseconds'))
+export async function importFromPapyrus(papyrusProfile: TextFileContent): Promise<Profile> {
+  const rustLines = await parsePapyrusWithRust(papyrusProfile)
+  if (rustLines) {
+    return buildPapyrusProfileFromParsedLines(
+      rustLines.map((line: RustPapyrusParsedLine) => ({
+        at: line.at,
+        event: line.event,
+        stackInt: line.stackInt,
+        name: line.name,
+      })),
+    )
+  }
+  return importFromPapyrusTs(papyrusProfile)
+}
 
+export function importFromPapyrusTs(papyrusProfile: TextFileContent): Profile {
+  return buildPapyrusProfileFromParsedLines(parsePapyrusLinesTs(papyrusProfile))
+}
+
+export function parsePapyrusLinesTs(papyrusProfile: TextFileContent): ParsedLine[] {
   const papyrusProfileLines = [...papyrusProfile.splitLines()].filter(
     line => !/^$|^Log closed$|log opened/.exec(line),
   )
+  if (papyrusProfileLines.length === 0) {
+    throw Error('Probably tried to import empty file.')
+  }
 
   let startValue = -1
+  function parseLine(lineStr: string): ParsedLine | null {
+    if (lineStr === undefined) throw Error('Probably tried to import empty file.')
+    const lineArr = lineStr.split(':')
+    if (lineArr.length < 3) return null
+    if (startValue !== -1) {
+      return {
+        at: parseInt(lineArr[0]) - startValue,
+        event: lineArr[1],
+        stackInt: parseInt(lineArr[2]),
+        name: lineArr[5],
+      }
+    } else {
+      // When parsing the first line, we return an absolute `at` value to initialize `startValue`
+      return {
+        at: parseInt(lineArr[0]),
+        event: lineArr[1],
+        stackInt: parseInt(lineArr[2]),
+        name: lineArr[5],
+      }
+    }
+  }
+
   const firstLineParsed = parseLine(papyrusProfileLines[0])
   if (firstLineParsed === null) throw Error
   startValue = firstLineParsed.at
-  const lastLine = lastOf(papyrusProfileLines)
-  if (lastLine === null) throw Error
-  const lastLineParsed = parseLine(lastLine)
-  if (lastLineParsed === null) throw Error
-  const endValue = lastLineParsed.at
+
+  return papyrusProfileLines
+    .map(parseLine)
+    .filter((line): line is ParsedLine => line !== null)
+    .map(line => ({
+      at: line.at,
+      event: line.event,
+      stackInt: line.stackInt,
+      name: line.name,
+    }))
+}
+
+export function buildPapyrusProfileFromParsedLines(parsedLines: ReadonlyArray<ParsedLine>): Profile {
+  const profile = new CallTreeProfileBuilder()
+  profile.setValueFormatter(new TimeFormatter('milliseconds'))
+  if (parsedLines.length === 0) throw Error('Probably tried to import empty file.')
+
+  const endValue = parsedLines[parsedLines.length - 1].at
 
   const nameSet = new KeyedSet<Frame>()
   const frameStack: string[] = []
@@ -122,39 +177,16 @@ export function importFromPapyrus(papyrusProfile: TextFileContent): Profile {
     }
   }
 
-  function parseLine(lineStr: string): ParsedLine | null {
-    if (lineStr === undefined) throw Error('Probably tried to import empty file.')
-    const lineArr = lineStr.split(':')
-    if (lineArr.length < 3) return null
-    if (startValue !== -1) {
-      return {
-        at: parseInt(lineArr[0]) - startValue,
-        event: lineArr[1],
-        stackInt: parseInt(lineArr[2]),
-        name: lineArr[5],
-      }
-    } else {
-      // When parsing the first line, we return an absolute `at` value to initialize `startValue`
-      return {
-        at: parseInt(lineArr[0]),
-        event: lineArr[1],
-        stackInt: parseInt(lineArr[2]),
-        name: lineArr[5],
-      }
-    }
-  }
-
-  papyrusProfileLines.forEach((lineStr, i, papyrusProfileLines) => {
-    const parsedLine = parseLine(lineStr)
-    if (parsedLine === null) return // continue
+  const mutableParsedLines = parsedLines.map(line => ({...line}))
+  mutableParsedLines.forEach((parsedLine, i) => {
     if (parsedLine.event === 'PUSH') {
       enterFrame(parsedLine.stackInt, parsedLine.at, parsedLine.name)
       i += 1
-      let parsedNextLine = parseLine(papyrusProfileLines[i])
+      let parsedNextLine: ParsedLine | undefined = mutableParsedLines[i]
       // Search all future events in the current event for one that leaves the current frame. If it exists, leave now.
       // This way, we avoid speedscope choking on the possibly wrong order of events. The changed order is still
       // functionally correct, as the function took less than a millisecond to execute, which is measured as 0 (ms).
-      while (parsedNextLine !== null && parsedNextLine.at === parsedLine.at) {
+      while (parsedNextLine && parsedNextLine.at === parsedLine.at) {
         if (
           parsedNextLine.name === parsedLine.name &&
           parsedNextLine.stackInt === parsedLine.stackInt &&
@@ -162,11 +194,11 @@ export function importFromPapyrus(papyrusProfile: TextFileContent): Profile {
         ) {
           tryToLeaveFrame(parsedNextLine.stackInt, parsedNextLine.at, parsedNextLine.name)
           // Delete the line that we successfully parsed and imported such that it is not processed twice
-          papyrusProfileLines.splice(i, 1)
-          parsedNextLine = null
+          mutableParsedLines.splice(i, 1)
+          parsedNextLine = undefined
         } else {
           i += 1
-          if (i < papyrusProfileLines.length) parsedNextLine = parseLine(papyrusProfileLines[i])
+          if (i < mutableParsedLines.length) parsedNextLine = mutableParsedLines[i]
         }
       }
     } else if (parsedLine.event === 'POP') {

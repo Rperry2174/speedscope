@@ -52,6 +52,26 @@ interface RunBrowserBenchmarkArgs {
 
 const PERF_TIMEOUT_MS = 180000
 
+function allExperimentsDisabled(experiments: ExperimentFlags): ExperimentFlags {
+  return {
+    deferDemangle: false,
+    optimizedForEachCall: false,
+    rustFuzzyFind: false,
+    rustFirefoxImport: false,
+    rustBase64Decode: false,
+    rustProfileSearch: false,
+    rustTextUtils: false,
+    rustPprofImport: false,
+    rustV8CpuFormatter: false,
+    rustHaskellImport: false,
+    rustInstrumentsDeepCopy: false,
+    rustCallgrindImport: false,
+    rustV8ProfLog: false,
+    rustLinuxPerf: false,
+    rustImportParsers: false,
+  }
+}
+
 function parseBooleanFlag(value: string | undefined): boolean {
   if (!value) return false
   return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase())
@@ -69,6 +89,7 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['deferDemangle', options.experiments.deferDemangle],
     ['optimizedForEachCall', options.experiments.optimizedForEachCall],
     ['rustFuzzyFind', options.experiments.rustFuzzyFind],
+    ['rustFirefoxImport', options.experiments.rustFirefoxImport],
     ['rustBase64Decode', options.experiments.rustBase64Decode],
     ['rustProfileSearch', options.experiments.rustProfileSearch],
     ['rustTextUtils', options.experiments.rustTextUtils],
@@ -78,6 +99,8 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['rustHaskellImport', options.experiments.rustHaskellImport],
     ['rustInstrumentsDeepCopy', options.experiments.rustInstrumentsDeepCopy],
     ['rustV8ProfLog', options.experiments.rustV8ProfLog],
+    ['rustV8CpuFormatter', options.experiments.rustV8CpuFormatter],
+    ['rustLinuxPerf', options.experiments.rustLinuxPerf],
   ]
   for (const [name, enabled] of experimentEntries) {
     if (enabled) enabledExperiments.push(name)
@@ -356,18 +379,38 @@ async function main() {
     warmRuns,
     experimentName,
     experiments: {
+      ...allExperimentsDisabled({
+        deferDemangle: false,
+        optimizedForEachCall: false,
+        rustFuzzyFind: false,
+        rustFirefoxImport: false,
+        rustBase64Decode: false,
+        rustProfileSearch: false,
+        rustTextUtils: false,
+        rustPprofImport: false,
+        rustV8CpuFormatter: false,
+        rustHaskellImport: false,
+        rustInstrumentsDeepCopy: false,
+        rustCallgrindImport: false,
+        rustV8ProfLog: false,
+        rustLinuxPerf: false,
+        rustImportParsers: false,
+      }),
       deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
       optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
       rustFuzzyFind: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FUZZY_FIND),
+      rustFirefoxImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FIREFOX_IMPORT),
       rustBase64Decode: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_BASE64_DECODE),
       rustProfileSearch: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PROFILE_SEARCH),
       rustTextUtils: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TEXT_UTILS),
       rustImportParsers: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_IMPORT_PARSERS),
       rustPprofImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PPROF_IMPORT),
       rustCallgrindImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_CALLGRIND_IMPORT),
+      rustV8CpuFormatter: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_CPU_FORMATTER),
       rustHaskellImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_HASKELL_IMPORT),
       rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
       rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),
+      rustLinuxPerf: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_LINUX_PERF),
     },
   })
   writeMarkdown(artifactPaths.reportPath, renderBenchmarkReport(report))

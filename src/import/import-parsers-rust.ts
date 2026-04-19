@@ -1,9 +1,11 @@
 import initRustImportParsers, {
   normalize_safari_profile as normalizeSafariProfileRustBinding,
   normalize_stackprof_profile as normalizeStackprofProfileRustBinding,
+  parse_papyrus_json as parsePapyrusJson,
+  parse_pmcstat_json as parsePMCStatJson,
 } from '../../rust/import-parsers/pkg/import_parsers.js'
-import wasmBinaryPath from '../../rust/import-parsers/pkg/import_parsers_bg.wasm'
 import {isExperimentEnabled} from '../lib/runtime-config'
+import type {TextFileContent} from './utils'
 
 export interface RustNormalizedFrame {
   key: string | number
@@ -30,24 +32,74 @@ export interface RustStackprofImport {
   samples: RustWeightedStack[]
 }
 
-let modulePromise: Promise<void> | null = null
-let moduleFailed = false
+export type RustPapyrusParsedLine = {
+  at: number
+  event: string
+  stackInt: number
+  name: string
+}
 
-async function initializeModule(): Promise<void> {
-  await initRustImportParsers({module_or_path: wasmBinaryPath as unknown as string})
+export type RustPMCStatEntry = {
+  indent: number
+  duration: number
+  name: string
+  file?: string
+}
+
+let modulePromise: Promise<void> | null = null
+
+async function resolveWasmModuleOrPath(): Promise<BufferSource | string> {
+  if (typeof window === 'undefined') {
+    const fs = await import('fs')
+    const path = await import('path')
+    return fs.readFileSync(
+      path.join(process.cwd(), 'rust', 'import-parsers', 'pkg', 'import_parsers_bg.wasm'),
+    )
+  }
+
+  const wasmModule = await import('../../rust/import-parsers/pkg/import_parsers_bg.wasm')
+  return ((wasmModule as any).default || wasmModule) as string
 }
 
 async function ensureModule(): Promise<void> {
-  if (moduleFailed) {
-    throw new Error('Rust import parsers module is unavailable')
-  }
   if (!modulePromise) {
-    modulePromise = initializeModule().catch(error => {
-      moduleFailed = true
-      throw error
-    })
+    modulePromise = resolveWasmModuleOrPath()
+      .then(moduleOrPath =>
+        initRustImportParsers({
+          module_or_path: moduleOrPath,
+        }),
+      )
+      .then(() => undefined)
+      .catch(error => {
+        modulePromise = null
+        throw error
+      })
   }
   await modulePromise
+}
+
+export async function parsePapyrusWithRust(
+  contents: TextFileContent,
+): Promise<RustPapyrusParsedLine[] | null> {
+  try {
+    await ensureModule()
+    const result = parsePapyrusJson(contents.fullText())
+    return JSON.parse(result) as RustPapyrusParsedLine[]
+  } catch {
+    return null
+  }
+}
+
+export async function parsePMCStatWithRust(
+  contents: TextFileContent,
+): Promise<RustPMCStatEntry[] | null> {
+  try {
+    await ensureModule()
+    const result = parsePMCStatJson(contents.fullText())
+    return JSON.parse(result) as RustPMCStatEntry[]
+  } catch {
+    return null
+  }
 }
 
 export async function normalizeSafariProfileWithRust(profile: unknown): Promise<RustSafariImport | null> {

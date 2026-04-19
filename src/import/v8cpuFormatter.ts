@@ -1,4 +1,6 @@
+import {isExperimentEnabled} from '../lib/runtime-config'
 import {CPUProfile, CPUProfileNode} from './chrome'
+import {chromeTreeToNodesRust} from './v8cpuFormatterRust'
 
 /**
  * This importer handles an old format used by the C++ API of V8. This format is still used by v8-profiler-node8.
@@ -57,9 +59,9 @@ function timestampsToDeltas(timestamps: number[], startTime: number): number[] {
 }
 
 /**
- * Convert the old tree-based format to the new flat-array based format
+ * Convert the old tree-based format to the new flat-array based format.
  */
-export function chromeTreeToNodes(content: OldCPUProfile): CPUProfile {
+export function chromeTreeToNodesTs(content: OldCPUProfile): CPUProfile {
   // Note that both startTime and endTime are now in microseconds
   return {
     samples: content.samples,
@@ -67,5 +69,17 @@ export function chromeTreeToNodes(content: OldCPUProfile): CPUProfile {
     endTime: content.endTime * 1000000,
     nodes: treeToArray(content.head),
     timeDeltas: timestampsToDeltas(content.timestamps, content.startTime),
+  }
+}
+
+export async function chromeTreeToNodes(content: OldCPUProfile): Promise<CPUProfile> {
+  if (!isExperimentEnabled('rustV8CpuFormatter')) {
+    return chromeTreeToNodesTs(content)
+  }
+
+  try {
+    return await chromeTreeToNodesRust(content)
+  } catch (_error) {
+    return chromeTreeToNodesTs(content)
   }
 }

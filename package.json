@@ -11,6 +11,7 @@
     "deploy": "./scripts/deploy.sh",
     "build:rust:base64-decoder": "./scripts/build-rust-base64-decoder.sh",
     "build:rust:callgrind-import": "./scripts/build-rust-callgrind-import.sh",
+    "build:rust:firefox-import": "bash ./scripts/build-rust-firefox-import.sh",
     "build:rust:fuzzy-find": "./scripts/build-rust-fuzzy-find.sh",
     "build:rust:text-utils": "./scripts/build-rust-text-utils.sh",
     "build:rust:profile-search": "./scripts/build-rust-profile-search.sh",
@@ -19,6 +20,8 @@
     "build:rust:haskell-import": "./scripts/build-rust-haskell-import.sh",
     "build:rust:instruments-deep-copy": "./scripts/build-rust-instruments-deep-copy.sh",
     "build:rust:v8-prof-log": "./scripts/build-rust-v8-prof-log.sh",
+    "build:rust:v8-cpu-formatter": "./scripts/build-rust-v8-cpu-formatter.sh",
+    "build:rust:linux-perf": "./scripts/build-rust-linux-perf.sh",
     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
@@ -90,6 +93,7 @@
     "moduleNameMapper": {
       "\\jfrview_bg.wasm$": "<rootDir>/src/import/java-flight-record.mock.ts",
       "callgrind_import_bg\\.wasm$": "<rootDir>/src/import/callgrind-rust.wasm.mock.ts",
+      "firefox_import_bg\\.wasm$": "<rootDir>/src/import/firefox-rust.wasm.mock.ts",
       "fuzzy_find_bg\\.wasm$": "<rootDir>/src/lib/fuzzy-find-rust.wasm.mock.ts",
       "base64_decoder_bg\\.wasm$": "<rootDir>/src/lib/base64-decoder-rust.wasm.mock.ts",
       "text_utils_bg\\.wasm$": "<rootDir>/src/lib/text-utils-rust.wasm.mock.ts",
@@ -98,7 +102,9 @@
       "import_parsers_bg\\.wasm$": "<rootDir>/src/import/import-parsers-rust.wasm.mock.ts",
       "instruments_deep_copy_bg\\.wasm$": "<rootDir>/src/import/instruments-deep-copy.wasm.mock.ts",
       "haskell_import_bg\\.wasm$": "<rootDir>/src/import/haskell-rust.wasm.mock.ts",
-      "v8_prof_log_bg\\.wasm$": "<rootDir>/src/import/v8-prof-log-rust.wasm.mock.ts"
+      "v8_prof_log_bg\\.wasm$": "<rootDir>/src/import/v8-prof-log-rust.wasm.mock.ts",
+      "v8_cpu_formatter_bg\\.wasm$": "<rootDir>/src/import/v8cpuFormatterRust.wasm.mock.ts",
+      "linux_perf_bg\\.wasm$": "<rootDir>/src/import/linux-tools-perf-rust.wasm.mock.ts"
     },
     "testRegex": "\\.test\\.tsx?$",
     "collectCoverageFrom": [
