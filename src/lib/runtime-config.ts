@@ -8,6 +8,7 @@ export interface ExperimentFlags {
   rustPprofImport: boolean
   rustHaskellImport: boolean
   rustInstrumentsDeepCopy: boolean
+  rustCallgrindImport: boolean
 }
 
 const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
@@ -20,6 +21,7 @@ const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   rustPprofImport: false,
   rustHaskellImport: false,
   rustInstrumentsDeepCopy: false,
+  rustCallgrindImport: false,
 }
 
 let experimentOverrides: Partial<ExperimentFlags> | null = null

@@ -224,7 +224,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.startsWith('callgrind.')) {
     console.log('Importing as Callgrind profile')
     annotatePerfRun('detected_format', 'callgrind')
-    const result = timePerfSync('import_callgrind', () => importFromCallgrind(contents, fileName))
+    const result = await timePerfAsync('import_callgrind', () =>
+      importFromCallgrind(contents, fileName, buffer),
+    )
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.pmcstat.graph')) {
@@ -344,7 +346,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     ) {
       console.log('Importing as Callgrind profile')
       annotatePerfRun('detected_format', 'callgrind')
-      const result = timePerfSync('import_callgrind', () => importFromCallgrind(contents, fileName))
+      const result = await timePerfAsync('import_callgrind', () =>
+        importFromCallgrind(contents, fileName, buffer),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     }

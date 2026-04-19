@@ -38,6 +38,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustPprofImport: false,
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
     },
   },
   {
@@ -54,6 +55,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustPprofImport: false,
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
     },
   },
   {
@@ -70,6 +72,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustPprofImport: false,
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
     },
   },
   {
@@ -87,6 +90,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustPprofImport: false,
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
     },
   },
   {
@@ -103,6 +107,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustPprofImport: true,
       rustHaskellImport: false,
       rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
     },
   },
   {
@@ -120,6 +125,25 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustPprofImport: false,
       rustHaskellImport: true,
       rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
+    },
+  },
+  {
+    id: 'rust-callgrind-import',
+    label: 'Rust Callgrind import',
+    description:
+      'Experimental path that routes Callgrind parsing through Rust/WASM while keeping the TypeScript importer as a fallback.',
+    flags: {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: false,
+      rustCallgrindImport: true,
+      rustInstrumentsDeepCopy: false,
     },
   },
   {
@@ -136,6 +160,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustTextUtils: false,
       rustPprofImport: false,
       rustHaskellImport: false,
+      rustCallgrindImport: false,
       rustInstrumentsDeepCopy: true,
     },
   },

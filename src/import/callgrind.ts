@@ -85,9 +85,11 @@
 // strat;backup;write, even though that never happened in the real program
 // execution.
 
+import {isExperimentEnabled} from '../lib/runtime-config'
 import {CallTreeProfileBuilder, Frame, FrameInfo, Profile, ProfileGroup} from '../lib/profile'
 import {getOrElse, getOrInsert, KeyedSet} from '../lib/utils'
 import {ByteFormatter, TimeFormatter} from '../lib/value-formatters'
+import type {ParsedCallgrindData, ParsedCallgrindOperation} from './callgrind-rust'
 import {TextFileContent} from './utils'
 
 class CallGraph {
@@ -318,6 +320,54 @@ class CallGraph {
     }
 
     return profile.build()
+  }
+}
+
+function frameInfoFromParts(
+  file: string | null | undefined,
+  functionName: string | null | undefined,
+): FrameInfo {
+  const normalizedFile = file || '(unknown)'
+  const normalizedName = functionName || '(unknown)'
+  return {
+    key: `${normalizedFile}:${normalizedName}`,
+    file: normalizedFile,
+    name: normalizedName,
+  }
+}
+
+function applyParsedOperation(callGraphs: CallGraph[], operation: ParsedCallgrindOperation) {
+  for (let i = 0; i < callGraphs.length; i++) {
+    if (operation.kind === 'self') {
+      callGraphs[i].addSelfWeight(frameInfoFromParts(operation.file, operation.name), operation.weights[i] ?? 0)
+      continue
+    }
+
+    callGraphs[i].addChildWithTotalWeight(
+      frameInfoFromParts(operation.parentFile, operation.parentName),
+      frameInfoFromParts(operation.childFile, operation.childName),
+      operation.weights[i] ?? 0,
+    )
+  }
+}
+
+function buildProfileGroupFromParsedCallgrind(
+  parsed: ParsedCallgrindData,
+  importedFileName: string,
+): ProfileGroup | null {
+  const callGraphs = parsed.fieldNames.map(fieldName => new CallGraph(importedFileName, fieldName))
+  if (callGraphs.length === 0) {
+    return null
+  }
+
+  for (const operation of parsed.operations) {
+    applyParsedOperation(callGraphs, operation)
+  }
+
+  return {
+    name: importedFileName,
+    indexToView: 0,
+    profiles: callGraphs.map(callGraph => callGraph.toProfile()),
   }
 }
 
@@ -629,9 +679,41 @@ class CallgrindParser {
   }
 }
 
-export function importFromCallgrind(
+export function importFromCallgrindTs(
   contents: TextFileContent,
   importedFileName: string,
 ): ProfileGroup | null {
   return new CallgrindParser(contents, importedFileName).parse()
+}
+
+async function importFromCallgrindRust(
+  buffer: ArrayBuffer,
+  importedFileName: string,
+): Promise<ProfileGroup | null> {
+  const {loadRustCallgrindParser} = await import('./callgrind-rust')
+  const parseCallgrind = await loadRustCallgrindParser()
+  const parsed = await parseCallgrind(buffer)
+  if (!parsed) {
+    return null
+  }
+  return buildProfileGroupFromParsedCallgrind(parsed, importedFileName)
+}
+
+export async function importFromCallgrind(
+  contents: TextFileContent,
+  importedFileName: string,
+  buffer?: ArrayBuffer,
+): Promise<ProfileGroup | null> {
+  if (buffer && isExperimentEnabled('rustCallgrindImport')) {
+    try {
+      const rustResult = await importFromCallgrindRust(buffer, importedFileName)
+      if (rustResult) {
+        return rustResult
+      }
+    } catch (error) {
+      console.warn('Rust Callgrind import failed; falling back to TypeScript parser.', error)
+    }
+  }
+
+  return importFromCallgrindTs(contents, importedFileName)
 }
