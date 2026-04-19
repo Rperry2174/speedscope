@@ -24,37 +24,22 @@ interface FrameInfoWithWeight extends FrameInfo {
 
 let modulePromise: Promise<void> | null = null
 
-function isNodeRuntime(): boolean {
+function isNodeLikeEnvironment(): boolean {
   return typeof process !== 'undefined' && !!process.versions?.node
 }
 
-async function getWasmModuleOrPath(): Promise<BufferSource | string | undefined> {
-  if (isNodeRuntime()) {
-    const {readFileSync} = await import('fs')
-    const path = await import('path')
-    const wasmModule = readFileSync(
-      path.join(
-        process.cwd(),
-        'rust',
-        'instruments-deep-copy',
-        'pkg',
-        'instruments_deep_copy_bg.wasm',
-      ),
-    )
-    return wasmModule.buffer.slice(wasmModule.byteOffset, wasmModule.byteOffset + wasmModule.byteLength)
-  }
-
-  const wasmBinaryModule = await import('../../rust/instruments-deep-copy/pkg/instruments_deep_copy_bg.wasm')
-  return wasmBinaryModule.default as unknown as string
-}
-
 async function initializeModule(): Promise<void> {
-  const moduleOrPath = await getWasmModuleOrPath()
-  if (moduleOrPath == null) {
-    await initRustInstrumentsDeepCopy()
+  if (isNodeLikeEnvironment()) {
+    const fs = await import('fs')
+    const path = await import('path')
+    const wasmBinary = fs.readFileSync(
+      path.join(process.cwd(), 'rust', 'instruments-deep-copy', 'pkg', 'instruments_deep_copy_bg.wasm'),
+    )
+    await initRustInstrumentsDeepCopy(new Uint8Array(wasmBinary))
     return
   }
-  await initRustInstrumentsDeepCopy({module_or_path: moduleOrPath as any})
+
+  await initRustInstrumentsDeepCopy()
 }
 
 async function ensureModuleReady() {
