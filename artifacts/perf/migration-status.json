@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-04-19T14:10:17.659Z",
+  "generatedAt": "2026-04-19T14:21:46.271Z",
   "counts": {
-    "ts": 124,
+    "ts": 157,
     "tsx": 23,
-    "rs": 1,
-    "wasm": 1
+    "rs": 10,
+    "wasm": 9
   },
   "lineCounts": {
-    "ts": 18656,
-    "tsx": 5544,
-    "rs": 240
+    "ts": 20930,
+    "tsx": 5531,
+    "rs": 1961
   },
   "rustMigratedPaths": [
     "src/lib/fuzzy-find.ts",
