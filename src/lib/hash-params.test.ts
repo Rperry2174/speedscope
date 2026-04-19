@@ -22,6 +22,13 @@ test('getHashParams', () => {
   expect(getHashParams('#title=hello%20world')).toEqual({
     title: 'hello world',
   })
+  expect(getHashParams('#title=hello=world')).toEqual({
+    title: 'hello=world',
+  })
+  expect(getHashParams('#view=sandwich')).toEqual({
+    viewMode: 2,
+  })
+  expect(getHashParams('#title=%E0%A4%A')).toEqual({})
   expect(getHashParams('#abc=bcd')).toEqual({})
   expect(getHashParams('garbage')).toEqual({})
 })
