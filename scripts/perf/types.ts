@@ -10,6 +10,10 @@ export interface ExperimentFlags {
   deferDemangle: boolean
   optimizedForEachCall: boolean
   rustFuzzyFind: boolean
+  rustBase64Decode: boolean
+  rustProfileSearch: boolean
+  rustTextUtils: boolean
+  rustPprofImport: boolean
 }
 
 export interface ExperimentRunOptions {

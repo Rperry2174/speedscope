@@ -5,6 +5,7 @@ export interface ExperimentFlags {
   rustBase64Decode: boolean
   rustProfileSearch: boolean
   rustTextUtils: boolean
+  rustPprofImport: boolean
 }
 
 const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
@@ -14,6 +15,7 @@ const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   rustBase64Decode: false,
   rustProfileSearch: false,
   rustTextUtils: false,
+  rustPprofImport: false,
 }
 
 let experimentOverrides: Partial<ExperimentFlags> | null = null
