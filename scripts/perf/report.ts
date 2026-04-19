@@ -44,6 +44,7 @@ Flags:
 - rustHaskellImport: ${report.experiment.experiments.rustHaskellImport}
 - rustInstrumentsDeepCopy: ${report.experiment.experiments.rustInstrumentsDeepCopy}
 - rustV8ProfLog: ${report.experiment.experiments.rustV8ProfLog}
+- rustLinuxPerf: ${report.experiment.experiments.rustLinuxPerf}
 
 ## Fixture results
 

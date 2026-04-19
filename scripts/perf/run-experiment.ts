@@ -41,6 +41,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
   },
   {
@@ -60,6 +61,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
   },
   {
@@ -79,6 +81,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
   },
   {
@@ -119,6 +122,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
   },
   {
@@ -138,6 +142,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
   },
   {
@@ -158,6 +163,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: true,
+      rustLinuxPerf: false,
     },
   },
   {
@@ -178,6 +184,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
   },
   {
@@ -198,6 +205,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: true,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
   },
   {
@@ -218,6 +226,27 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustInstrumentsDeepCopy: true,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
+    },
+  },
+  {
+    id: 'rust-linux-perf',
+    label: 'Rust linux perf',
+    description:
+      'Experimental path that parses linux perf script output through the Rust/WASM importer with a TS fallback.',
+    flags: {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
+      rustV8ProfLog: false,
+      rustLinuxPerf: true,
     },
   },
 ]

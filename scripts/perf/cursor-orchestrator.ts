@@ -232,6 +232,7 @@ function toSummaryReport(
         rustInstrumentsDeepCopy: false,
         rustCallgrindImport: false,
         rustV8ProfLog: false,
+        rustLinuxPerf: false,
       },
     },
     results: [],
@@ -251,6 +252,7 @@ function toSummaryReport(
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     fixtures: [],
   }
@@ -297,6 +299,7 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     {
       deferDemangle: true,
@@ -311,6 +314,7 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     {
       deferDemangle: false,
@@ -325,6 +329,7 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     {
       deferDemangle: false,
@@ -339,6 +344,7 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     {
       deferDemangle: false,
@@ -353,6 +359,7 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     {
       deferDemangle: false,
@@ -367,6 +374,7 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     {
       deferDemangle: false,
@@ -381,6 +389,7 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: true,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     {
       deferDemangle: false,
@@ -395,6 +404,7 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: false,
+      rustLinuxPerf: false,
     },
     {
       deferDemangle: false,
@@ -409,6 +419,21 @@ async function main() {
       rustInstrumentsDeepCopy: false,
       rustCallgrindImport: false,
       rustV8ProfLog: true,
+      rustLinuxPerf: false,
+    },
+    {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: false,
+      rustInstrumentsDeepCopy: false,
+      rustCallgrindImport: false,
+      rustV8ProfLog: false,
+      rustLinuxPerf: true,
     },
     {
       deferDemangle: false,

@@ -19,6 +19,7 @@ export interface ExperimentFlags {
   rustInstrumentsDeepCopy: boolean
   rustCallgrindImport: boolean
   rustV8ProfLog: boolean
+  rustLinuxPerf: boolean
 }
 
 export interface ExperimentRunOptions {

@@ -9,6 +9,12 @@ export interface PerfFixture {
 
 export const FIXTURES: PerfFixture[] = [
   {
+    id: 'linux-perf-system-wide',
+    label: 'Linux perf script output (system wide)',
+    relativePath: 'sample/profiles/linux-perf/system-wide.linux-perf.txt',
+    format: 'linux-perf',
+  },
+  {
     id: 'v8-log-small',
     label: 'V8 --prof-process log (small)',
     relativePath: 'sample/profiles/node/fixture.v8log.json',

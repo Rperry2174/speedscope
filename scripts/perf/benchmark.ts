@@ -95,6 +95,7 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['rustInstrumentsDeepCopy', options.experiments.rustInstrumentsDeepCopy],
     ['rustV8ProfLog', options.experiments.rustV8ProfLog],
     ['rustV8CpuFormatter', options.experiments.rustV8CpuFormatter],
+    ['rustLinuxPerf', options.experiments.rustLinuxPerf],
   ]
   for (const [name, enabled] of experimentEntries) {
     if (enabled) enabledExperiments.push(name)
@@ -399,6 +400,7 @@ async function main() {
       rustHaskellImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_HASKELL_IMPORT),
       rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
       rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),
+      rustLinuxPerf: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_LINUX_PERF),
     },
   })
   writeMarkdown(artifactPaths.reportPath, renderBenchmarkReport(report))

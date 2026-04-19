@@ -20,6 +20,7 @@
     "build:rust:instruments-deep-copy": "./scripts/build-rust-instruments-deep-copy.sh",
     "build:rust:v8-prof-log": "./scripts/build-rust-v8-prof-log.sh",
     "build:rust:v8-cpu-formatter": "./scripts/build-rust-v8-cpu-formatter.sh",
+    "build:rust:linux-perf": "./scripts/build-rust-linux-perf.sh",
     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
@@ -100,7 +101,8 @@
       "instruments_deep_copy_bg\\.wasm$": "<rootDir>/src/import/instruments-deep-copy.wasm.mock.ts",
       "haskell_import_bg\\.wasm$": "<rootDir>/src/import/haskell-rust.wasm.mock.ts",
       "v8_prof_log_bg\\.wasm$": "<rootDir>/src/import/v8-prof-log-rust.wasm.mock.ts",
-      "v8_cpu_formatter_bg\\.wasm$": "<rootDir>/src/import/v8cpuFormatterRust.wasm.mock.ts"
+      "v8_cpu_formatter_bg\\.wasm$": "<rootDir>/src/import/v8cpuFormatterRust.wasm.mock.ts",
+      "linux_perf_bg\\.wasm$": "<rootDir>/src/import/linux-tools-perf-rust.wasm.mock.ts"
     },
     "testRegex": "\\.test\\.tsx?$",
     "collectCoverageFrom": [

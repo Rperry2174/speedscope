@@ -208,7 +208,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.linux-perf.txt')) {
     console.log('Importing as output of linux perf script')
     annotatePerfRun('detected_format', 'linux-perf')
-    const result = timePerfSync('import_linux_perf', () => importFromLinuxPerf(contents))
+    const result = await timePerfAsync('import_linux_perf', () => importFromLinuxPerf(contents, buffer))
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.collapsedstack.txt')) {
@@ -411,7 +411,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
       return result
     }
 
-    const fromLinuxPerf = timePerfSync('import_linux_perf_probe', () => importFromLinuxPerf(contents))
+    const fromLinuxPerf = await timePerfAsync('import_linux_perf_probe', () =>
+      importFromLinuxPerf(contents, buffer),
+    )
     if (fromLinuxPerf) {
       console.log('Importing from linux perf script output')
       annotatePerfRun('detected_format', 'linux-perf')
