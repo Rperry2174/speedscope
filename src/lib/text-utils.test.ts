@@ -1,5 +1,7 @@
 import {buildTrimmedText, ELLIPSIS, remapRangesToTrimmedText} from './text-utils'
 import {fuzzyMatchStrings} from './fuzzy-find'
+import {loadRustTextUtilsRemapper} from './text-utils-rust'
+import {setExperimentOverridesForTesting} from './runtime-config'
 
 function assertTrimmed(text: string, length: number, expectedTrimmed: string) {
   expect(buildTrimmedText(text, length).trimmedString).toEqual(
@@ -120,5 +122,52 @@ test('remapRangesToTrimmedText', () => {
     length: 4,
     expectedHighlighted: 'hello [world]',
     expectedHighlightedTrimmed: `he[...d]`,
+  })
+})
+
+describe('rust text-utils parity', () => {
+  afterEach(() => {
+    setExperimentOverridesForTesting(null)
+  })
+
+  test('matches the TypeScript remapping implementation for representative cases', async () => {
+    const rustRemapper = await loadRustTextUtilsRemapper()
+    const cases: Array<{text: string; pattern: string; length: number}> = [
+      {text: 'hello world', pattern: 'he', length: 4},
+      {text: 'hello world', pattern: 'o w', length: 4},
+      {text: 'hello world', pattern: 'ow', length: 4},
+      {text: 'hello world', pattern: 'hello', length: 4},
+      {text: 'xxhello world', pattern: 'hello', length: 6},
+      {text: 'hello world', pattern: 'hello world', length: 4},
+      {text: 'hello world', pattern: 'helloworld', length: 4},
+      {text: 'hello world', pattern: 'world', length: 4},
+      {text: 'application::helloWorld', pattern: 'helloWorld', length: 9},
+      {text: 'hello ab shabby', pattern: 'ab', length: 8},
+    ]
+
+    for (const testCase of cases) {
+      const match = fuzzyMatchStrings(testCase.text, testCase.pattern)
+      expect(match).not.toBeNull()
+      if (!match) continue
+
+      const trimmed = buildTrimmedText(testCase.text, testCase.length)
+      const expected = remapRangesToTrimmedText(trimmed, match.matchedRanges)
+      expect(rustRemapper(trimmed, match.matchedRanges)).toEqual(expected)
+    }
+  })
+
+  test('public remapper stays aligned with the TypeScript fallback when rust flag is off', () => {
+    setExperimentOverridesForTesting({rustTextUtils: false})
+    const text = 'hello world'
+    const pattern = 'helloworld'
+    const match = fuzzyMatchStrings(text, pattern)
+    expect(match).not.toBeNull()
+    if (!match) return
+
+    const trimmed = buildTrimmedText(text, 4)
+    expect(remapRangesToTrimmedText(trimmed, match.matchedRanges)).toEqual([
+      [0, 3],
+      [3, 4],
+    ])
   })
 })
