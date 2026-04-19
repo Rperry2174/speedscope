@@ -20,6 +20,12 @@ latency in SpeedScope and organize TypeScript -> Rust migration work.
 - `npm run perf:orchestrate`
   - Uses the Cursor TypeScript SDK to create a multi-agent cloud execution plan
     for the same experiment loop and emits a shard-oriented migration summary.
+- `npm run perf:migration-status`
+  - Reports remaining tracked TypeScript/TSX files, current Rust proof points, and
+    the explicit migration task shards under `artifacts/perf/migration-status.json`
+- `npm run perf:delegate-migration`
+  - Launches one cloud agent per migration task shard and records agent/run URLs and
+    statuses under `artifacts/perf/migration-delegation.json`
 - `npm run build:rust:fuzzy-find`
   - Builds the first concrete Rust/WASM migration in this branch:
     `src/lib/fuzzy-find.ts` -> `rust/fuzzy-find/`

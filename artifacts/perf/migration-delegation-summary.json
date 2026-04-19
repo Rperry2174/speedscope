@@ -1,0 +1,101 @@
+{
+  "generatedAt": "2026-04-19T13:08:35.061Z",
+  "tasks": [
+    {
+      "taskId": "proof-point-fuzzy-find",
+      "title": "Validate fuzzy-find Rust proof point",
+      "modelId": "gpt-5.4-high",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-a35f4972-6202-47d7-82e7-58f41eefe25b"
+    },
+    {
+      "taskId": "migrate-profile-core",
+      "title": "Migrate profile core",
+      "modelId": "claude-4.6-opus-high-thinking-fast",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-3391b064-e16b-4434-82da-ae2e6b47490a"
+    },
+    {
+      "taskId": "migrate-flamechart-core",
+      "title": "Migrate flamechart core",
+      "modelId": "claude-4.6-opus-high-thinking-fast",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-192293cc-6966-48f4-8e8e-f0be90866bb9"
+    },
+    {
+      "taskId": "migrate-profile-search",
+      "title": "Migrate profile search",
+      "modelId": "gpt-5.4-high",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-1ad53c64-d1d2-4361-a16a-ebcf6a5f47fa"
+    },
+    {
+      "taskId": "migrate-import-chrome-trace",
+      "title": "Migrate Chrome and trace-event importers",
+      "modelId": "gpt-5.4-high",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-e76733ef-1850-481d-ae0e-b19a0d541440"
+    },
+    {
+      "taskId": "migrate-import-firefox-safari",
+      "title": "Migrate Firefox and Safari importers",
+      "modelId": "gpt-5.4-high",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-4a777b5c-719a-4c71-ac74-647ecc0c17a7"
+    },
+    {
+      "taskId": "migrate-import-pprof-jfr",
+      "title": "Migrate pprof and JFR importers",
+      "modelId": "claude-4.6-opus-high-thinking-fast",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-9f65b3ea-014b-41ed-930e-d65ea5c0e917"
+    },
+    {
+      "taskId": "migrate-import-stackprof-v8",
+      "title": "Migrate stackprof and V8-family importers",
+      "modelId": "gpt-5.4-high",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-09a4a5b0-3104-4d67-abcb-f84600c6c559"
+    },
+    {
+      "taskId": "migrate-import-text-family",
+      "title": "Migrate text-based importer family",
+      "modelId": "gpt-5.4-high",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-f831caf8-5fb2-408c-b7f4-abd5ee3f0da9"
+    },
+    {
+      "taskId": "keep-ts-browser-ui",
+      "title": "Review browser UI retention",
+      "modelId": "composer-2",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-285df982-0ef6-44f2-ad5f-fb88564a7d8b"
+    },
+    {
+      "taskId": "keep-ts-webgl-canvas",
+      "title": "Review WebGL and canvas retention",
+      "modelId": "composer-2",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-00e1c4b2-5476-46c7-81cc-84e0c412621f"
+    },
+    {
+      "taskId": "keep-ts-tooling-control-plane",
+      "title": "Review tooling and control plane retention",
+      "modelId": "composer-2",
+      "status": "error",
+      "error": "fetch failed",
+      "agentId": "agent-616fbabc-033c-4df5-aefc-c5118a48ab03"
+    }
+  ]
+}

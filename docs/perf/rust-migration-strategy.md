@@ -74,6 +74,18 @@ one rewrite. The checked-in orchestrator now uses these shard labels:
 - `tooling-and-tests`
 - `migrated-proof-points`
 
+Concrete script-first outputs now available:
+
+- `npm run perf:migration-status`
+  - writes `artifacts/perf/migration-status.json`
+  - reports current TS/TSX vs Rust counts
+  - lists migrated proof points
+  - emits the current shard and task manifest
+- `CURSOR_API_KEY=... npm run perf:delegate-migration`
+  - writes `artifacts/perf/migration-delegation-summary.json`
+  - launches one cloud-agent attempt per migration task
+  - records agent IDs and statuses per task
+
 ### Recommended model split
 
 - Composer 2
