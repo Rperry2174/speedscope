@@ -24,7 +24,7 @@ import {importFromChromeHeapProfile} from './v8heapalloc'
 import {isTraceEventFormatted, importTraceEvents} from './trace-event'
 import {importFromCallgrind} from './callgrind'
 import {importFromPapyrus} from './papyrus'
-import {importFromPMCStatCallGraph} from './pmcstat-callgraph'
+import {importFromPMCStatCallGraph, importFromPMCStatCallGraphTs} from './pmcstat-callgraph'
 type JfrModule = typeof import('./java-flight-recorder')
 
 let jfrModulePromise: Promise<JfrModule> | null = null
@@ -253,7 +253,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.pmcstat.graph')) {
     console.log('Importing as pmcstat callgraph format')
     annotatePerfRun('detected_format', 'pmcstat')
-    const result = timePerfSync('import_pmcstat', () => toGroup(importFromPMCStatCallGraph(contents)))
+    const result = await timePerfAsync('import_pmcstat', async () =>
+      toGroup(await importFromPMCStatCallGraph(contents)),
+    )
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.jfr')) {
@@ -393,7 +395,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     if (/^(Stack_|Script_|Obj_)\S+ log opened \(PC\)\n/.exec(contents.firstChunk())) {
       console.log('Importing as Papyrus profile')
       annotatePerfRun('detected_format', 'papyrus')
-      const result = timePerfSync('import_papyrus', () => toGroup(importFromPapyrus(contents)))
+      const result = await timePerfAsync('import_papyrus', async () =>
+        toGroup(await importFromPapyrus(contents)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     }
@@ -426,7 +430,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     }
 
     const fromPMCStatCallGraph = timePerfSync('import_pmcstat_probe', () =>
-      importFromPMCStatCallGraph(contents),
+      importFromPMCStatCallGraphTs(contents),
     )
     if (fromPMCStatCallGraph) {
       console.log('Importing as pmcstat callgraph format')
