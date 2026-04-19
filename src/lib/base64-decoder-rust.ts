@@ -1,4 +1,6 @@
+import fs from 'fs'
 import initRustBase64Decoder, {
+  initSync as initRustBase64DecoderSync,
   decode_base64 as decodeBase64Rust,
 } from '../../rust/base64-decoder/pkg/base64_decoder.js'
 import {isExperimentEnabled} from './runtime-config'
@@ -7,19 +9,12 @@ import {decodeBase64} from './utils'
 let modulePromise: Promise<unknown> | null = null
 let rustDecoder: ((encoded: string) => Uint8Array) | null = null
 
-async function initializeModule(): Promise<unknown> {
+async function initializeModule(): Promise<void> {
   if (typeof window === 'undefined') {
-    const {readFile} = await import('fs/promises')
-    const {join} = await import('path')
-    return initRustBase64Decoder(
-      await readFile(join(process.cwd(), 'rust', 'base64-decoder', 'pkg', 'base64_decoder_bg.wasm')),
-    )
+    initRustBase64DecoderSync(fs.readFileSync('rust/base64-decoder/pkg/base64_decoder_bg.wasm'))
+    return
   }
-
-  const wasmModule = (await import('../../rust/base64-decoder/pkg/base64_decoder_bg.wasm')) as unknown as {
-    default: string
-  }
-  return initRustBase64Decoder(wasmModule.default as unknown as BufferSource)
+  await initRustBase64Decoder()
 }
 
 export async function loadRustBase64Decoder(): Promise<(encoded: string) => Uint8Array> {
