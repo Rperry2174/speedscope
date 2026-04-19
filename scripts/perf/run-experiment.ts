@@ -36,6 +36,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustProfileSearch: false,
       rustTextUtils: false,
       rustPprofImport: false,
+      rustHaskellImport: false,
     },
   },
   {
@@ -50,6 +51,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustProfileSearch: false,
       rustTextUtils: false,
       rustPprofImport: false,
+      rustHaskellImport: false,
     },
   },
   {
@@ -64,6 +66,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustProfileSearch: false,
       rustTextUtils: false,
       rustPprofImport: false,
+      rustHaskellImport: false,
     },
   },
   {
@@ -78,6 +81,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustProfileSearch: false,
       rustTextUtils: false,
       rustPprofImport: false,
+      rustHaskellImport: false,
     },
   },
   {
@@ -92,6 +96,23 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       rustProfileSearch: false,
       rustTextUtils: false,
       rustPprofImport: true,
+      rustHaskellImport: false,
+    },
+  },
+  {
+    id: 'rust-haskell-import',
+    label: 'Rust Haskell import',
+    description:
+      'Experimental path that routes the Haskell JSON importer through Rust/WASM while preserving TypeScript file IO and a TS fallback.',
+    flags: {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustBase64Decode: false,
+      rustProfileSearch: false,
+      rustTextUtils: false,
+      rustPprofImport: false,
+      rustHaskellImport: true,
     },
   },
 ]

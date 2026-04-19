@@ -14,6 +14,7 @@ export interface ExperimentFlags {
   rustProfileSearch: boolean
   rustTextUtils: boolean
   rustPprofImport: boolean
+  rustHaskellImport: boolean
 }
 
 export interface ExperimentRunOptions {

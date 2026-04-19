@@ -321,7 +321,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if ('rts_arguments' in parsed && 'initial_capabilities' in parsed) {
       console.log('Importing as Haskell GHC JSON Profile')
       annotatePerfRun('detected_format', 'haskell')
-      const result = timePerfSync('import_haskell', () => importFromHaskell(parsed))
+      const result = await timePerfAsync('import_haskell', () => importFromHaskell(parsed))
       notePerfMilestone('import_parse_finished')
       return result
     } else if ('recording' in parsed && 'sampleStackTraces' in parsed.recording) {
