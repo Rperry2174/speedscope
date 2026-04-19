@@ -1,4 +1,11 @@
-import {exactMatchStrings} from './profile-search'
+import {
+  exactMatchStrings,
+  exactMatchStringsBatch,
+  exactMatchStringsBatchTs,
+  exactMatchStringsTs,
+  loadRustExactMatchBatchMatcher,
+} from './profile-search'
+import {setExperimentOverridesForTesting} from './runtime-config'
 
 function assertMatch(text: string, pattern: string, expected: string) {
   const match = exactMatchStrings(text, pattern)
@@ -46,5 +53,63 @@ describe('exactMatchStrings', () => {
   test('overlapping occurrences', () => {
     assertMatch('aaaaa', 'aa', '[aa][aa]a')
     assertMatch('abababa', 'aba', '[aba]b[aba]')
+  })
+
+  test('empty pattern produces no highlights', () => {
+    assertMatch('hello', '', 'hello')
+  })
+})
+
+describe('exactMatchStringsBatch', () => {
+  test('returns null for unmatched entries', () => {
+    expect(exactMatchStringsBatchTs(['hello', 'world'], 'zz')).toEqual([null, null])
+  })
+
+  test('returns aligned per-string matches', () => {
+    expect(exactMatchStringsBatchTs(['hello hello', 'world'], 'hello')).toEqual([
+      [
+        [0, 5],
+        [6, 11],
+      ],
+      null,
+    ])
+  })
+})
+
+describe('rust exact matcher parity', () => {
+  afterEach(() => {
+    setExperimentOverridesForTesting(null)
+  })
+
+  test('matches TypeScript batch implementation for representative ASCII cases', async () => {
+    const rustMatcher = await loadRustExactMatchBatchMatcher()
+    const cases: Array<{texts: string[]; pattern: string}> = [
+      {texts: ['hello', 'HELLO', 'world'], pattern: 'hello'},
+      {texts: ['hello hello', 'hellohello'], pattern: 'hello'},
+      {texts: ['aaaaa', 'abababa'], pattern: 'aa'},
+      {texts: ['abababa', 'ca'], pattern: 'aba'},
+      {texts: ['hello', 'world'], pattern: ''},
+    ]
+
+    for (const testCase of cases) {
+      expect(rustMatcher(testCase.texts, testCase.pattern)).toEqual(
+        exactMatchStringsBatchTs(testCase.texts, testCase.pattern),
+      )
+    }
+  })
+
+  test('falls back to TypeScript behavior for non-ascii input', async () => {
+    const rustMatcher = await loadRustExactMatchBatchMatcher()
+    const texts = ['Straße', 'STRASSE']
+    const pattern = 'ß'
+    expect(rustMatcher(texts, pattern)).toEqual(exactMatchStringsBatchTs(texts, pattern))
+  })
+
+  test('public APIs stay aligned with TypeScript fallback when rust flag is off', () => {
+    setExperimentOverridesForTesting({rustProfileSearch: false})
+    expect(exactMatchStrings('hello world', 'world')).toEqual(exactMatchStringsTs('hello world', 'world'))
+    expect(exactMatchStringsBatch(['hello world', 'world'], 'world')).toEqual(
+      exactMatchStringsBatchTs(['hello world', 'world'], 'world'),
+    )
   })
 })

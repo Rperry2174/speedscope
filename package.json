@@ -12,6 +12,7 @@
     "build:rust:base64-decoder": "./scripts/build-rust-base64-decoder.sh",
     "build:rust:fuzzy-find": "./scripts/build-rust-fuzzy-find.sh",
     "build:rust:text-utils": "./scripts/build-rust-text-utils.sh",
+    "build:rust:profile-search": "./scripts/build-rust-profile-search.sh",
     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
@@ -84,7 +85,8 @@
       "\\jfrview_bg.wasm$": "<rootDir>/src/import/java-flight-record.mock.ts",
       "fuzzy_find_bg\\.wasm$": "<rootDir>/src/lib/fuzzy-find-rust.wasm.mock.ts",
       "base64_decoder_bg\\.wasm$": "<rootDir>/src/lib/base64-decoder-rust.wasm.mock.ts",
-      "text_utils_bg\\.wasm$": "<rootDir>/src/lib/text-utils-rust.wasm.mock.ts"
+      "text_utils_bg\\.wasm$": "<rootDir>/src/lib/text-utils-rust.wasm.mock.ts",
+      "profile_search_bg\\.wasm$": "<rootDir>/src/lib/profile-search-rust.wasm.mock.ts"
     },
     "testRegex": "\\.test\\.tsx?$",
     "collectCoverageFrom": [
