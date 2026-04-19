@@ -1,3 +1,5 @@
+import {ImportEngine} from '../../src/experimental/contracts'
+
 export type PerfValue = string | number | boolean | null
 
 export interface BenchmarkArtifactPaths {
@@ -6,28 +8,16 @@ export interface BenchmarkArtifactPaths {
   reportPath: string
 }
 
-export interface ExperimentFlags {
-  deferDemangle: boolean
-  optimizedForEachCall: boolean
-  rustFuzzyFind: boolean
-  rustImportParsers: boolean
-  rustFirefoxImport: boolean
-  rustBase64Decode: boolean
-  rustProfileSearch: boolean
-  rustTextUtils: boolean
-  rustV8CpuFormatter: boolean
-  rustPprofImport: boolean
-  rustHaskellImport: boolean
-  rustInstrumentsDeepCopy: boolean
-  rustCallgrindImport: boolean
-  rustV8ProfLog: boolean
-  rustLinuxPerf: boolean
-  rustTraceEventImport: boolean
+export interface EngineRunOptions {
+  name: string
+  importEngine: ImportEngine
+  compareImport?: boolean
+  visibleImportEngine?: ImportEngine
 }
 
 export interface ExperimentRunOptions {
   experimentName: string
-  experiments: ExperimentFlags
+  engine: EngineRunOptions
 }
 
 export interface BrowserBenchmarkMilestones {
@@ -78,6 +68,8 @@ export interface BrowserBenchmarkResult {
   fixturePath: string
   format: string
   experiment: string
+  importEngine: ImportEngine
+  compareImport: boolean
   runs: BrowserBenchmarkRun[]
   coldSummary: {
     firstMeaningfulPaintMs: number | null
@@ -104,7 +96,7 @@ export interface ParityFixtureResult {
 
 export interface ParityReport {
   generatedAt: string
-  experiment: ExperimentFlags
+  experiment: EngineRunOptions
   fixtures: ParityFixtureResult[]
 }
 

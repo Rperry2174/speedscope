@@ -140,19 +140,15 @@ test('importTraceEvents multi-thread profile with samples', async () => {
   await checkProfileSnapshot('./sample/profiles/trace-event/multi-thread-with-samples.json')
 })
 
-test('rust trace-event importer preserves parity for standard trace events', async () => {
-  const comparison = await compareFixtureParity('./sample/profiles/trace-event/multiprocess.json', {
-    rustTraceEventImport: true,
-  })
+test('experimental engine preserves parity for standard trace events', async () => {
+  const comparison = await compareFixtureParity('./sample/profiles/trace-event/multiprocess.json')
 
   expect(comparison.equivalent).toBe(true)
   expect(comparison.reason).toBeNull()
 })
 
-test('rust trace-event importer falls back to TypeScript for Hermes traces', async () => {
-  const comparison = await compareFixtureParity('./sample/profiles/trace-event/simple-hermes.json', {
-    rustTraceEventImport: true,
-  })
+test('experimental engine falls back to TypeScript for Hermes traces', async () => {
+  const comparison = await compareFixtureParity('./sample/profiles/trace-event/simple-hermes.json')
 
   expect(comparison.equivalent).toBe(true)
   expect(comparison.reason).toBeNull()

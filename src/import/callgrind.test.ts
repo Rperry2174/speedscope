@@ -2,26 +2,20 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import {compareProfileGroups} from '../lib/profile-parity'
-import {setExperimentOverridesForTesting} from '../lib/runtime-config'
 import {checkProfileSnapshot} from '../lib/test-utils'
-import {importProfilesFromArrayBuffer} from './index'
+import {ImportProfileOptions, importProfilesFromArrayBuffer} from './index'
 
 async function importCallgrindFixture(
   fixturePath: string,
-  overrides: Parameters<typeof setExperimentOverridesForTesting>[0],
+  options?: ImportProfileOptions,
 ) {
   const buffer = fs.readFileSync(fixturePath)
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
-  setExperimentOverridesForTesting(overrides)
-  try {
-    const imported = await importProfilesFromArrayBuffer(path.basename(fixturePath), arrayBuffer)
-    if (!imported) {
-      throw new Error(`Failed to import fixture ${fixturePath}`)
-    }
-    return imported
-  } finally {
-    setExperimentOverridesForTesting(null)
+  const imported = await importProfilesFromArrayBuffer(path.basename(fixturePath), arrayBuffer, options)
+  if (!imported) {
+    throw new Error(`Failed to import fixture ${fixturePath}`)
   }
+  return imported
 }
 
 test('importFromCallgrind', async () => {
@@ -46,12 +40,8 @@ test('importFromCallgrind cfn reset', async () => {
 
 test('importFromCallgrind Rust path preserves TypeScript parity', async () => {
   const fixturePath = './sample/profiles/callgrind/callgrind.multiple-event-types.log'
-  const legacy = await importCallgrindFixture(fixturePath, {
-    rustCallgrindImport: false,
-  })
-  const experimental = await importCallgrindFixture(fixturePath, {
-    rustCallgrindImport: true,
-  })
+  const legacy = await importCallgrindFixture(fixturePath, {engine: 'legacy'})
+  const experimental = await importCallgrindFixture(fixturePath, {engine: 'experimental'})
 
   expect(compareProfileGroups(legacy, experimental)).toEqual([])
 })

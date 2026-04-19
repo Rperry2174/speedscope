@@ -1,6 +1,7 @@
 import initRustV8ProfLog, {
   import_v8_prof_log_json as importV8ProfLogJson,
 } from '../../rust/v8-prof-log/pkg/v8_prof_log.js'
+import {readNodeFileSync, resolveFromCwd} from '../lib/node-shim'
 import {isExperimentEnabled} from '../lib/runtime-config'
 import {Profile} from '../lib/profile'
 import {
@@ -19,11 +20,7 @@ function isNodeLikeEnvironment(): boolean {
 
 async function initializeModule(): Promise<void> {
   if (isNodeLikeEnvironment()) {
-    const fs = await import('fs')
-    const path = await import('path')
-    const wasmBinary = fs.readFileSync(
-      path.join(process.cwd(), 'rust', 'v8-prof-log', 'pkg', 'v8_prof_log_bg.wasm'),
-    )
+    const wasmBinary = readNodeFileSync(resolveFromCwd('rust', 'v8-prof-log', 'pkg', 'v8_prof_log_bg.wasm'))
     await initRustV8ProfLog(new Uint8Array(wasmBinary))
     return
   }

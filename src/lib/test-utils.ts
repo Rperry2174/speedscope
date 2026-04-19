@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import {Profile, CallTreeNode, Frame} from './profile'
 import {exportProfileGroup, importSpeedscopeProfiles} from './file-format'
-import {importProfilesFromArrayBuffer} from '../import'
+import {importProfilesFromArrayBuffer, type ImportProfileOptions} from '../import'
 
 interface DumpedProfile {
   name: string
@@ -46,11 +46,18 @@ export function dumpProfile(profile: Profile): any {
   return dump
 }
 
-export async function checkProfileSnapshot(filepath: string) {
+export async function checkProfileSnapshot(
+  filepath: string,
+  options?: ImportProfileOptions | null,
+) {
   const buffer = fs.readFileSync(filepath)
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
 
-  const profileGroup = await importProfilesFromArrayBuffer(path.basename(filepath), arrayBuffer)
+  const profileGroup = await importProfilesFromArrayBuffer(
+    path.basename(filepath),
+    arrayBuffer,
+    options,
+  )
   if (profileGroup) {
     expect(profileGroup.name).toMatchSnapshot('profileGroup.name')
     expect(profileGroup.indexToView).toMatchSnapshot('indexToView')
@@ -63,7 +70,7 @@ export async function checkProfileSnapshot(filepath: string) {
     return
   }
 
-  const profilesWithoutFilename = await importProfilesFromArrayBuffer('unknown', arrayBuffer)
+  const profilesWithoutFilename = await importProfilesFromArrayBuffer('unknown', arrayBuffer, options)
   if (profilesWithoutFilename) {
     expect(profilesWithoutFilename.profiles.length).toEqual(profileGroup.profiles.length)
     profilesWithoutFilename.name = profileGroup.name

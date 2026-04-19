@@ -1,7 +1,6 @@
 import {readFileSync} from 'fs'
 import {importProfileGroupFromText} from '.'
 import {checkProfileSnapshot} from '../lib/test-utils'
-import {setExperimentOverridesForTesting} from '../lib/runtime-config'
 
 test('importFromStackprof', async () => {
   await checkProfileSnapshot('./sample/profiles/stackprof/simple-stackprof.json')
@@ -41,16 +40,12 @@ describe('importCpuProfileWithProperWeights', () => {
 })
 
 describe('rust stackprof importer parity', () => {
-  afterEach(() => {
-    setExperimentOverridesForTesting(null)
-  })
-
   test('preserves cpu profile weights when enabled', async () => {
     const profileFile = readFileSync('./sample/profiles/stackprof/simple-cpu-stackprof.json')
-    setExperimentOverridesForTesting({rustImportParsers: true})
     const profileGroup = await importProfileGroupFromText(
       'simple-cpu-stackprof.json',
       profileFile.toString(),
+      {engine: 'experimental'},
     )
     expect(profileGroup).not.toBeNull()
 

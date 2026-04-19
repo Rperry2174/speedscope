@@ -34,12 +34,14 @@ interface GenerateIndexHtmlOptions {
   buildResult: esbuild.BuildResult
   outdir: string
   servingProtocol: 'file' | 'http'
+  defaultHash?: string
 }
 
 export const generateIndexHtml = ({
   buildResult,
   outdir,
   servingProtocol,
+  defaultHash = '',
 }: GenerateIndexHtmlOptions) => {
   const outputs = buildResult.metafile!.outputs
 
@@ -104,6 +106,13 @@ export const generateIndexHtml = ({
       servingProtocol === 'file'
         ? ''
         : `<link rel="preload" href="${fontName}" as="font" type="font/woff2" crossorigin>`
+    }
+    ${
+      defaultHash
+        ? `<script>if (!window.location.hash) { history.replaceState(null, '', window.location.pathname + window.location.search + ${JSON.stringify(
+            defaultHash,
+          )}) }</script>`
+        : ''
     }
   </body>
 </html>

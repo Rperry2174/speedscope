@@ -1,6 +1,7 @@
 import initRustHaskellImport, {
   import_haskell_profile_json as importHaskellProfileRustJson,
 } from '../../rust/haskell-import/pkg/haskell_import.js'
+import {readNodeFileSync, resolveFromCwd} from '../lib/node-shim'
 
 export interface RustHaskellEvent {
   frame: number
@@ -30,8 +31,11 @@ function isNodeRuntime() {
 
 async function initializeModule(): Promise<void> {
   if (isNodeRuntime()) {
-    const wasmModule = require('./haskell-rust.wasm.mock')
-    await initRustHaskellImport({module_or_path: wasmModule})
+    await initRustHaskellImport({
+      module_or_path: readNodeFileSync(
+        resolveFromCwd('rust', 'haskell-import', 'pkg', 'haskell_import_bg.wasm'),
+      ),
+    })
     return
   }
 

@@ -35,23 +35,11 @@ Generated at: ${report.generatedAt}
 
 Experiment: ${report.experiment.experimentName}
 
-Flags:
+Engine:
 
-- deferDemangle: ${report.experiment.experiments.deferDemangle}
-- optimizedForEachCall: ${report.experiment.experiments.optimizedForEachCall}
-- rustFuzzyFind: ${report.experiment.experiments.rustFuzzyFind}
-- rustImportParsers: ${report.experiment.experiments.rustImportParsers}
-- rustFirefoxImport: ${report.experiment.experiments.rustFirefoxImport}
-- rustBase64Decode: ${report.experiment.experiments.rustBase64Decode}
-- rustProfileSearch: ${report.experiment.experiments.rustProfileSearch}
-- rustTextUtils: ${report.experiment.experiments.rustTextUtils}
-- rustPprofImport: ${report.experiment.experiments.rustPprofImport}
-- rustHaskellImport: ${report.experiment.experiments.rustHaskellImport}
-- rustInstrumentsDeepCopy: ${report.experiment.experiments.rustInstrumentsDeepCopy}
-- rustCallgrindImport: ${report.experiment.experiments.rustCallgrindImport}
-- rustV8ProfLog: ${report.experiment.experiments.rustV8ProfLog}
-- rustLinuxPerf: ${report.experiment.experiments.rustLinuxPerf}
-- rustTraceEventImport: ${report.experiment.experiments.rustTraceEventImport}
+- requested engine: ${report.experiment.engine.importEngine}
+- compare import: ${report.experiment.engine.compareImport ? 'enabled' : 'disabled'}
+- visible engine: ${report.experiment.engine.visibleImportEngine || report.experiment.engine.importEngine}
 
 ## Fixture results
 

@@ -1,9 +1,8 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-import {exportProfileGroup} from './file-format'
-import {dumpProfile} from './test-utils'
-import {ExperimentFlags, setExperimentOverridesForTesting} from './runtime-config'
+import {ImportEngine} from '../experimental/contracts'
+import {canonicalizeImportedProfileGroup} from '../experimental/engine'
 import {importProfilesFromArrayBuffer} from '../import'
 import {ProfileGroup} from './profile'
 
@@ -17,15 +16,13 @@ export interface ProfileParityResult {
 
 export function compareProfileGroups(a: ProfileGroup, b: ProfileGroup): string[] {
   const diffs: string[] = []
-  const aExport = exportProfileGroup(a)
-  const bExport = exportProfileGroup(b)
-  if (JSON.stringify(aExport) !== JSON.stringify(bExport)) {
+  const aSummary = canonicalizeImportedProfileGroup(a)
+  const bSummary = canonicalizeImportedProfileGroup(b)
+  if (JSON.stringify(aSummary?.group) !== JSON.stringify(bSummary?.group)) {
     diffs.push('Exported profile groups differed')
   }
 
-  const aDumps = a.profiles.map(profile => dumpProfile(profile))
-  const bDumps = b.profiles.map(profile => dumpProfile(profile))
-  if (JSON.stringify(aDumps) !== JSON.stringify(bDumps)) {
+  if (JSON.stringify(aSummary?.dumps) !== JSON.stringify(bSummary?.dumps)) {
     diffs.push('Profile stack dumps differed')
   }
 
@@ -34,38 +31,20 @@ export function compareProfileGroups(a: ProfileGroup, b: ProfileGroup): string[]
 
 async function importFixtureWithExperiment(
   fixturePath: string,
-  overrides: Partial<ExperimentFlags> | null,
+  engine: ImportEngine,
 ) {
   const buffer = fs.readFileSync(fixturePath)
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
-  setExperimentOverridesForTesting(overrides)
-  try {
-    return await importProfilesFromArrayBuffer(path.basename(fixturePath), arrayBuffer)
-  } finally {
-    setExperimentOverridesForTesting(null)
-  }
+  return await importProfilesFromArrayBuffer(path.basename(fixturePath), arrayBuffer, {engine})
 }
 
 export async function compareFixtureParity(
   fixturePath: string,
-  overrides: Partial<ExperimentFlags>,
+  candidateEngine: ImportEngine = 'experimental',
+  baselineEngine: ImportEngine = 'legacy',
 ): Promise<ProfileParityResult> {
-  const legacy = await importFixtureWithExperiment(fixturePath, {
-    optimizedForEachCall: false,
-    deferDemangle: false,
-    rustFirefoxImport: false,
-    rustFuzzyFind: false,
-    rustBase64Decode: false,
-    rustProfileSearch: false,
-    rustTextUtils: false,
-    rustPprofImport: false,
-    rustHaskellImport: false,
-    rustInstrumentsDeepCopy: false,
-    rustCallgrindImport: false,
-    rustV8ProfLog: false,
-    rustImportParsers: false,
-  })
-  const experimental = await importFixtureWithExperiment(fixturePath, overrides)
+  const legacy = await importFixtureWithExperiment(fixturePath, baselineEngine)
+  const experimental = await importFixtureWithExperiment(fixturePath, candidateEngine)
 
   if (!legacy || !experimental) {
     return {
@@ -77,17 +56,8 @@ export async function compareFixtureParity(
     }
   }
 
-  const legacyExport = exportProfileGroup(legacy)
-  const experimentalExport = exportProfileGroup(experimental)
-
-  const legacySummary = {
-    group: legacyExport,
-    dumps: legacy.profiles.map(profile => dumpProfile(profile)),
-  }
-  const experimentalSummary = {
-    group: experimentalExport,
-    dumps: experimental.profiles.map(profile => dumpProfile(profile)),
-  }
+  const legacySummary = canonicalizeImportedProfileGroup(legacy)
+  const experimentalSummary = canonicalizeImportedProfileGroup(experimental)
 
   const equivalent = compareProfileGroups(legacy, experimental).length === 0
   return {

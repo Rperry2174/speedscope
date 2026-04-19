@@ -24,11 +24,20 @@ import {
   annotatePerfRun,
   completePerfRun,
   notePerfMilestone,
+  runWithoutPerfInstrumentation,
   startPerfRun,
   timePerfAsync,
   updatePerfMetadata,
 } from '../lib/perf'
 import {isExperimentEnabled} from '../lib/runtime-config'
+import {
+  ImportComparisonResult,
+  ImportEngine,
+  ImportProfileOptions,
+  ImportRunResult,
+  getDefaultImportEngine,
+} from '../experimental/contracts'
+import {replaceHashParams} from '../lib/hash-params'
 
 const importModule = import('../import')
 
@@ -40,32 +49,110 @@ importModule.then(() => {})
 import('../lib/demangle').then(() => {})
 import('source-map').then(() => {})
 
+function getImportProfileOptionsFromHashParams(hashParams: HashParams): ImportProfileOptions {
+  return {
+    engine: hashParams.importEngine || getDefaultImportEngine(),
+    compare: hashParams.compareImport || false,
+  }
+}
+
+function getVisibleImportEngineFromHashParams(hashParams: HashParams): ImportEngine {
+  return hashParams.compareImport ? 'legacy' : hashParams.importEngine || getDefaultImportEngine()
+}
+
+function logImportComparisonResult(result: ImportComparisonResult) {
+  if (result.mismatchSummary.equivalent) {
+    console.info('[import-compare] legacy and experimental matched', {
+      requestedEngine: result.requestedEngine,
+      visibleEngine: result.visibleEngine,
+      comparisonMode: result.comparisonMode,
+    })
+    return
+  }
+
+  console.warn('[import-compare] mismatch detected', {
+    requestedEngine: result.requestedEngine,
+    visibleEngine: result.visibleEngine,
+    comparisonMode: result.comparisonMode,
+    reasons: result.mismatchSummary.reasons,
+    mismatchPaths: result.mismatchSummary.mismatchPaths,
+    legacyError: result.mismatchSummary.legacyError,
+    experimentalError: result.mismatchSummary.experimentalError,
+  })
+}
+
+function isImportRunResult(
+  value: ImportRunResult | ProfileGroup | null,
+): value is ImportRunResult {
+  return value != null && 'visibleEngine' in value
+}
+
+function scheduleDeferredComparison(result: ImportRunResult) {
+  const deferredComparison = result.deferredComparison
+  if (!deferredComparison) {
+    return
+  }
+
+  const runDeferredComparison = () => {
+    void runWithoutPerfInstrumentation(async () => {
+      try {
+        await deferredComparison()
+      } catch (error) {
+        console.warn('[import-compare] comparison run failed', error)
+      }
+    })
+  }
+
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(runDeferredComparison)
+    })
+    return
+  }
+
+  if (typeof setTimeout === 'function') {
+    setTimeout(runDeferredComparison, 0)
+    return
+  }
+
+  runDeferredComparison()
+}
+
 async function importProfilesFromText(
   fileName: string,
   contents: string,
-): Promise<ProfileGroup | null> {
-  return (await importModule).importProfileGroupFromText(fileName, contents)
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return (await importModule).runImportProfileGroupFromText(fileName, contents, options)
 }
 
 async function importProfilesFromBase64(
   fileName: string,
   contents: string,
-): Promise<ProfileGroup | null> {
-  return (await importModule).importProfileGroupFromBase64(fileName, contents)
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return (await importModule).runImportProfileGroupFromBase64(fileName, contents, options)
 }
 
 async function importProfilesFromArrayBuffer(
   fileName: string,
   contents: ArrayBuffer,
-): Promise<ProfileGroup | null> {
-  return (await importModule).importProfilesFromArrayBuffer(fileName, contents)
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return (await importModule).runImportProfilesFromArrayBuffer(fileName, contents, options)
 }
 
-async function importProfilesFromFile(file: File): Promise<ProfileGroup | null> {
-  return (await importModule).importProfilesFromFile(file)
+async function importProfilesFromFile(
+  file: File,
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return (await importModule).runImportProfilesFromFile(file, options)
 }
-async function importFromFileSystemDirectoryEntry(entry: FileSystemDirectoryEntry) {
-  return (await importModule).importFromFileSystemDirectoryEntry(entry)
+async function importFromFileSystemDirectoryEntry(
+  entry: FileSystemDirectoryEntry,
+  options?: ImportProfileOptions | null,
+) {
+  return (await importModule).runImportFromFileSystemDirectoryEntry(entry, options)
 }
 
 declare function require(x: string): any
@@ -179,8 +266,47 @@ export type ApplicationProps = {
 }
 
 export class Application extends StatelessComponent<ApplicationProps> {
+  private getRequestedImportEngine(): ImportEngine {
+    return this.props.hashParams.importEngine || getDefaultImportEngine()
+  }
+
+  private getCompareImport(): boolean {
+    return this.props.hashParams.compareImport || false
+  }
+
+  private getImportProfileOptions(): ImportProfileOptions {
+    return {
+      ...getImportProfileOptionsFromHashParams(this.props.hashParams),
+      onComparisonResult: logImportComparisonResult,
+    }
+  }
+
+  private updateImportHashParams(nextOverrides: Partial<HashParams>) {
+    const nextHashParams: HashParams = {
+      ...this.props.hashParams,
+      ...nextOverrides,
+    }
+
+    if (nextHashParams.importEngine === getDefaultImportEngine()) {
+      delete nextHashParams.importEngine
+    }
+    if (!nextHashParams.compareImport) {
+      delete nextHashParams.compareImport
+    }
+
+    replaceHashParams(nextHashParams)
+  }
+
+  private setImportEngine = (importEngine: ImportEngine) => {
+    this.updateImportHashParams({importEngine})
+  }
+
+  private setCompareImport = (compareImport: boolean) => {
+    this.updateImportHashParams({compareImport})
+  }
+
   private async loadProfile(
-    loader: () => Promise<ProfileGroup | null>,
+    loader: () => Promise<ImportRunResult | ProfileGroup | null>,
     metadata: {loadSource: string; fileName?: string},
   ) {
     this.props.setError(false)
@@ -201,8 +327,15 @@ export class Application extends StatelessComponent<ApplicationProps> {
     console.time('import')
 
     let profileGroup: ProfileGroup | null = null
+    let importRunResult: ImportRunResult | null = null
     try {
-      profileGroup = await timePerfAsync('application_loader', loader)
+      const loaded = await timePerfAsync('application_loader', loader)
+      if (isImportRunResult(loaded)) {
+        importRunResult = loaded
+        profileGroup = loaded.profileGroup
+      } else {
+        profileGroup = loaded
+      }
       notePerfMilestone('loader_finished')
     } catch (e) {
       console.log('Failed to load format', e)
@@ -210,6 +343,13 @@ export class Application extends StatelessComponent<ApplicationProps> {
       completePerfRun('error')
       this.props.setError(true)
       return
+    }
+
+    if (importRunResult?.comparisonResult) {
+      logImportComparisonResult(importRunResult.comparisonResult)
+    }
+    if (importRunResult?.deferredComparison) {
+      scheduleDeferredComparison(importRunResult)
     }
 
     // TODO(jlfwong): Make these into nicer overlays
@@ -281,14 +421,15 @@ export class Application extends StatelessComponent<ApplicationProps> {
         updatePerfMetadata({
           fileName: file.name,
         })
-        const profiles = await importProfilesFromFile(file)
+        const importResult = await importProfilesFromFile(file, this.getImportProfileOptions())
+        const profiles = importResult.profileGroup
         if (profiles) {
           for (let profile of profiles.profiles) {
             if (!profile.getName()) {
               profile.setName(file.name)
             }
           }
-          return profiles
+          return importResult
         }
 
         if (this.props.profileGroup && this.props.activeProfileState) {
@@ -364,7 +505,7 @@ export class Application extends StatelessComponent<ApplicationProps> {
           fetch(exampleProfileURL).then(resp => resp.text()),
         )
         notePerfMilestone('bytes_available')
-        return await importProfilesFromText(filename, data)
+        return await importProfilesFromText(filename, data, this.getImportProfileOptions())
       },
       {loadSource: 'example-link', fileName: filename},
     )
@@ -393,7 +534,10 @@ export class Application extends StatelessComponent<ApplicationProps> {
             updatePerfMetadata({
               fileName: webkitDirectoryEntry.name,
             })
-            return await importFromFileSystemDirectoryEntry(webkitDirectoryEntry)
+            return await importFromFileSystemDirectoryEntry(
+              webkitDirectoryEntry,
+              this.getImportProfileOptions(),
+            )
           },
           {loadSource: 'drag-drop-trace-directory', fileName: webkitDirectoryEntry.name},
         )
@@ -487,7 +631,11 @@ export class Application extends StatelessComponent<ApplicationProps> {
         })
         notePerfMilestone('bytes_available')
         annotatePerfRun('clipboard_text_length', pasted.length)
-        return await importProfilesFromText('From Clipboard', pasted)
+        return await importProfilesFromText(
+          'From Clipboard',
+          pasted,
+          this.getImportProfileOptions(),
+        )
       },
       {loadSource: 'clipboard-text', fileName: 'From Clipboard'},
     )
@@ -532,7 +680,11 @@ export class Application extends StatelessComponent<ApplicationProps> {
           )
           notePerfMilestone('bytes_available')
           annotatePerfRun('fetched_byte_length', arrayBuffer.byteLength)
-          return await importProfilesFromArrayBuffer(filename, arrayBuffer)
+          return await importProfilesFromArrayBuffer(
+            filename,
+            arrayBuffer,
+            this.getImportProfileOptions(),
+          )
         },
         {loadSource: 'profile-url', fileName: filename},
       )
@@ -547,7 +699,11 @@ export class Application extends StatelessComponent<ApplicationProps> {
               updatePerfMetadata({
                 fileName: filename,
               })
-              return importProfilesFromBase64(filename, base64source)
+              return importProfilesFromBase64(
+                filename,
+                base64source,
+                this.getImportProfileOptions(),
+              )
             },
             {loadSource: 'local-base64-script', fileName: filename},
           )
@@ -703,6 +859,11 @@ export class Application extends StatelessComponent<ApplicationProps> {
         <Toolbar
           saveFile={this.saveFile}
           browseForFile={this.browseForFile}
+          importEngine={this.getRequestedImportEngine()}
+          visibleImportEngine={getVisibleImportEngineFromHashParams(this.props.hashParams)}
+          compareImport={this.getCompareImport()}
+          setImportEngine={this.setImportEngine}
+          setCompareImport={this.setCompareImport}
           {...(this.props as ApplicationProps)}
         />
         <div className={css(style.contentContainer)}>{this.renderContent()}</div>

@@ -1,16 +1,24 @@
 import {checkProfileSnapshot} from '../lib/test-utils'
 import * as fs from 'fs'
 import * as path from 'path'
-import {extractFirefoxImportPayload, importFromFirefox} from './firefox'
+import {buildFirefoxProfileFromPayload, importFromFirefox} from './firefox'
 import {importFromFirefoxArrayBuffer} from './firefox-rust'
-import {setExperimentOverridesForTesting} from '../lib/runtime-config'
-import {dumpProfile} from '../lib/test-utils'
+import {compareProfileGroups} from '../lib/profile-parity'
+import {ProfileGroup} from '../lib/profile'
 
 async function loadFirefoxProfile(relativePath: string) {
   const absolutePath = path.join(process.cwd(), relativePath)
   const buffer = fs.readFileSync(absolutePath)
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
   return {absolutePath, arrayBuffer}
+}
+
+function toProfileGroup(profileName: string, profile: ReturnType<typeof importFromFirefox>): ProfileGroup {
+  return {
+    name: profileName,
+    indexToView: 0,
+    profiles: [profile],
+  }
 }
 
 test('importFromFirefox', async () => {
@@ -37,7 +45,13 @@ describe('rust firefox importer parity', () => {
       const {absolutePath, arrayBuffer} = await loadFirefoxProfile(fixture)
       const parsed = JSON.parse(fs.readFileSync(absolutePath, 'utf8'))
       const rustPayload = await importFromFirefoxArrayBuffer(arrayBuffer)
-      expect(rustPayload).toEqual(extractFirefoxImportPayload(parsed))
+      expect(rustPayload).not.toBeNull()
+      expect(
+        compareProfileGroups(
+          toProfileGroup(path.basename(fixture), buildFirefoxProfileFromPayload(rustPayload!)),
+          toProfileGroup(path.basename(fixture), importFromFirefox(parsed)),
+        ),
+      ).toEqual([])
     }
   })
 
@@ -46,19 +60,18 @@ describe('rust firefox importer parity', () => {
     const {absolutePath, arrayBuffer} = await loadFirefoxProfile(fixture)
     const parsed = JSON.parse(fs.readFileSync(absolutePath, 'utf8'))
     const legacyProfile = importFromFirefox(parsed)
+    legacyProfile.setName(path.basename(fixture))
 
-    setExperimentOverridesForTesting({rustFirefoxImport: true})
-    try {
-      const experimentalModule = await import('./index')
-      const profileGroup = await experimentalModule.importProfilesFromArrayBuffer(
-        path.basename(fixture),
-        arrayBuffer,
-      )
-      expect(profileGroup).not.toBeNull()
-      expect(profileGroup!.profiles).toHaveLength(1)
-      expect(dumpProfile(profileGroup!.profiles[0])).toEqual(dumpProfile(legacyProfile))
-    } finally {
-      setExperimentOverridesForTesting(null)
-    }
+    const experimentalModule = await import('./index')
+    const profileGroup = await experimentalModule.importProfilesFromArrayBuffer(
+      path.basename(fixture),
+      arrayBuffer,
+      {engine: 'experimental'},
+    )
+    expect(profileGroup).not.toBeNull()
+    expect(profileGroup!.profiles).toHaveLength(1)
+    expect(
+      compareProfileGroups(profileGroup!, toProfileGroup(path.basename(fixture), legacyProfile)),
+    ).toEqual([])
   })
 })

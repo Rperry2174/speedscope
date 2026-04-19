@@ -37,6 +37,7 @@ const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
 }
 
 let experimentOverrides: Partial<ExperimentFlags> | null = null
+let scopedExperimentOverrideQueue: Promise<void> = Promise.resolve()
 
 function isBrowser() {
   return typeof window !== 'undefined'
@@ -108,10 +109,40 @@ export function setExperimentOverridesForTesting(overrides: Partial<ExperimentFl
   experimentOverrides = overrides
 }
 
+export function getDefaultExperimentFlags(): ExperimentFlags {
+  return {...DEFAULT_EXPERIMENT_FLAGS}
+}
+
 export function getExperimentFlags(): ExperimentFlags {
   return {
     ...resolveExperimentFlagsFromEnvironment(),
     ...(experimentOverrides || {}),
+  }
+}
+
+export async function runWithExperimentOverrides<T>(
+  overrides: Partial<ExperimentFlags>,
+  cb: () => Promise<T> | T,
+): Promise<T> {
+  const previousScope = scopedExperimentOverrideQueue
+  let releaseScope!: () => void
+  scopedExperimentOverrideQueue = new Promise<void>(resolve => {
+    releaseScope = resolve
+  })
+
+  await previousScope
+
+  const previousOverrides = experimentOverrides
+  experimentOverrides = {
+    ...(previousOverrides || {}),
+    ...overrides,
+  }
+
+  try {
+    return await cb()
+  } finally {
+    experimentOverrides = previousOverrides
+    releaseScope()
   }
 }
 

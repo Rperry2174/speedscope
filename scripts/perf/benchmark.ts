@@ -9,7 +9,7 @@ import {
   BrowserBenchmarkReport,
   BrowserBenchmarkResult,
   BrowserBenchmarkRun,
-  ExperimentFlags,
+  EngineRunOptions,
   ExperimentRunOptions,
   PerfSummary,
 } from './types'
@@ -46,32 +46,12 @@ interface RunBrowserBenchmarkArgs {
   fixtures?: PerfFixture[]
   outputPath?: string
   warmRuns: number
-  experiments: ExperimentFlags
+  engine: EngineRunOptions
   experimentName: string
+  serverCommand?: string[]
 }
 
 const PERF_TIMEOUT_MS = 180000
-
-function allExperimentsDisabled(experiments: ExperimentFlags): ExperimentFlags {
-  return {
-    deferDemangle: false,
-    optimizedForEachCall: false,
-    rustFuzzyFind: false,
-    rustFirefoxImport: false,
-    rustBase64Decode: false,
-    rustProfileSearch: false,
-    rustTextUtils: false,
-    rustPprofImport: false,
-    rustV8CpuFormatter: false,
-    rustHaskellImport: false,
-    rustInstrumentsDeepCopy: false,
-    rustCallgrindImport: false,
-    rustV8ProfLog: false,
-    rustLinuxPerf: false,
-    rustImportParsers: false,
-    rustTraceEventImport: false,
-  }
-}
 
 function parseBooleanFlag(value: string | undefined): boolean {
   if (!value) return false
@@ -85,31 +65,9 @@ function toIsoLikeTimestamp(date: Date): string {
 function buildQueryString(options: ExperimentRunOptions): string {
   const params = new URLSearchParams()
   params.set('perf', '1')
-  const enabledExperiments: string[] = []
-  const experimentEntries: [keyof ExperimentFlags, boolean][] = [
-    ['deferDemangle', options.experiments.deferDemangle],
-    ['optimizedForEachCall', options.experiments.optimizedForEachCall],
-    ['rustFuzzyFind', options.experiments.rustFuzzyFind],
-    ['rustFirefoxImport', options.experiments.rustFirefoxImport],
-    ['rustBase64Decode', options.experiments.rustBase64Decode],
-    ['rustProfileSearch', options.experiments.rustProfileSearch],
-    ['rustTextUtils', options.experiments.rustTextUtils],
-    ['rustImportParsers', options.experiments.rustImportParsers],
-    ['rustPprofImport', options.experiments.rustPprofImport],
-    ['rustCallgrindImport', options.experiments.rustCallgrindImport],
-    ['rustHaskellImport', options.experiments.rustHaskellImport],
-    ['rustInstrumentsDeepCopy', options.experiments.rustInstrumentsDeepCopy],
-    ['rustV8ProfLog', options.experiments.rustV8ProfLog],
-    ['rustV8CpuFormatter', options.experiments.rustV8CpuFormatter],
-    ['rustLinuxPerf', options.experiments.rustLinuxPerf],
-    ['rustTraceEventImport', options.experiments.rustTraceEventImport],
-  ]
-  for (const [name, enabled] of experimentEntries) {
-    if (enabled) enabledExperiments.push(name)
-    params.set(name, enabled ? '1' : '0')
-  }
-  if (enabledExperiments.length > 0) {
-    params.set('experiments', enabledExperiments.join(','))
+  params.set('importEngine', options.engine.importEngine)
+  if (options.engine.compareImport) {
+    params.set('compareImport', '1')
   }
   return params.toString()
 }
@@ -140,9 +98,10 @@ function aggregateNumbers(values: number[]) {
   }
 }
 
-async function startServer(): Promise<ServerInfo> {
+async function startServer(serverCommand: string[] = ['npm', 'run', 'serve']): Promise<ServerInfo> {
   return await new Promise((resolve, reject) => {
-    const childProcess = spawn('npm', ['run', 'serve'], {
+    const [command, ...args] = serverCommand
+    const childProcess = spawn(command, args, {
       cwd: path.resolve('/workspace'),
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
@@ -287,6 +246,8 @@ function summarizeFixtureRuns(
     fixturePath: fixture.relativePath,
     format: fixture.format,
     experiment: options.experimentName,
+    importEngine: options.engine.importEngine,
+    compareImport: options.engine.compareImport || false,
     runs,
     coldSummary:
       coldRuns.length > 0
@@ -320,10 +281,10 @@ export async function runBrowserBenchmark(args: RunBrowserBenchmarkArgs): Promis
   const fixtures = args.fixtures || FIXTURES
   const options: ExperimentRunOptions = {
     experimentName: args.experimentName,
-    experiments: args.experiments,
+    engine: args.engine,
   }
 
-  const server = await startServer()
+  const server = await startServer(args.serverCommand)
   const browser = await chromium.launch({headless: true})
 
   try {
@@ -360,6 +321,10 @@ export async function runBrowserBenchmark(args: RunBrowserBenchmarkArgs): Promis
 async function main() {
   const experimentName = process.env.SPEEDSCOPE_EXPERIMENT_NAME || 'legacy'
   const warmRuns = Number(process.env.SPEEDSCOPE_WARM_RUNS || '2')
+  const importEngine = parseBooleanFlag(process.env.SPEEDSCOPE_EXPERIMENTAL_IMPORT)
+    ? 'experimental'
+    : 'legacy'
+  const compareImport = parseBooleanFlag(process.env.SPEEDSCOPE_COMPARE_IMPORT)
   const includeOnly = process.env.SPEEDSCOPE_FIXTURES
     ? new Set(process.env.SPEEDSCOPE_FIXTURES.split(',').map(token => token.trim()))
     : null
@@ -380,41 +345,11 @@ async function main() {
     outputPath: artifactPaths.jsonPath,
     warmRuns,
     experimentName,
-    experiments: {
-      ...allExperimentsDisabled({
-        deferDemangle: false,
-        optimizedForEachCall: false,
-        rustFuzzyFind: false,
-        rustFirefoxImport: false,
-        rustBase64Decode: false,
-        rustProfileSearch: false,
-        rustTextUtils: false,
-        rustPprofImport: false,
-        rustV8CpuFormatter: false,
-        rustHaskellImport: false,
-        rustInstrumentsDeepCopy: false,
-        rustCallgrindImport: false,
-        rustV8ProfLog: false,
-        rustLinuxPerf: false,
-        rustImportParsers: false,
-        rustTraceEventImport: false,
-      }),
-      deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
-      optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
-      rustFuzzyFind: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FUZZY_FIND),
-      rustFirefoxImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FIREFOX_IMPORT),
-      rustBase64Decode: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_BASE64_DECODE),
-      rustProfileSearch: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PROFILE_SEARCH),
-      rustTextUtils: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TEXT_UTILS),
-      rustImportParsers: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_IMPORT_PARSERS),
-      rustPprofImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PPROF_IMPORT),
-      rustCallgrindImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_CALLGRIND_IMPORT),
-      rustV8CpuFormatter: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_CPU_FORMATTER),
-      rustHaskellImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_HASKELL_IMPORT),
-      rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
-      rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),
-      rustLinuxPerf: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_LINUX_PERF),
-      rustTraceEventImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TRACE_EVENT_IMPORT),
+    engine: {
+      name: experimentName,
+      importEngine,
+      compareImport,
+      visibleImportEngine: compareImport ? 'legacy' : importEngine,
     },
   })
   writeMarkdown(artifactPaths.reportPath, renderBenchmarkReport(report))

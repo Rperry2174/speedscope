@@ -1,11 +1,24 @@
 {
-  "generatedAt": "2026-04-19T08:35:44.920Z",
+  "generatedAt": "2026-04-19T18:19:15.850Z",
   "experiment": {
-    "deferDemangle": false,
-    "optimizedForEachCall": false,
-    "rustFuzzyFind": false
+    "name": "legacy",
+    "importEngine": "legacy",
+    "compareImport": false,
+    "visibleImportEngine": "legacy"
   },
   "fixtures": [
+    {
+      "fixtureId": "linux-perf-system-wide",
+      "fixturePath": "sample/profiles/linux-perf/system-wide.linux-perf.txt",
+      "equal": true,
+      "reason": null
+    },
+    {
+      "fixtureId": "v8-log-small",
+      "fixturePath": "sample/profiles/node/fixture.v8log.json",
+      "equal": true,
+      "reason": null
+    },
     {
       "fixtureId": "chrome-timeline-large",
       "fixturePath": "sample/profiles/Chrome/65/timeline.json",
