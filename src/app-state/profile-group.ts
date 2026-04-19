@@ -2,6 +2,7 @@ import {Atom} from '../lib/atom'
 import {clamp, Rect, Vec2} from '../lib/math'
 import {CallTreeNode, Frame, Profile, ProfileGroup} from '../lib/profile'
 import {objectsHaveShallowEquality} from '../lib/utils'
+import {annotatePerfRun, notePerfMilestone} from '../lib/perf'
 
 export interface FlamechartViewState {
   hover: {
@@ -78,6 +79,9 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
         sandwichViewState: {callerCallee: null},
       })),
     })
+    annotatePerfRun('profile_group_name', group.name)
+    annotatePerfRun('profile_count', group.profiles.length)
+    notePerfMilestone('profile_state_applied')
   }
 
   setProfileIndexToView = (indexToView: number) => {

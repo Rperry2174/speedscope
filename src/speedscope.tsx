@@ -1,8 +1,14 @@
 import {h, render} from 'preact'
 import {ApplicationContainer} from './views/application-container'
 import {ThemeProvider} from './views/themes/theme'
+import {getPerfState} from './lib/perf'
+import {getExperimentFlags} from './lib/runtime-config'
 
 console.log(`speedscope v${require('../package.json').version}`)
+;(window as any)['__speedscopeDebug'] = {
+  getPerfState,
+  getExperimentFlags,
+}
 
 /*
 TODO(jlfwong): Fix this

@@ -16,7 +16,11 @@
     "coverage": "npm run jest -- --coverage",
     "typecheck": "tsc --noEmit",
     "test": "./scripts/ci.sh",
-    "serve": "tsx scripts/dev-server.ts"
+    "serve": "tsx scripts/dev-server.ts",
+    "perf:bench": "tsx scripts/perf/benchmark.ts",
+    "perf:parity": "tsx scripts/perf/parity.ts",
+    "perf:run": "tsx scripts/perf/run-experiment.ts",
+    "perf:orchestrate": "tsx scripts/perf/cursor-orchestrator.ts"
   },
   "files": [
     "bin/cli.mjs",
@@ -87,6 +91,8 @@
     ]
   },
   "dependencies": {
-    "open": "10.1.0"
+    "@cursor/february": "^1.0.1",
+    "open": "10.1.0",
+    "playwright": "^1.59.1"
   }
 }

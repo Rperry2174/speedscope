@@ -1,6 +1,7 @@
 import {lastOf, KeyedSet} from './utils'
 import {ValueFormatter, RawValueFormatter} from './value-formatters'
 import {FileFormat} from './file-format-spec'
+import {isExperimentEnabled} from './runtime-config'
 
 export interface FrameInfo {
   key: string | number
@@ -84,6 +85,7 @@ export class Frame extends HasWeights {
 
 export class CallTreeNode extends HasWeights {
   children: CallTreeNode[] = []
+  depth: number
 
   isRoot() {
     return this.frame === Frame.root
@@ -103,6 +105,7 @@ export class CallTreeNode extends HasWeights {
     readonly parent: CallTreeNode | null,
   ) {
     super()
+    this.depth = parent ? parent.depth + 1 : 0
   }
 }
 
@@ -223,6 +226,10 @@ export class Profile {
     openFrame: (node: CallTreeNode, value: number) => void,
     closeFrame: (node: CallTreeNode, value: number) => void,
   ) {
+    if (isExperimentEnabled('optimizedForEachCall')) {
+      return this.forEachCallOptimized(openFrame, closeFrame)
+    }
+
     let prevStack: CallTreeNode[] = []
     let value = 0
 
@@ -265,6 +272,51 @@ export class Profile {
     }
 
     // Close frames that are open at the end of the trace
+    for (let i = prevStack.length - 1; i >= 0; i--) {
+      closeFrame(prevStack[i], value)
+    }
+  }
+
+  private forEachCallOptimized(
+    openFrame: (node: CallTreeNode, value: number) => void,
+    closeFrame: (node: CallTreeNode, value: number) => void,
+  ) {
+    let prevStack: CallTreeNode[] = []
+    let value = 0
+
+    let sampleIndex = 0
+    for (let stackTop of this.samples) {
+      const nextStack: CallTreeNode[] = []
+      for (
+        let node: CallTreeNode | null = stackTop;
+        node && node.frame !== Frame.root;
+        node = node.parent
+      ) {
+        nextStack.push(node)
+      }
+      nextStack.reverse()
+
+      let sharedPrefixLength = 0
+      const maxPrefix = Math.min(prevStack.length, nextStack.length)
+      while (
+        sharedPrefixLength < maxPrefix &&
+        prevStack[sharedPrefixLength] === nextStack[sharedPrefixLength]
+      ) {
+        sharedPrefixLength++
+      }
+
+      for (let i = prevStack.length - 1; i >= sharedPrefixLength; i--) {
+        closeFrame(prevStack[i], value)
+      }
+
+      for (let i = sharedPrefixLength; i < nextStack.length; i++) {
+        openFrame(nextStack[i], value)
+      }
+
+      prevStack = nextStack
+      value += this.weights[sampleIndex++]
+    }
+
     for (let i = prevStack.length - 1; i >= 0; i--) {
       closeFrame(prevStack[i], value)
     }

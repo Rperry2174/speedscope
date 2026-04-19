@@ -18,6 +18,7 @@ import {BatchCanvasTextRenderer, BatchCanvasRectRenderer} from '../lib/canvas-2d
 import {Color} from '../lib/color'
 import {Theme} from './themes/theme'
 import {minimapMousePositionAtom} from '../app-state'
+import {annotatePerfRun, completePerfRun, hasPerfMilestone, notePerfMilestone} from '../lib/perf'
 
 interface FlamechartFrameLabel {
   configSpaceBounds: Rect
@@ -73,6 +74,7 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
   private overlayCtx: CanvasRenderingContext2D | null = null
 
   private hoveredLabel: FlamechartFrameLabel | null = null
+  private hasRenderedFirstMeaningfulPaint = false
 
   private getStyle() {
     return getFlamechartStyle(this.props.theme)
@@ -520,7 +522,26 @@ export class FlamechartPanZoomView extends Component<FlamechartPanZoomViewProps,
     this.resizeOverlayCanvasIfNeeded()
     this.renderRects()
     this.renderOverlays()
+    this.maybeRecordFirstMeaningfulPaint()
     this.maybeClearInteractionLock()
+  }
+
+  private maybeRecordFirstMeaningfulPaint() {
+    if (this.hasRenderedFirstMeaningfulPaint) return
+    if (hasPerfMilestone('first_meaningful_paint')) return
+    if (this.props.configSpaceViewportRect.isEmpty()) return
+
+    const layerCount = this.props.flamechart.getLayers().length
+    if (layerCount === 0) return
+    const rootLayer = this.props.flamechart.getLayers()[0] || []
+    if (rootLayer.length === 0) return
+    if (!this.overlayCanvas || !this.overlayCtx) return
+
+    this.hasRenderedFirstMeaningfulPaint = true
+    annotatePerfRun('first_painted_layer_count', layerCount)
+    annotatePerfRun('first_painted_root_frame_count', rootLayer.length)
+    notePerfMilestone('first_meaningful_paint')
+    completePerfRun('completed')
   }
 
   private renderCanvas = () => {

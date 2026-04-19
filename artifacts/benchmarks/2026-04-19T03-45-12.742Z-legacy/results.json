@@ -1,0 +1,1932 @@
+{
+  "generatedAt": "2026-04-19T03:45:25.412Z",
+  "experiment": {
+    "experimentName": "legacy",
+    "experiments": {
+      "deferDemangle": false,
+      "optimizedForEachCall": false
+    }
+  },
+  "results": [
+    {
+      "fixtureId": "chrome-timeline-large",
+      "fixturePath": "sample/profiles/Chrome/65/timeline.json",
+      "format": "chrome-timeline",
+      "experiment": "legacy",
+      "runs": [
+        {
+          "fixtureId": "chrome-timeline-large",
+          "runIndex": 0,
+          "warm": false,
+          "wallClockMs": 347,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 12.699999988079071,
+            "importParseFinishedMs": 77.40000003576279,
+            "profileStateAppliedMs": 78,
+            "firstMeaningfulPaintMs": 269.30000001192093,
+            "totalWallClockMs": 269.4000000357628
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 211.5,
+            "finishedAt": 480.9000000357628,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "timeline.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 12.699999988079071,
+              "import_parse_finished": 77.40000003576279,
+              "loader_finished": 77.40000003576279,
+              "profile_demangle_finished": 77.69999998807907,
+              "before_profile_group_set": 77.90000003576279,
+              "profile_state_applied": 78,
+              "loading_indicator_cleared": 78,
+              "first_meaningful_paint": 269.30000001192093,
+              "run_complete": 269.4000000357628
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                11
+              ],
+              "inflate_if_needed": [
+                0.8999999761581421
+              ],
+              "read_array_buffer": [
+                11.199999988079071
+              ],
+              "import_pprof_probe": [
+                0.7999999523162842
+              ],
+              "read_text": [
+                20.400000035762787
+              ],
+              "json_parse_string": [
+                19.599999964237213
+              ],
+              "parse_json_dispatch": [
+                23.5
+              ],
+              "import_chrome_timeline": [
+                18.600000023841858
+              ],
+              "import_profile_group_total": [
+                76.20000004768372
+              ],
+              "application_loader": [
+                77.10000002384186
+              ],
+              "profile_demangle": [
+                0
+              ],
+              "build_chrono_flamechart": [
+                3
+              ],
+              "build_flamechart_renderer": [
+                2.300000011920929
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 6036746,
+              "input_file_type": "application/json",
+              "file_name": "timeline.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 6036746,
+              "byte_length": 6036746,
+              "detected_format": "chrome-timeline",
+              "profile_count_loaded": 1,
+              "profile_group_name": "timeline.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 57,
+              "first_painted_root_frame_count": 181
+            }
+          }
+        },
+        {
+          "fixtureId": "chrome-timeline-large",
+          "runIndex": 1,
+          "warm": true,
+          "wallClockMs": 247,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 17.19999998807907,
+            "importParseFinishedMs": 76.69999998807907,
+            "profileStateAppliedMs": 77.30000001192093,
+            "firstMeaningfulPaintMs": 198,
+            "totalWallClockMs": 198.10000002384186
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 154.19999998807907,
+            "finishedAt": 352.30000001192093,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "timeline.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 17.19999998807907,
+              "import_parse_finished": 76.69999998807907,
+              "loader_finished": 76.80000001192093,
+              "profile_demangle_finished": 77.10000002384186,
+              "before_profile_group_set": 77.19999998807907,
+              "profile_state_applied": 77.30000001192093,
+              "loading_indicator_cleared": 77.30000001192093,
+              "first_meaningful_paint": 198,
+              "run_complete": 198
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                15.800000011920929
+              ],
+              "inflate_if_needed": [
+                0.800000011920929
+              ],
+              "read_array_buffer": [
+                16.099999964237213
+              ],
+              "import_pprof_probe": [
+                0.800000011920929
+              ],
+              "read_text": [
+                13.399999976158142
+              ],
+              "json_parse_string": [
+                19
+              ],
+              "parse_json_dispatch": [
+                22.69999998807907
+              ],
+              "import_chrome_timeline": [
+                21.30000001192093
+              ],
+              "import_profile_group_total": [
+                75.69999998807907
+              ],
+              "application_loader": [
+                76.60000002384186
+              ],
+              "profile_demangle": [
+                0.10000002384185791
+              ],
+              "build_chrono_flamechart": [
+                1.800000011920929
+              ],
+              "build_flamechart_renderer": [
+                3.199999988079071
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 6036746,
+              "input_file_type": "application/json",
+              "file_name": "timeline.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 6036746,
+              "byte_length": 6036746,
+              "detected_format": "chrome-timeline",
+              "profile_count_loaded": 1,
+              "profile_group_name": "timeline.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 57,
+              "first_painted_root_frame_count": 181
+            }
+          }
+        },
+        {
+          "fixtureId": "chrome-timeline-large",
+          "runIndex": 2,
+          "warm": true,
+          "wallClockMs": 240,
+          "summary": {
+            "loadStartMs": 0,
+            "bytesAvailableMs": 15.300000011920929,
+            "importParseFinishedMs": 71.39999997615814,
+            "profileStateAppliedMs": 72,
+            "firstMeaningfulPaintMs": 180.69999998807907,
+            "totalWallClockMs": 180.69999998807907
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 146.10000002384186,
+            "finishedAt": 326.80000001192093,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "timeline.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0,
+              "bytes_available": 15.300000011920929,
+              "import_parse_finished": 71.39999997615814,
+              "loader_finished": 71.39999997615814,
+              "profile_demangle_finished": 71.69999998807907,
+              "before_profile_group_set": 71.80000001192093,
+              "profile_state_applied": 72,
+              "loading_indicator_cleared": 72,
+              "first_meaningful_paint": 180.69999998807907,
+              "run_complete": 180.69999998807907
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                12.400000035762787
+              ],
+              "inflate_if_needed": [
+                0.9000000357627869
+              ],
+              "read_array_buffer": [
+                11.100000023841858
+              ],
+              "import_pprof_probe": [
+                0.800000011920929
+              ],
+              "read_text": [
+                12.300000011920929
+              ],
+              "json_parse_string": [
+                21.100000023841858
+              ],
+              "parse_json_dispatch": [
+                25.30000001192093
+              ],
+              "import_chrome_timeline": [
+                16.5
+              ],
+              "import_profile_group_total": [
+                67.39999997615814
+              ],
+              "application_loader": [
+                71.09999996423721
+              ],
+              "profile_demangle": [
+                0.10000002384185791
+              ],
+              "build_chrono_flamechart": [
+                1.9000000357627869
+              ],
+              "build_flamechart_renderer": [
+                2.5
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 6036746,
+              "input_file_type": "application/json",
+              "file_name": "timeline.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 6036746,
+              "byte_length": 6036746,
+              "detected_format": "chrome-timeline",
+              "profile_count_loaded": 1,
+              "profile_group_name": "timeline.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 57,
+              "first_painted_root_frame_count": 181
+            }
+          }
+        }
+      ],
+      "coldSummary": {
+        "firstMeaningfulPaintMs": 269.30000001192093,
+        "totalWallClockMs": 269.4000000357628
+      },
+      "warmSummary": {
+        "firstMeaningfulPaintMs": {
+          "min": 180.69999998807907,
+          "max": 198,
+          "median": 198,
+          "average": 189.34999999403954
+        },
+        "totalWallClockMs": {
+          "min": 180.69999998807907,
+          "max": 198.10000002384186,
+          "median": 198.10000002384186,
+          "average": 189.40000000596046
+        }
+      }
+    },
+    {
+      "fixtureId": "firefox-large",
+      "fixturePath": "sample/profiles/Firefox/59/firefox.json",
+      "format": "firefox",
+      "experiment": "legacy",
+      "runs": [
+        {
+          "fixtureId": "firefox-large",
+          "runIndex": 0,
+          "warm": false,
+          "wallClockMs": 211,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 15.699999988079071,
+            "importParseFinishedMs": 53.10000002384186,
+            "profileStateAppliedMs": 53.80000001192093,
+            "firstMeaningfulPaintMs": 153.19999998807907,
+            "totalWallClockMs": 153.19999998807907
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 158.0999999642372,
+            "finishedAt": 311.2999999523163,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "firefox.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 15.699999988079071,
+              "import_parse_finished": 53.10000002384186,
+              "loader_finished": 53.19999998807907,
+              "profile_demangle_finished": 53.60000002384186,
+              "before_profile_group_set": 53.80000001192093,
+              "profile_state_applied": 53.80000001192093,
+              "loading_indicator_cleared": 53.80000001192093,
+              "first_meaningful_paint": 153.19999998807907,
+              "run_complete": 153.19999998807907
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                14.099999964237213
+              ],
+              "inflate_if_needed": [
+                0.8999999761581421
+              ],
+              "read_array_buffer": [
+                14.5
+              ],
+              "import_pprof_probe": [
+                0.7000000476837158
+              ],
+              "read_text": [
+                1.2999999523162842
+              ],
+              "json_parse_string": [
+                9.300000011920929
+              ],
+              "parse_json_dispatch": [
+                9.300000011920929
+              ],
+              "import_firefox": [
+                25.69999998807907
+              ],
+              "import_profile_group_total": [
+                52.10000002384186
+              ],
+              "application_loader": [
+                52.80000001192093
+              ],
+              "profile_demangle": [
+                0.10000002384185791
+              ],
+              "build_chrono_flamechart": [
+                0.800000011920929
+              ],
+              "build_flamechart_renderer": [
+                2.199999988079071
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 2376576,
+              "input_file_type": "application/json",
+              "file_name": "firefox.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 2376576,
+              "byte_length": 2376576,
+              "detected_format": "firefox",
+              "profile_count_loaded": 1,
+              "profile_group_name": "firefox.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 85,
+              "first_painted_root_frame_count": 14
+            }
+          }
+        },
+        {
+          "fixtureId": "firefox-large",
+          "runIndex": 1,
+          "warm": true,
+          "wallClockMs": 228,
+          "summary": {
+            "loadStartMs": 0.19999998807907104,
+            "bytesAvailableMs": 14.5,
+            "importParseFinishedMs": 56,
+            "profileStateAppliedMs": 56.89999997615814,
+            "firstMeaningfulPaintMs": 177.10000002384186,
+            "totalWallClockMs": 177.30000001192093
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 158.89999997615814,
+            "finishedAt": 336.19999998807907,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "firefox.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.19999998807907104,
+              "bytes_available": 14.5,
+              "import_parse_finished": 56,
+              "loader_finished": 56,
+              "profile_demangle_finished": 56.39999997615814,
+              "before_profile_group_set": 56.69999998807907,
+              "profile_state_applied": 56.89999997615814,
+              "loading_indicator_cleared": 56.89999997615814,
+              "first_meaningful_paint": 177.10000002384186,
+              "run_complete": 177.19999998807907
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                12.800000011920929
+              ],
+              "inflate_if_needed": [
+                0.8999999761581421
+              ],
+              "read_array_buffer": [
+                11.399999976158142
+              ],
+              "import_pprof_probe": [
+                0.800000011920929
+              ],
+              "read_text": [
+                1.199999988079071
+              ],
+              "json_parse_string": [
+                7.100000023841858
+              ],
+              "parse_json_dispatch": [
+                7.299999952316284
+              ],
+              "import_firefox": [
+                32
+              ],
+              "import_profile_group_total": [
+                53.30000001192093
+              ],
+              "application_loader": [
+                55.69999998807907
+              ],
+              "profile_demangle": [
+                0.09999996423721313
+              ],
+              "build_chrono_flamechart": [
+                0.800000011920929
+              ],
+              "build_flamechart_renderer": [
+                2.900000035762787
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 2376576,
+              "input_file_type": "application/json",
+              "file_name": "firefox.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 2376576,
+              "byte_length": 2376576,
+              "detected_format": "firefox",
+              "profile_count_loaded": 1,
+              "profile_group_name": "firefox.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 85,
+              "first_painted_root_frame_count": 14
+            }
+          }
+        },
+        {
+          "fixtureId": "firefox-large",
+          "runIndex": 2,
+          "warm": true,
+          "wallClockMs": 201,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 6.100000023841858,
+            "importParseFinishedMs": 39.30000001192093,
+            "profileStateAppliedMs": 39.89999997615814,
+            "firstMeaningfulPaintMs": 150,
+            "totalWallClockMs": 150
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 137.80000001192093,
+            "finishedAt": 287.80000001192093,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "firefox.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 6.100000023841858,
+              "import_parse_finished": 39.30000001192093,
+              "loader_finished": 39.39999997615814,
+              "profile_demangle_finished": 39.60000002384186,
+              "before_profile_group_set": 39.69999998807907,
+              "profile_state_applied": 39.89999997615814,
+              "loading_indicator_cleared": 39.89999997615814,
+              "first_meaningful_paint": 150,
+              "run_complete": 150
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                4.100000023841858
+              ],
+              "inflate_if_needed": [
+                0.9000000357627869
+              ],
+              "read_array_buffer": [
+                4.5
+              ],
+              "import_pprof_probe": [
+                0.699999988079071
+              ],
+              "read_text": [
+                1.100000023841858
+              ],
+              "json_parse_string": [
+                5.800000011920929
+              ],
+              "parse_json_dispatch": [
+                5.899999976158142
+              ],
+              "import_firefox": [
+                25.100000023841858
+              ],
+              "import_profile_group_total": [
+                37.80000001192093
+              ],
+              "application_loader": [
+                39.09999996423721
+              ],
+              "profile_demangle": [
+                0.10000002384185791
+              ],
+              "build_chrono_flamechart": [
+                0.9000000357627869
+              ],
+              "build_flamechart_renderer": [
+                0.9000000357627869
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 2376576,
+              "input_file_type": "application/json",
+              "file_name": "firefox.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 2376576,
+              "byte_length": 2376576,
+              "detected_format": "firefox",
+              "profile_count_loaded": 1,
+              "profile_group_name": "firefox.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 85,
+              "first_painted_root_frame_count": 14
+            }
+          }
+        }
+      ],
+      "coldSummary": {
+        "firstMeaningfulPaintMs": 153.19999998807907,
+        "totalWallClockMs": 153.19999998807907
+      },
+      "warmSummary": {
+        "firstMeaningfulPaintMs": {
+          "min": 150,
+          "max": 177.10000002384186,
+          "median": 177.10000002384186,
+          "average": 163.55000001192093
+        },
+        "totalWallClockMs": {
+          "min": 150,
+          "max": 177.30000001192093,
+          "median": 177.30000001192093,
+          "average": 163.65000000596046
+        }
+      }
+    },
+    {
+      "fixtureId": "instruments-random-allocations",
+      "fixturePath": "sample/profiles/Instruments/16.0/simple-time-profile-deep-copy.txt",
+      "format": "instruments-deep-copy",
+      "experiment": "legacy",
+      "runs": [
+        {
+          "fixtureId": "instruments-random-allocations",
+          "runIndex": 0,
+          "warm": false,
+          "wallClockMs": 150,
+          "summary": {
+            "loadStartMs": 0,
+            "bytesAvailableMs": 4.699999988079071,
+            "importParseFinishedMs": 7.699999988079071,
+            "profileStateAppliedMs": 8.099999964237213,
+            "firstMeaningfulPaintMs": 101.80000001192093,
+            "totalWallClockMs": 101.89999997615814
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 161.9000000357628,
+            "finishedAt": 263.80000001192093,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "simple-time-profile-deep-copy.txt"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0,
+              "bytes_available": 4.699999988079071,
+              "import_parse_finished": 7.699999988079071,
+              "loader_finished": 7.699999988079071,
+              "profile_demangle_finished": 7.899999976158142,
+              "before_profile_group_set": 8.099999964237213,
+              "profile_state_applied": 8.099999964237213,
+              "loading_indicator_cleared": 8.199999988079071,
+              "first_meaningful_paint": 101.80000001192093,
+              "run_complete": 101.89999997615814
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                3
+              ],
+              "inflate_if_needed": [
+                1
+              ],
+              "read_array_buffer": [
+                3.300000011920929
+              ],
+              "import_pprof_probe": [
+                0.699999988079071
+              ],
+              "read_text": [
+                0.09999996423721313
+              ],
+              "json_parse_string": [
+                0.10000002384185791
+              ],
+              "parse_json_dispatch": [
+                0.20000004768371582
+              ],
+              "import_instruments_deep_copy": [
+                1.699999988079071
+              ],
+              "import_profile_group_total": [
+                6.5
+              ],
+              "application_loader": [
+                7.5
+              ],
+              "profile_demangle": [
+                0.09999996423721313
+              ],
+              "build_chrono_flamechart": [
+                0.9000000357627869
+              ],
+              "build_flamechart_renderer": [
+                0.5
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 8330,
+              "input_file_type": "text/plain",
+              "file_name": "simple-time-profile-deep-copy.txt",
+              "format_guess": "unknown",
+              "compressed_byte_length": 8330,
+              "byte_length": 8330,
+              "detected_format": "instruments-deep-copy",
+              "profile_count_loaded": 1,
+              "profile_group_name": "simple-time-profile-deep-copy.txt",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 22,
+              "first_painted_root_frame_count": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "instruments-random-allocations",
+          "runIndex": 1,
+          "warm": true,
+          "wallClockMs": 150,
+          "summary": {
+            "loadStartMs": 0.09999996423721313,
+            "bytesAvailableMs": 2.799999952316284,
+            "importParseFinishedMs": 6,
+            "profileStateAppliedMs": 6.599999964237213,
+            "firstMeaningfulPaintMs": 104.69999998807907,
+            "totalWallClockMs": 104.79999995231628
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 171.5,
+            "finishedAt": 276.2999999523163,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "simple-time-profile-deep-copy.txt"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.09999996423721313,
+              "bytes_available": 2.799999952316284,
+              "import_parse_finished": 6,
+              "loader_finished": 6,
+              "profile_demangle_finished": 6.299999952316284,
+              "before_profile_group_set": 6.5,
+              "profile_state_applied": 6.599999964237213,
+              "loading_indicator_cleared": 6.599999964237213,
+              "first_meaningful_paint": 104.69999998807907,
+              "run_complete": 104.79999995231628
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                0.7999999523162842
+              ],
+              "inflate_if_needed": [
+                0.8999999761581421
+              ],
+              "read_array_buffer": [
+                1.300000011920929
+              ],
+              "import_pprof_probe": [
+                0.699999988079071
+              ],
+              "read_text": [
+                0.09999996423721313
+              ],
+              "json_parse_string": [
+                0.10000002384185791
+              ],
+              "parse_json_dispatch": [
+                0.10000002384185791
+              ],
+              "import_instruments_deep_copy": [
+                1.800000011920929
+              ],
+              "import_profile_group_total": [
+                4.600000023841858
+              ],
+              "application_loader": [
+                5.700000047683716
+              ],
+              "profile_demangle": [
+                0.09999996423721313
+              ],
+              "build_chrono_flamechart": [
+                0.30000001192092896
+              ],
+              "build_flamechart_renderer": [
+                0.3999999761581421
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 8330,
+              "input_file_type": "text/plain",
+              "file_name": "simple-time-profile-deep-copy.txt",
+              "format_guess": "unknown",
+              "compressed_byte_length": 8330,
+              "byte_length": 8330,
+              "detected_format": "instruments-deep-copy",
+              "profile_count_loaded": 1,
+              "profile_group_name": "simple-time-profile-deep-copy.txt",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 22,
+              "first_painted_root_frame_count": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "instruments-random-allocations",
+          "runIndex": 2,
+          "warm": true,
+          "wallClockMs": 161,
+          "summary": {
+            "loadStartMs": 0.09999996423721313,
+            "bytesAvailableMs": 5.299999952316284,
+            "importParseFinishedMs": 9,
+            "profileStateAppliedMs": 9.799999952316284,
+            "firstMeaningfulPaintMs": 106.59999996423721,
+            "totalWallClockMs": 106.69999998807907
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 162.9000000357628,
+            "finishedAt": 269.60000002384186,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "simple-time-profile-deep-copy.txt"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.09999996423721313,
+              "bytes_available": 5.299999952316284,
+              "import_parse_finished": 9,
+              "loader_finished": 9,
+              "profile_demangle_finished": 9.399999976158142,
+              "before_profile_group_set": 9.599999964237213,
+              "profile_state_applied": 9.799999952316284,
+              "loading_indicator_cleared": 9.799999952316284,
+              "first_meaningful_paint": 106.59999996423721,
+              "run_complete": 106.69999998807907
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                2.5
+              ],
+              "inflate_if_needed": [
+                1
+              ],
+              "read_array_buffer": [
+                3
+              ],
+              "import_pprof_probe": [
+                1.100000023841858
+              ],
+              "read_text": [
+                0.10000002384185791
+              ],
+              "json_parse_string": [
+                0
+              ],
+              "parse_json_dispatch": [
+                0
+              ],
+              "import_instruments_deep_copy": [
+                2
+              ],
+              "import_profile_group_total": [
+                6.900000035762787
+              ],
+              "application_loader": [
+                8.800000011920929
+              ],
+              "profile_demangle": [
+                0.10000002384185791
+              ],
+              "build_chrono_flamechart": [
+                0.30000001192092896
+              ],
+              "build_flamechart_renderer": [
+                0.40000003576278687
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 8330,
+              "input_file_type": "text/plain",
+              "file_name": "simple-time-profile-deep-copy.txt",
+              "format_guess": "unknown",
+              "compressed_byte_length": 8330,
+              "byte_length": 8330,
+              "detected_format": "instruments-deep-copy",
+              "profile_count_loaded": 1,
+              "profile_group_name": "simple-time-profile-deep-copy.txt",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 22,
+              "first_painted_root_frame_count": 1
+            }
+          }
+        }
+      ],
+      "coldSummary": {
+        "firstMeaningfulPaintMs": 101.80000001192093,
+        "totalWallClockMs": 101.89999997615814
+      },
+      "warmSummary": {
+        "firstMeaningfulPaintMs": {
+          "min": 104.69999998807907,
+          "max": 106.59999996423721,
+          "median": 106.59999996423721,
+          "average": 105.64999997615814
+        },
+        "totalWallClockMs": {
+          "min": 104.79999995231628,
+          "max": 106.69999998807907,
+          "median": 106.69999998807907,
+          "average": 105.74999997019768
+        }
+      }
+    },
+    {
+      "fixtureId": "stackprof-ruby-large",
+      "fixturePath": "sample/profiles/stackprof/ruby-stackprof.json",
+      "format": "stackprof",
+      "experiment": "legacy",
+      "runs": [
+        {
+          "fixtureId": "stackprof-ruby-large",
+          "runIndex": 0,
+          "warm": false,
+          "wallClockMs": 247,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 4.600000023841858,
+            "importParseFinishedMs": 36.89999997615814,
+            "profileStateAppliedMs": 37.39999997615814,
+            "firstMeaningfulPaintMs": 190.10000002384186,
+            "totalWallClockMs": 190.10000002384186
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 156.39999997615814,
+            "finishedAt": 346.5,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "ruby-stackprof.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 4.600000023841858,
+              "import_parse_finished": 36.89999997615814,
+              "loader_finished": 36.89999997615814,
+              "profile_demangle_finished": 37.19999998807907,
+              "before_profile_group_set": 37.39999997615814,
+              "profile_state_applied": 37.39999997615814,
+              "loading_indicator_cleared": 37.5,
+              "first_meaningful_paint": 190.10000002384186,
+              "run_complete": 190.10000002384186
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                2.899999976158142
+              ],
+              "inflate_if_needed": [
+                0.800000011920929
+              ],
+              "read_array_buffer": [
+                3.300000011920929
+              ],
+              "import_pprof_probe": [
+                0.699999988079071
+              ],
+              "read_text": [
+                0.5999999642372131
+              ],
+              "json_parse_string": [
+                2.199999988079071
+              ],
+              "parse_json_dispatch": [
+                2.300000011920929
+              ],
+              "import_stackprof": [
+                28.400000035762787
+              ],
+              "import_profile_group_total": [
+                35.89999997615814
+              ],
+              "application_loader": [
+                36.59999996423721
+              ],
+              "profile_demangle": [
+                0.19999998807907104
+              ],
+              "build_chrono_flamechart": [
+                1.7999999523162842
+              ],
+              "build_flamechart_renderer": [
+                4.199999988079071
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 1135629,
+              "input_file_type": "application/json",
+              "file_name": "ruby-stackprof.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 1135629,
+              "byte_length": 1135629,
+              "detected_format": "stackprof",
+              "profile_count_loaded": 1,
+              "profile_group_name": "ruby-stackprof.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 89,
+              "first_painted_root_frame_count": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "stackprof-ruby-large",
+          "runIndex": 1,
+          "warm": true,
+          "wallClockMs": 250,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 12.300000011920929,
+            "importParseFinishedMs": 45.5,
+            "profileStateAppliedMs": 46,
+            "firstMeaningfulPaintMs": 197.5,
+            "totalWallClockMs": 197.5
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 148.10000002384186,
+            "finishedAt": 345.60000002384186,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "ruby-stackprof.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 12.300000011920929,
+              "import_parse_finished": 45.5,
+              "loader_finished": 45.60000002384186,
+              "profile_demangle_finished": 45.69999998807907,
+              "before_profile_group_set": 45.89999997615814,
+              "profile_state_applied": 46,
+              "loading_indicator_cleared": 46,
+              "first_meaningful_paint": 197.5,
+              "run_complete": 197.5
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                9.300000011920929
+              ],
+              "inflate_if_needed": [
+                0.800000011920929
+              ],
+              "read_array_buffer": [
+                9.600000023841858
+              ],
+              "import_pprof_probe": [
+                0.8999999761581421
+              ],
+              "read_text": [
+                0.5
+              ],
+              "json_parse_string": [
+                2.200000047683716
+              ],
+              "parse_json_dispatch": [
+                2.200000047683716
+              ],
+              "import_stackprof": [
+                29.099999964237213
+              ],
+              "import_profile_group_total": [
+                43
+              ],
+              "application_loader": [
+                45.30000001192093
+              ],
+              "profile_demangle": [
+                0
+              ],
+              "build_chrono_flamechart": [
+                2.699999988079071
+              ],
+              "build_flamechart_renderer": [
+                3.100000023841858
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 1135629,
+              "input_file_type": "application/json",
+              "file_name": "ruby-stackprof.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 1135629,
+              "byte_length": 1135629,
+              "detected_format": "stackprof",
+              "profile_count_loaded": 1,
+              "profile_group_name": "ruby-stackprof.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 89,
+              "first_painted_root_frame_count": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "stackprof-ruby-large",
+          "runIndex": 2,
+          "warm": true,
+          "wallClockMs": 265,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 11.5,
+            "importParseFinishedMs": 42.90000003576279,
+            "profileStateAppliedMs": 43.5,
+            "firstMeaningfulPaintMs": 207.9000000357628,
+            "totalWallClockMs": 207.9000000357628
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 155.89999997615814,
+            "finishedAt": 363.80000001192093,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "ruby-stackprof.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 11.5,
+              "import_parse_finished": 42.90000003576279,
+              "loader_finished": 42.90000003576279,
+              "profile_demangle_finished": 43.19999998807907,
+              "before_profile_group_set": 43.30000001192093,
+              "profile_state_applied": 43.5,
+              "loading_indicator_cleared": 43.5,
+              "first_meaningful_paint": 207.9000000357628,
+              "run_complete": 207.9000000357628
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                10
+              ],
+              "inflate_if_needed": [
+                0.800000011920929
+              ],
+              "read_array_buffer": [
+                10.099999964237213
+              ],
+              "import_pprof_probe": [
+                0.5999999642372131
+              ],
+              "read_text": [
+                0.6000000238418579
+              ],
+              "json_parse_string": [
+                2.299999952316284
+              ],
+              "parse_json_dispatch": [
+                2.299999952316284
+              ],
+              "import_stackprof": [
+                27.399999976158142
+              ],
+              "import_profile_group_total": [
+                41.80000001192093
+              ],
+              "application_loader": [
+                42.60000002384186
+              ],
+              "profile_demangle": [
+                0.19999998807907104
+              ],
+              "build_chrono_flamechart": [
+                5.600000023841858
+              ],
+              "build_flamechart_renderer": [
+                2.699999988079071
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 1135629,
+              "input_file_type": "application/json",
+              "file_name": "ruby-stackprof.json",
+              "format_guess": "unknown",
+              "compressed_byte_length": 1135629,
+              "byte_length": 1135629,
+              "detected_format": "stackprof",
+              "profile_count_loaded": 1,
+              "profile_group_name": "ruby-stackprof.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 89,
+              "first_painted_root_frame_count": 1
+            }
+          }
+        }
+      ],
+      "coldSummary": {
+        "firstMeaningfulPaintMs": 190.10000002384186,
+        "totalWallClockMs": 190.10000002384186
+      },
+      "warmSummary": {
+        "firstMeaningfulPaintMs": {
+          "min": 197.5,
+          "max": 207.9000000357628,
+          "median": 207.9000000357628,
+          "average": 202.7000000178814
+        },
+        "totalWallClockMs": {
+          "min": 197.5,
+          "max": 207.9000000357628,
+          "median": 207.9000000357628,
+          "average": 202.7000000178814
+        }
+      }
+    },
+    {
+      "fixtureId": "chrome-cpuprofile-sucrase",
+      "fixturePath": "sample/profiles/Chrome/65/sucrase.cpuprofile",
+      "format": "chrome-cpu-profile",
+      "experiment": "legacy",
+      "runs": [
+        {
+          "fixtureId": "chrome-cpuprofile-sucrase",
+          "runIndex": 0,
+          "warm": false,
+          "wallClockMs": 1096,
+          "summary": {
+            "loadStartMs": 0.09999996423721313,
+            "bytesAvailableMs": 11.799999952316284,
+            "importParseFinishedMs": 255.0999999642372,
+            "profileStateAppliedMs": 255.79999995231628,
+            "firstMeaningfulPaintMs": 1045,
+            "totalWallClockMs": 1045
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 162.30000001192093,
+            "finishedAt": 1207.300000011921,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "sucrase.cpuprofile"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.09999996423721313,
+              "bytes_available": 11.799999952316284,
+              "import_parse_finished": 255.0999999642372,
+              "loader_finished": 255.0999999642372,
+              "profile_demangle_finished": 255.5,
+              "before_profile_group_set": 255.69999998807907,
+              "profile_state_applied": 255.79999995231628,
+              "loading_indicator_cleared": 255.89999997615814,
+              "first_meaningful_paint": 1045,
+              "run_complete": 1045
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                9
+              ],
+              "inflate_if_needed": [
+                0.9000000357627869
+              ],
+              "read_array_buffer": [
+                9.399999976158142
+              ],
+              "import_pprof_probe": [
+                0.699999988079071
+              ],
+              "read_text": [
+                0.5
+              ],
+              "json_parse_string": [
+                3.200000047683716
+              ],
+              "parse_json_dispatch": [
+                3.300000011920929
+              ],
+              "import_chrome_cpu_profile": [
+                238.30000001192093
+              ],
+              "import_profile_group_total": [
+                252.89999997615814
+              ],
+              "application_loader": [
+                254.89999997615814
+              ],
+              "profile_demangle": [
+                0.20000004768371582
+              ],
+              "build_chrono_flamechart": [
+                63.69999998807907
+              ],
+              "build_flamechart_renderer": [
+                87.30000001192093
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 1001345,
+              "input_file_type": null,
+              "file_name": "sucrase.cpuprofile",
+              "format_guess": "unknown",
+              "compressed_byte_length": 1001345,
+              "byte_length": 1001345,
+              "detected_format": "chrome-cpu-profile",
+              "profile_count_loaded": 1,
+              "profile_group_name": "sucrase.cpuprofile",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 107,
+              "first_painted_root_frame_count": 45
+            }
+          }
+        },
+        {
+          "fixtureId": "chrome-cpuprofile-sucrase",
+          "runIndex": 1,
+          "warm": true,
+          "wallClockMs": 997,
+          "summary": {
+            "loadStartMs": 0.19999998807907104,
+            "bytesAvailableMs": 5.800000011920929,
+            "importParseFinishedMs": 248.19999998807907,
+            "profileStateAppliedMs": 249.30000001192093,
+            "firstMeaningfulPaintMs": 930.5999999642372,
+            "totalWallClockMs": 930.6999999880791
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 161.60000002384186,
+            "finishedAt": 1092.300000011921,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "sucrase.cpuprofile"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.19999998807907104,
+              "bytes_available": 5.800000011920929,
+              "import_parse_finished": 248.19999998807907,
+              "loader_finished": 248.30000001192093,
+              "profile_demangle_finished": 249,
+              "before_profile_group_set": 249.0999999642372,
+              "profile_state_applied": 249.30000001192093,
+              "loading_indicator_cleared": 249.30000001192093,
+              "first_meaningful_paint": 930.5999999642372,
+              "run_complete": 930.6999999880791
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                4.100000023841858
+              ],
+              "inflate_if_needed": [
+                0.8999999761581421
+              ],
+              "read_array_buffer": [
+                4.200000047683716
+              ],
+              "import_pprof_probe": [
+                0.699999988079071
+              ],
+              "read_text": [
+                0.5
+              ],
+              "json_parse_string": [
+                2.900000035762787
+              ],
+              "parse_json_dispatch": [
+                3
+              ],
+              "import_chrome_cpu_profile": [
+                238
+              ],
+              "import_profile_group_total": [
+                246.9000000357628
+              ],
+              "application_loader": [
+                247.9000000357628
+              ],
+              "profile_demangle": [
+                0.09999996423721313
+              ],
+              "build_chrono_flamechart": [
+                41.69999998807907
+              ],
+              "build_flamechart_renderer": [
+                65.5
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 1001345,
+              "input_file_type": null,
+              "file_name": "sucrase.cpuprofile",
+              "format_guess": "unknown",
+              "compressed_byte_length": 1001345,
+              "byte_length": 1001345,
+              "detected_format": "chrome-cpu-profile",
+              "profile_count_loaded": 1,
+              "profile_group_name": "sucrase.cpuprofile",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 107,
+              "first_painted_root_frame_count": 45
+            }
+          }
+        },
+        {
+          "fixtureId": "chrome-cpuprofile-sucrase",
+          "runIndex": 2,
+          "warm": true,
+          "wallClockMs": 944,
+          "summary": {
+            "loadStartMs": 0.19999998807907104,
+            "bytesAvailableMs": 4.300000011920929,
+            "importParseFinishedMs": 242.69999998807907,
+            "profileStateAppliedMs": 243.30000001192093,
+            "firstMeaningfulPaintMs": 893.1999999880791,
+            "totalWallClockMs": 893.3000000119209
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 148.69999998807907,
+            "finishedAt": 1042,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "sucrase.cpuprofile"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.19999998807907104,
+              "bytes_available": 4.300000011920929,
+              "import_parse_finished": 242.69999998807907,
+              "loader_finished": 242.80000001192093,
+              "profile_demangle_finished": 243,
+              "before_profile_group_set": 243.19999998807907,
+              "profile_state_applied": 243.30000001192093,
+              "loading_indicator_cleared": 243.4000000357628,
+              "first_meaningful_paint": 893.1999999880791,
+              "run_complete": 893.1999999880791
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                1.9000000357627869
+              ],
+              "inflate_if_needed": [
+                1.5
+              ],
+              "read_array_buffer": [
+                3
+              ],
+              "import_pprof_probe": [
+                0.699999988079071
+              ],
+              "read_text": [
+                0.5999999642372131
+              ],
+              "json_parse_string": [
+                3.100000023841858
+              ],
+              "parse_json_dispatch": [
+                3.100000023841858
+              ],
+              "import_chrome_cpu_profile": [
+                233.60000002384186
+              ],
+              "import_profile_group_total": [
+                241.5999999642372
+              ],
+              "application_loader": [
+                242.29999995231628
+              ],
+              "profile_demangle": [
+                0.09999996423721313
+              ],
+              "build_chrono_flamechart": [
+                42.89999997615814
+              ],
+              "build_flamechart_renderer": [
+                62.89999997615814
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 1001345,
+              "input_file_type": null,
+              "file_name": "sucrase.cpuprofile",
+              "format_guess": "unknown",
+              "compressed_byte_length": 1001345,
+              "byte_length": 1001345,
+              "detected_format": "chrome-cpu-profile",
+              "profile_count_loaded": 1,
+              "profile_group_name": "sucrase.cpuprofile",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 107,
+              "first_painted_root_frame_count": 45
+            }
+          }
+        }
+      ],
+      "coldSummary": {
+        "firstMeaningfulPaintMs": 1045,
+        "totalWallClockMs": 1045
+      },
+      "warmSummary": {
+        "firstMeaningfulPaintMs": {
+          "min": 893.1999999880791,
+          "max": 930.5999999642372,
+          "median": 930.5999999642372,
+          "average": 911.8999999761581
+        },
+        "totalWallClockMs": {
+          "min": 893.3000000119209,
+          "max": 930.6999999880791,
+          "median": 930.6999999880791,
+          "average": 912
+        }
+      }
+    },
+    {
+      "fixtureId": "chrome-trace-116",
+      "fixturePath": "sample/profiles/Chrome/116/Trace-20230603T221323.json",
+      "format": "chrome-trace-object",
+      "experiment": "legacy",
+      "runs": [
+        {
+          "fixtureId": "chrome-trace-116",
+          "runIndex": 0,
+          "warm": false,
+          "wallClockMs": 153,
+          "summary": {
+            "loadStartMs": 0.09999996423721313,
+            "bytesAvailableMs": 3.199999988079071,
+            "importParseFinishedMs": 9.199999988079071,
+            "profileStateAppliedMs": 9.699999988079071,
+            "firstMeaningfulPaintMs": 107.59999996423721,
+            "totalWallClockMs": 107.59999996423721
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 142.10000002384186,
+            "finishedAt": 249.69999998807907,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "Trace-20230603T221323.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.09999996423721313,
+              "bytes_available": 3.199999988079071,
+              "import_parse_finished": 9.199999988079071,
+              "loader_finished": 9.300000011920929,
+              "profile_demangle_finished": 9.399999976158142,
+              "before_profile_group_set": 9.599999964237213,
+              "profile_state_applied": 9.699999988079071,
+              "loading_indicator_cleared": 9.699999988079071,
+              "first_meaningful_paint": 107.59999996423721,
+              "run_complete": 107.59999996423721
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                1.600000023841858
+              ],
+              "inflate_if_needed": [
+                0.800000011920929
+              ],
+              "read_array_buffer": [
+                1.899999976158142
+              ],
+              "import_pprof_probe": [
+                0.9000000357627869
+              ],
+              "read_text": [
+                0.19999998807907104
+              ],
+              "json_parse_string": [
+                2
+              ],
+              "parse_json_dispatch": [
+                2.099999964237213
+              ],
+              "import_chrome_timeline_object": [
+                2.199999988079071
+              ],
+              "import_profile_group_total": [
+                8.199999988079071
+              ],
+              "application_loader": [
+                9
+              ],
+              "profile_demangle": [
+                0.09999996423721313
+              ],
+              "build_chrono_flamechart": [
+                0.30000001192092896
+              ],
+              "build_flamechart_renderer": [
+                0.5
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 544863,
+              "input_file_type": "application/json",
+              "file_name": "Trace-20230603T221323.json",
+              "format_guess": "chrome-timeline",
+              "compressed_byte_length": 544863,
+              "byte_length": 544863,
+              "detected_format": "chrome-timeline-object",
+              "profile_count_loaded": 1,
+              "profile_group_name": "Trace-20230603T221323.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 4,
+              "first_painted_root_frame_count": 5
+            }
+          }
+        },
+        {
+          "fixtureId": "chrome-trace-116",
+          "runIndex": 1,
+          "warm": true,
+          "wallClockMs": 157,
+          "summary": {
+            "loadStartMs": 0.19999998807907104,
+            "bytesAvailableMs": 4.800000011920929,
+            "importParseFinishedMs": 10.800000011920929,
+            "profileStateAppliedMs": 11.399999976158142,
+            "firstMeaningfulPaintMs": 101.89999997615814,
+            "totalWallClockMs": 102
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 130.80000001192093,
+            "finishedAt": 232.80000001192093,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "Trace-20230603T221323.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.19999998807907104,
+              "bytes_available": 4.800000011920929,
+              "import_parse_finished": 10.800000011920929,
+              "loader_finished": 10.899999976158142,
+              "profile_demangle_finished": 11.099999964237213,
+              "before_profile_group_set": 11.199999988079071,
+              "profile_state_applied": 11.399999976158142,
+              "loading_indicator_cleared": 11.399999976158142,
+              "first_meaningful_paint": 101.89999997615814,
+              "run_complete": 102
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                1.699999988079071
+              ],
+              "inflate_if_needed": [
+                0.9000000357627869
+              ],
+              "read_array_buffer": [
+                2.200000047683716
+              ],
+              "import_pprof_probe": [
+                1
+              ],
+              "read_text": [
+                0.30000001192092896
+              ],
+              "json_parse_string": [
+                2.099999964237213
+              ],
+              "parse_json_dispatch": [
+                2.199999988079071
+              ],
+              "import_chrome_timeline_object": [
+                2.200000047683716
+              ],
+              "import_profile_group_total": [
+                8.599999964237213
+              ],
+              "application_loader": [
+                10.599999964237213
+              ],
+              "profile_demangle": [
+                0.09999996423721313
+              ],
+              "build_chrono_flamechart": [
+                0.30000001192092896
+              ],
+              "build_flamechart_renderer": [
+                0.5
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 544863,
+              "input_file_type": "application/json",
+              "file_name": "Trace-20230603T221323.json",
+              "format_guess": "chrome-timeline",
+              "compressed_byte_length": 544863,
+              "byte_length": 544863,
+              "detected_format": "chrome-timeline-object",
+              "profile_count_loaded": 1,
+              "profile_group_name": "Trace-20230603T221323.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 4,
+              "first_painted_root_frame_count": 5
+            }
+          }
+        },
+        {
+          "fixtureId": "chrome-trace-116",
+          "runIndex": 2,
+          "warm": true,
+          "wallClockMs": 1572,
+          "summary": {
+            "loadStartMs": 0.10000002384185791,
+            "bytesAvailableMs": 13.199999988079071,
+            "importParseFinishedMs": 19.5,
+            "profileStateAppliedMs": 20,
+            "firstMeaningfulPaintMs": 111.10000002384186,
+            "totalWallClockMs": 111.19999998807907
+          },
+          "perfRun": {
+            "id": "run-1",
+            "startedAt": 150.80000001192093,
+            "finishedAt": 262,
+            "status": "completed",
+            "metadata": {
+              "route": "browser-open-profile",
+              "loadSource": "file-input",
+              "fileName": "Trace-20230603T221323.json"
+            },
+            "experimentFlags": {
+              "deferDemangle": false,
+              "optimizedForEachCall": false
+            },
+            "milestones": {
+              "load_start": 0.10000002384185791,
+              "bytes_available": 13.199999988079071,
+              "import_parse_finished": 19.5,
+              "loader_finished": 19.5,
+              "profile_demangle_finished": 19.69999998807907,
+              "before_profile_group_set": 19.80000001192093,
+              "profile_state_applied": 20,
+              "loading_indicator_cleared": 20.100000023841858,
+              "first_meaningful_paint": 111.10000002384186,
+              "run_complete": 111.19999998807907
+            },
+            "measures": {
+              "file_reader_array_buffer": [
+                11.400000035762787
+              ],
+              "inflate_if_needed": [
+                0.800000011920929
+              ],
+              "read_array_buffer": [
+                11.899999976158142
+              ],
+              "import_pprof_probe": [
+                1.100000023841858
+              ],
+              "read_text": [
+                0.19999998807907104
+              ],
+              "json_parse_string": [
+                2.199999988079071
+              ],
+              "parse_json_dispatch": [
+                2.199999988079071
+              ],
+              "import_chrome_timeline_object": [
+                2.399999976158142
+              ],
+              "import_profile_group_total": [
+                18.399999976158142
+              ],
+              "application_loader": [
+                19.19999998807907
+              ],
+              "profile_demangle": [
+                0
+              ],
+              "build_chrono_flamechart": [
+                0.19999998807907104
+              ],
+              "build_flamechart_renderer": [
+                0.5
+              ]
+            },
+            "annotations": {
+              "route": "browser-open-profile",
+              "input_file_size": 544863,
+              "input_file_type": "application/json",
+              "file_name": "Trace-20230603T221323.json",
+              "format_guess": "chrome-timeline",
+              "compressed_byte_length": 544863,
+              "byte_length": 544863,
+              "detected_format": "chrome-timeline-object",
+              "profile_count_loaded": 1,
+              "profile_group_name": "Trace-20230603T221323.json",
+              "profile_count": 1,
+              "active_view": "chrono",
+              "first_painted_layer_count": 4,
+              "first_painted_root_frame_count": 5
+            }
+          }
+        }
+      ],
+      "coldSummary": {
+        "firstMeaningfulPaintMs": 107.59999996423721,
+        "totalWallClockMs": 107.59999996423721
+      },
+      "warmSummary": {
+        "firstMeaningfulPaintMs": {
+          "min": 101.89999997615814,
+          "max": 111.10000002384186,
+          "median": 111.10000002384186,
+          "average": 106.5
+        },
+        "totalWallClockMs": {
+          "min": 102,
+          "max": 111.19999998807907,
+          "median": 111.19999998807907,
+          "average": 106.59999999403954
+        }
+      }
+    }
+  ]
+}
