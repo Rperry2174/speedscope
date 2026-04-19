@@ -1,7 +1,8 @@
 # SpeedScope performance experiment harness
 
-This directory contains the reproducible benchmark, parity, and orchestration
-scripts used to evaluate end-to-end browser file-open latency in SpeedScope.
+This directory contains the reproducible benchmark, parity, orchestration, and
+migration-planning scripts used to evaluate end-to-end browser file-open
+latency in SpeedScope and organize TypeScript -> Rust migration work.
 
 ## Commands
 
@@ -18,7 +19,10 @@ scripts used to evaluate end-to-end browser file-open latency in SpeedScope.
     - per-experiment `browser-benchmark.json`, `parity.json`, and `report.md`
 - `npm run perf:orchestrate`
   - Uses the Cursor TypeScript SDK to create a multi-agent cloud execution plan
-    for the same experiment loop.
+    for the same experiment loop and emits a shard-oriented migration summary.
+- `npm run build:rust:fuzzy-find`
+  - Builds the first concrete Rust/WASM migration in this branch:
+    `src/lib/fuzzy-find.ts` -> `rust/fuzzy-find/`
 
 ## Runtime flags
 
@@ -27,6 +31,9 @@ The browser app reads the following query parameters and environment variables:
 - `perf=1` or `SPEEDSCOPE_PERF=1`
   - Enables instrumentation and exposes `window.__speedscopePerf`
 - `experiments=deferDemangle,optimizedForEachCall`
+  - Existing perf experiments
+- `rustFuzzyFind=1`
+  - Enables the Rust/WASM fuzzy matcher when it has been built
   - Enables one or more experiment flags
 - `deferDemangle=1`
   - Defers demangling until after first meaningful paint
@@ -37,3 +44,15 @@ The browser app reads the following query parameters and environment variables:
 
 Generated outputs are written under `artifacts/perf/`. The scripts create the
 directory automatically.
+
+## Migration planning
+
+The shard plan for broader migration delegation lives in:
+
+- `scripts/perf/migration-plan.ts`
+
+It divides the codebase into:
+
+- core algorithm and parser candidates that make sense to migrate to Rust/WASM
+- UI/browser integration areas that should remain in TypeScript/TSX
+- cloud-agent delegation shards for parallel planning or execution

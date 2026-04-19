@@ -9,6 +9,7 @@ export interface BenchmarkArtifactPaths {
 export interface ExperimentFlags {
   deferDemangle: boolean
   optimizedForEachCall: boolean
+  rustFuzzyFind: boolean
 }
 
 export interface ExperimentRunOptions {
@@ -100,3 +101,4 @@ export interface BuildPerfReportInput {
   benchmarkReport: BrowserBenchmarkReport
   parityReport: ParityReport
 }
+

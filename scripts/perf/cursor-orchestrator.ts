@@ -4,8 +4,14 @@ import * as path from 'path'
 import {Agent} from '@cursor/february'
 import {ensureRequestedModelFamilies, fetchCursorModels, selectCursorModel} from './cursor-api'
 import {FIXTURES} from './fixtures'
-import {BuildPerfReportInput, BrowserBenchmarkReport, ExperimentFlags, ParityReport} from './types'
+import {
+  BuildPerfReportInput,
+  BrowserBenchmarkReport,
+  ExperimentFlags,
+  ParityReport,
+} from './types'
 import {buildPerfReport} from './report'
+import {MIGRATION_SHARDS, type MigrationShard} from './migration-plan'
 
 type SpecialistRole = 'conductor' | 'analyst' | 'reviewer'
 
@@ -45,6 +51,18 @@ function getSpecialists(): SpecialistDefinition[] {
       prompt:
         'You are the architecture reviewer. Evaluate worker and Rust/WASM boundaries, reject wrapper-style designs, and keep correctness and measurable end-to-end improvements front and center.',
     },
+  ]
+}
+
+function summarizeShard(shard: MigrationShard): string[] {
+  return [
+    `- shard: ${shard.id}`,
+    `  - label: ${shard.label}`,
+    `  - model: ${shard.suggestedModelFamily}`,
+    `  - keep in TS: ${shard.keepInTypeScript ? 'yes' : 'no'}`,
+    `  - files:`,
+    ...shard.paths.map((filePath: string) => `    - ${filePath}`),
+    `  - rationale: ${shard.rationale}`,
   ]
 }
 
@@ -109,6 +127,9 @@ function createAgentForRuntime(args: {
 
 function buildPrompt(role: SpecialistRole, experimentFlags: ExperimentFlags[]) {
   const fixtures = FIXTURES
+  const shardLines = ([] as string[]).concat(
+    ...MIGRATION_SHARDS.map((shard: MigrationShard) => summarizeShard(shard)),
+  )
   return [
     `Role: ${role}`,
     '',
@@ -121,6 +142,9 @@ function buildPrompt(role: SpecialistRole, experimentFlags: ExperimentFlags[]) {
         `  - ${fixture.id}: ${fixture.relativePath} (${fixture.format})`,
     ),
     '',
+    '- Migration shard map:',
+    ...shardLines,
+    '',
     'Current experiment flags under comparison:',
     ...experimentFlags.map(flags => `  - ${JSON.stringify(flags)}`),
     '',
@@ -128,6 +152,7 @@ function buildPrompt(role: SpecialistRole, experimentFlags: ExperimentFlags[]) {
     '- Prefer evidence-driven recommendations grounded in browser timing.',
     '- Maintain parity on supported fixtures.',
     '- Rust/WASM is only worthwhile if it wins end-to-end.',
+    '- Organize the repo into many cloud-agent tasks instead of a single monolithic migration.',
     '',
     'Respond with a concise structured recommendation for your role.',
   ].join('\n')
@@ -183,6 +208,13 @@ function toSummaryReport(
         output.text || 'no text output'
       }`,
   )
+  summaryLines.push('')
+  summaryLines.push('Proposed migration shards:')
+  for (const shard of MIGRATION_SHARDS) {
+    summaryLines.push(
+      `${shard.id}: ${shard.suggestedModelFamily} / ${shard.keepInTypeScript ? 'keep-ts' : 'rust-candidate'} / ${shard.label}`,
+    )
+  }
   const emptyBenchmark: BrowserBenchmarkReport = {
     generatedAt: new Date().toISOString(),
     experiment: {
@@ -190,6 +222,7 @@ function toSummaryReport(
       experiments: {
         deferDemangle: false,
         optimizedForEachCall: false,
+        rustFuzzyFind: false,
       },
     },
     results: [],
@@ -199,6 +232,7 @@ function toSummaryReport(
     experiment: {
       deferDemangle: false,
       optimizedForEachCall: false,
+      rustFuzzyFind: false,
     },
     fixtures: [],
   }
@@ -210,6 +244,21 @@ function toSummaryReport(
   }
 }
 
+function createSummaryPayload(specialistOutputs: Awaited<ReturnType<typeof runSpecialist>>[]) {
+  return {
+    generatedAt: new Date().toISOString(),
+    runtime: getRequestedRuntime(),
+    specialists: specialistOutputs.map(output => ({
+      role: output.role,
+      modelId: output.modelId,
+      runtime: output.runtime,
+      status: output.status,
+      text: output.text,
+    })),
+    migrationShards: MIGRATION_SHARDS,
+  }
+}
+
 async function main() {
   const apiKey = requireApiKey()
   const cwd = path.resolve('/workspace')
@@ -217,9 +266,10 @@ async function main() {
   ensureRequestedModelFamilies(models, ['composer-2', 'gpt-5.4', 'opus-4.6'])
 
   const experimentFlags: ExperimentFlags[] = [
-    {deferDemangle: false, optimizedForEachCall: false},
-    {deferDemangle: true, optimizedForEachCall: false},
-    {deferDemangle: false, optimizedForEachCall: true},
+    {deferDemangle: false, optimizedForEachCall: false, rustFuzzyFind: false},
+    {deferDemangle: true, optimizedForEachCall: false, rustFuzzyFind: false},
+    {deferDemangle: false, optimizedForEachCall: true, rustFuzzyFind: false},
+    {deferDemangle: false, optimizedForEachCall: false, rustFuzzyFind: true},
   ]
 
   const specialistOutputs = await Promise.all(
@@ -229,17 +279,11 @@ async function main() {
   )
 
   const reportInput = toSummaryReport(specialistOutputs)
+  const summaryPayload = createSummaryPayload(specialistOutputs)
   const outputDir = ensureOutputDir()
   writeFileSync(
     path.join(outputDir, 'cursor-orchestrator-summary.json'),
-    JSON.stringify(
-      {
-        generatedAt: new Date().toISOString(),
-        specialists: specialistOutputs,
-      },
-      null,
-      2,
-    ),
+    JSON.stringify(summaryPayload, null, 2),
   )
   writeFileSync(
     path.join(outputDir, 'cursor-orchestrator-summary.md'),

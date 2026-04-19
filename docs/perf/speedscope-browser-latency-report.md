@@ -69,6 +69,21 @@ Takeaway: on representative supported fixtures, the common user-visible cost is 
    - Moved demangling out of the blocking pre-render path behind an experiment flag.
    - First meaningful paint is allowed to occur before symbol demangling completes.
 
+### First concrete TypeScript -> Rust migration
+
+- Added a Rust/WASM implementation of `src/lib/fuzzy-find.ts` as the first actual migration that fit the repo's constraints well.
+- The Rust code lives in:
+  - `rust/fuzzy-find/`
+- The browser/runtime wrapper lives in:
+  - `src/lib/fuzzy-find-rust.ts`
+- The shared/public API remains stable for callers:
+  - `src/lib/fuzzy-find.ts`
+- The migration is gated behind:
+  - `rustFuzzyFind=1`
+  - `SPEEDSCOPE_RUSTFUZZYFIND=1`
+- Verified parity against the TypeScript implementation in:
+  - `src/lib/fuzzy-find.test.ts`
+
 ### Supporting fix
 
 - Made the JFR importer lazy-loaded in `src/import/index.ts` so Node-based experiment scripts do not eagerly load `jfrview_bg.wasm` on non-JFR paths.
@@ -122,15 +137,16 @@ Artifacts:
 
 ## Was Rust/WASM worthwhile?
 
-Not based on the evidence gathered here.
+Not for the main measured browser bottleneck yet.
 
 The current measured wins came from:
 
 - reducing traversal overhead in JS
 - reducing blocking work before first render
 - tightening the experiment boundary and benchmark visibility
+- migrating a small, self-contained algorithmic module (`fuzzy-find`) where the boundary was low-risk and testable
 
-That is enough to say the initial hypothesis of needing a broader rewrite is not yet supported by the browser-end-to-end data collected so far.
+That is enough to say the initial hypothesis of needing a broader rewrite is not yet supported by the browser-end-to-end data collected so far. The evidence supports selective Rust migration for isolated algorithmic modules, not a blanket rewrite.
 
 ## Recommendation
 
@@ -147,14 +163,20 @@ In ship/experimental/stop terms:
 
 - `deferDemangle`: keep experimental
 - `optimizedForEachCall`: keep experimental
-- Rust/WASM rewrite: stop for now; hypothesis not yet supported
+- targeted Rust migration of low-coupling algorithmic modules: continue
+- broad Rust/WASM rewrite of the app: stop for now; hypothesis not yet supported
 
 ## Next best steps
 
 1. Add an experiment that combines `deferDemangle` and `optimizedForEachCall` and rerun the same harness.
 2. Investigate why `deferDemangle` regresses the Instruments deep-copy fixture before making it default.
-3. Add one more render-focused candidate for the heaviest CPU profile path:
+3. Use the new shard map in `docs/perf/rust-migration-strategy.md` and `scripts/perf/migration-plan.ts` to delegate Rust migration across many cloud agents rather than attempting a monolithic rewrite.
+4. Prioritize the next Rust candidates by low coupling and high algorithmic density:
+   - profile search / fuzzy-find-adjacent search code
+   - import/parser stages
+   - flamechart construction helpers
+5. Add one more render-focused candidate for the heaviest CPU profile path:
    - lazy flamechart construction
    - incremental renderer setup
    - or delayed non-essential overlay work
-4. If render setup still dominates after those steps, then reconsider a coarser-grained rewrite boundary based on measured browser wins, not on parser-only assumptions.
+6. If render setup still dominates after those steps, then reconsider a coarser-grained rewrite boundary based on measured browser wins, not on parser-only assumptions.

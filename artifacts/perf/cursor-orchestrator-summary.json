@@ -1,5 +1,6 @@
 {
-  "generatedAt": "2026-04-19T04:14:34.862Z",
+  "generatedAt": "2026-04-19T08:36:02.908Z",
+  "runtime": "cloud",
   "specialists": [
     {
       "role": "conductor",
@@ -21,6 +22,94 @@
       "runtime": "cloud",
       "status": "error",
       "text": "fetch failed"
+    }
+  ],
+  "migrationShards": [
+    {
+      "id": "core-algorithms",
+      "label": "Core algorithms and data structures",
+      "keepInTypeScript": false,
+      "rationale": "Pure algorithmic code and profile traversal logic are the strongest Rust candidates because they are CPU-heavy and minimally coupled to the browser.",
+      "suggestedModelFamily": "opus-4.6",
+      "paths": [
+        "src/lib/profile.ts",
+        "src/lib/flamechart.ts",
+        "src/lib/fuzzy-find.ts",
+        "src/lib/math.ts"
+      ]
+    },
+    {
+      "id": "importers",
+      "label": "Importer pipeline",
+      "keepInTypeScript": false,
+      "rationale": "Format parsing and normalization are natural Rust/WASM boundaries, with TS kept for File/ArrayBuffer I/O and browser integration.",
+      "suggestedModelFamily": "gpt-5.4",
+      "paths": [
+        "src/import/*.ts",
+        "src/import/utils.ts",
+        "src/lib/file-format.ts"
+      ]
+    },
+    {
+      "id": "search-and-indexing",
+      "label": "Search and indexing",
+      "keepInTypeScript": false,
+      "rationale": "Search, fuzzy match, and derived indexing are self-contained and easy to shard across agents for Rust experiments.",
+      "suggestedModelFamily": "gpt-5.4",
+      "paths": [
+        "src/lib/profile-search.ts",
+        "src/lib/fuzzy-find.ts",
+        "src/views/profile-select.tsx"
+      ]
+    },
+    {
+      "id": "render-prep",
+      "label": "Render preparation and geometry",
+      "keepInTypeScript": false,
+      "rationale": "Data preparation for flamechart layers and culling may move to Rust, but TS should retain direct WebGL and canvas ownership.",
+      "suggestedModelFamily": "opus-4.6",
+      "paths": [
+        "src/lib/flamechart.ts",
+        "src/gl/flamechart-renderer.ts",
+        "src/app-state/getters.ts"
+      ]
+    },
+    {
+      "id": "browser-ui",
+      "label": "UI, DOM, and browser integration",
+      "keepInTypeScript": true,
+      "rationale": "Preact views, canvas refs, DOM events, theming, and browser APIs should remain in TS/TSX even in a Rust-heavy architecture.",
+      "suggestedModelFamily": "composer-2",
+      "paths": [
+        "src/views/**/*.tsx",
+        "src/views/**/*.ts",
+        "src/speedscope.tsx",
+        "src/app-state/**/*.ts"
+      ]
+    },
+    {
+      "id": "webgl-and-canvas",
+      "label": "WebGL and canvas bindings",
+      "keepInTypeScript": true,
+      "rationale": "The browser owns WebGL/canvas APIs; Rust can prepare data, but draw submission and browser object lifecycle should stay in TS.",
+      "suggestedModelFamily": "composer-2",
+      "paths": [
+        "src/gl/**/*.ts",
+        "src/lib/canvas-2d-batch-renderers.ts",
+        "src/lib/text-utils.ts"
+      ]
+    },
+    {
+      "id": "tooling-and-orchestration",
+      "label": "Tooling and orchestrator",
+      "keepInTypeScript": true,
+      "rationale": "The Cursor SDK and the current benchmark/orchestration stack already live naturally in TS/Node and are useful as the control plane for migration work.",
+      "suggestedModelFamily": "composer-2",
+      "paths": [
+        "scripts/perf/*.ts",
+        "scripts/*.ts",
+        "package.json"
+      ]
     }
   ]
 }

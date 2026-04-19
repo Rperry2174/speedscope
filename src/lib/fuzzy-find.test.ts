@@ -1,4 +1,5 @@
-import {fuzzyMatchStrings} from './fuzzy-find'
+import {fuzzyMatchStrings, fuzzyMatchStringsTs} from './fuzzy-find'
+import {loadRustFuzzyMatcher} from './fuzzy-find-rust'
 import {sortBy} from './utils'
 
 function assertMatches(texts: string[], pattern: string, expectedResults: string[]) {
@@ -77,5 +78,35 @@ describe('fuzzyMatchStrings', () => {
 
   test('prefer number prefix matches', () => {
     assertMatches(['211', 'a123'], '1', ['a[1]23', '2[1]1'])
+  })
+})
+
+describe('rust fuzzy matcher parity', () => {
+  test('matches TypeScript implementation for representative cases', async () => {
+    const rustMatcher = await loadRustFuzzyMatcher()
+    const cases: Array<{text: string; pattern: string}> = [
+      {text: 'hello', pattern: 'hello'},
+      {text: 'HELLO', pattern: 'hello'},
+      {text: 'hello hello', pattern: 'hello'},
+      {text: 'abc', pattern: 'ac'},
+      {text: 'a c', pattern: 'ac'},
+      {text: 'OutNode', pattern: 'n'},
+      {text: 'a123', pattern: '1'},
+      {text: 'ruby-stackprof.json', pattern: 'rsj'},
+      {text: 'Trace-20230603T221323.json', pattern: 'ttj'},
+      {text: 'firefox.json', pattern: 'fx'},
+      {text: 'hello world', pattern: 'world'},
+      {text: 'ca', pattern: 'ac'},
+    ]
+
+    for (const testCase of cases) {
+      expect(rustMatcher(testCase.text, testCase.pattern)).toEqual(
+        fuzzyMatchStringsTs(testCase.text, testCase.pattern),
+      )
+    }
+  })
+
+  test('public API stays aligned with the TypeScript fallback when rust flag is off', () => {
+    expect(fuzzyMatchStrings('hello world', 'hw')).toEqual(fuzzyMatchStringsTs('hello world', 'hw'))
   })
 })

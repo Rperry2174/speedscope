@@ -9,6 +9,7 @@
   },
   "scripts": {
     "deploy": "./scripts/deploy.sh",
+    "build:rust:fuzzy-find": "./scripts/build-rust-fuzzy-find.sh",
     "prepack": "./scripts/prepack.sh --outdir \"$(pwd)/dist/release\" --protocol file",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'",
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
@@ -75,7 +76,8 @@
       "./src/jest-setup.js"
     ],
     "moduleNameMapper": {
-      "\\jfrview_bg.wasm$": "<rootDir>/src/import/java-flight-record.mock.ts"
+      "\\jfrview_bg.wasm$": "<rootDir>/src/import/java-flight-record.mock.ts",
+      "fuzzy_find_bg\\.wasm$": "<rootDir>/src/lib/fuzzy-find-rust.wasm.mock.ts"
     },
     "testRegex": "\\.test\\.tsx?$",
     "collectCoverageFrom": [

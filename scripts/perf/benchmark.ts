@@ -348,6 +348,7 @@ async function main() {
     experiments: {
       deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
       optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
+      rustFuzzyFind: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FUZZY_FIND),
     },
   })
   writeMarkdown(artifactPaths.reportPath, renderBenchmarkReport(report))

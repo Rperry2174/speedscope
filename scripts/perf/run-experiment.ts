@@ -31,6 +31,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
     flags: {
       deferDemangle: false,
       optimizedForEachCall: false,
+      rustFuzzyFind: false,
     },
   },
   {
@@ -40,6 +41,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
     flags: {
       deferDemangle: false,
       optimizedForEachCall: true,
+      rustFuzzyFind: false,
     },
   },
   {
@@ -49,6 +51,17 @@ const EXPERIMENTS: ExperimentDefinition[] = [
     flags: {
       deferDemangle: true,
       optimizedForEachCall: false,
+      rustFuzzyFind: false,
+    },
+  },
+  {
+    id: 'rust-fuzzy-find',
+    label: 'Rust fuzzy find',
+    description: 'Experimental path that routes fuzzy matching through the Rust/WASM implementation with a TS fallback.',
+    flags: {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: true,
     },
   },
 ]

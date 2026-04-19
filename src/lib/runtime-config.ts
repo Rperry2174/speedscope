@@ -1,11 +1,13 @@
 export interface ExperimentFlags {
   deferDemangle: boolean
   optimizedForEachCall: boolean
+  rustFuzzyFind: boolean
 }
 
 const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   deferDemangle: false,
   optimizedForEachCall: false,
+  rustFuzzyFind: false,
 }
 
 let experimentOverrides: Partial<ExperimentFlags> | null = null
