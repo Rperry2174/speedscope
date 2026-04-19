@@ -69,7 +69,15 @@ function buildQueryString(options: ExperimentRunOptions): string {
     ['deferDemangle', options.experiments.deferDemangle],
     ['optimizedForEachCall', options.experiments.optimizedForEachCall],
     ['rustFuzzyFind', options.experiments.rustFuzzyFind],
+    ['rustBase64Decode', options.experiments.rustBase64Decode],
+    ['rustProfileSearch', options.experiments.rustProfileSearch],
+    ['rustTextUtils', options.experiments.rustTextUtils],
     ['rustImportParsers', options.experiments.rustImportParsers],
+    ['rustPprofImport', options.experiments.rustPprofImport],
+    ['rustCallgrindImport', options.experiments.rustCallgrindImport],
+    ['rustHaskellImport', options.experiments.rustHaskellImport],
+    ['rustInstrumentsDeepCopy', options.experiments.rustInstrumentsDeepCopy],
+    ['rustV8ProfLog', options.experiments.rustV8ProfLog],
   ]
   for (const [name, enabled] of experimentEntries) {
     if (enabled) enabledExperiments.push(name)
@@ -351,7 +359,15 @@ async function main() {
       deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
       optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
       rustFuzzyFind: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FUZZY_FIND),
+      rustBase64Decode: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_BASE64_DECODE),
+      rustProfileSearch: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PROFILE_SEARCH),
+      rustTextUtils: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TEXT_UTILS),
       rustImportParsers: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_IMPORT_PARSERS),
+      rustPprofImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PPROF_IMPORT),
+      rustCallgrindImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_CALLGRIND_IMPORT),
+      rustHaskellImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_HASKELL_IMPORT),
+      rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
+      rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),
     },
   })
   writeMarkdown(artifactPaths.reportPath, renderBenchmarkReport(report))

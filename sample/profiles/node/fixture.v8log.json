@@ -1,0 +1,49 @@
+{
+  "code": [
+    {
+      "name": "outer /tmp/demo.js:10:4",
+      "type": "JS"
+    },
+    {
+      "name": "inner /tmp/demo.js:20:8",
+      "type": "JS"
+    },
+    {
+      "name": "T Foo::Bar(int)",
+      "type": "CPP"
+    },
+    {
+      "name": "LoadICStub",
+      "type": "CODE",
+      "kind": "LoadIC"
+    }
+  ],
+  "functions": [],
+  "ticks": [
+    {
+      "tm": 10,
+      "vm": 0,
+      "s": [2, -1, 0, -1]
+    },
+    {
+      "tm": 5,
+      "vm": 0,
+      "s": [1, -1, 0, -1]
+    },
+    {
+      "tm": 12,
+      "vm": 0,
+      "s": [99, -1, 0, -1]
+    },
+    {
+      "tm": 7,
+      "vm": 0,
+      "s": [3, -1, 0, -1]
+    },
+    {
+      "tm": 15,
+      "vm": 0,
+      "s": [4, -1, 0, -1]
+    }
+  ]
+}

@@ -7,6 +7,22 @@ export interface HashParams {
   viewMode?: ViewMode
 }
 
+function parseHashComponent(component: string): {key: string; value: string} | null {
+  const separatorIndex = component.indexOf('=')
+  if (separatorIndex === -1) {
+    return null
+  }
+
+  const key = component.slice(0, separatorIndex)
+  const encodedValue = component.slice(separatorIndex + 1)
+
+  try {
+    return {key, value: decodeURIComponent(encodedValue)}
+  } catch {
+    return null
+  }
+}
+
 function getViewMode(value: string): ViewMode | null {
   switch (value) {
     case 'time-ordered':
@@ -28,8 +44,12 @@ export function getHashParams(hashContents = window.location.hash): HashParams {
     const components = hashContents.substr(1).split('&')
     const result: HashParams = {}
     for (const component of components) {
-      let [key, value] = component.split('=')
-      value = decodeURIComponent(value)
+      const parsedComponent = parseHashComponent(component)
+      if (parsedComponent == null) {
+        continue
+      }
+
+      const {key, value} = parsedComponent
       if (key === 'profileURL') {
         result.profileURL = value
       } else if (key === 'title') {

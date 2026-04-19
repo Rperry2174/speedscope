@@ -11,6 +11,10 @@ import {
 import {sortBy, getOrThrow, getOrInsert, lastOf, getOrElse, zeroPad} from '../lib/utils'
 import {ByteFormatter, TimeFormatter} from '../lib/value-formatters'
 import {MaybeCompressedDataReader, TextFileContent} from './utils'
+import {
+  importFromInstrumentsDeepCopyRust,
+  shouldUseRustInstrumentsDeepCopy,
+} from './instruments-deep-copy-rust'
 
 function parseTSV<T>(contents: TextFileContent): T[] {
   const lines = [...contents.splitLines()].map(l => l.split('\t'))
@@ -104,7 +108,7 @@ function getWeight(deepCopyRow: any): number {
 }
 
 // Import from a deep copy made of a profile
-export function importFromInstrumentsDeepCopy(contents: TextFileContent): Profile {
+export function importFromInstrumentsDeepCopyLegacy(contents: TextFileContent): Profile {
   const profile = new CallTreeProfileBuilder()
   const rows = parseTSV<PastedTimeProfileRow | PastedAllocationsProfileRow>(contents)
 
@@ -160,6 +164,20 @@ export function importFromInstrumentsDeepCopy(contents: TextFileContent): Profil
   }
 
   return profile.build()
+}
+
+export async function importFromInstrumentsDeepCopy(
+  contents: TextFileContent,
+  sourceBuffer?: ArrayBuffer,
+): Promise<Profile> {
+  if (sourceBuffer && shouldUseRustInstrumentsDeepCopy(sourceBuffer)) {
+    try {
+      return await importFromInstrumentsDeepCopyRust(sourceBuffer)
+    } catch {
+      // Fall back to the legacy parser if wasm fails to initialize or parse.
+    }
+  }
+  return importFromInstrumentsDeepCopyLegacy(contents)
 }
 
 interface TraceDirectoryTree {

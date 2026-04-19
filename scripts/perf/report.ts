@@ -41,6 +41,10 @@ Flags:
 - optimizedForEachCall: ${report.experiment.experiments.optimizedForEachCall}
 - rustFuzzyFind: ${report.experiment.experiments.rustFuzzyFind}
 - rustImportParsers: ${report.experiment.experiments.rustImportParsers}
+- rustPprofImport: ${report.experiment.experiments.rustPprofImport}
+- rustHaskellImport: ${report.experiment.experiments.rustHaskellImport}
+- rustInstrumentsDeepCopy: ${report.experiment.experiments.rustInstrumentsDeepCopy}
+- rustV8ProfLog: ${report.experiment.experiments.rustV8ProfLog}
 
 ## Fixture results
 

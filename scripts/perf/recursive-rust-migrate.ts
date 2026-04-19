@@ -184,10 +184,9 @@ function chunk<T>(items: T[], size: number): T[][] {
 }
 
 function buildRecursiveTasks(repoRoot: string): RecursiveTask[] {
-  const allFiles: string[] = []
-  for (const root of ROOTS) {
-    allFiles.push(...collectTsFilesRecursive(path.join(repoRoot, root), repoRoot))
-  }
+  const allFiles = ROOTS.reduce<string[]>((files, root) => {
+    return files.concat(collectTsFilesRecursive(path.join(repoRoot, root), repoRoot))
+  }, [])
 
   const groupedByDirectory = new Map<string, string[]>()
   for (const filePath of allFiles) {

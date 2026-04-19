@@ -10,7 +10,7 @@ struct WeightedStack {
 
 #[derive(Clone, Serialize)]
 struct NormalizedFrame {
-    key: String,
+    key: serde_json::Value,
     name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     file: Option<String>,
@@ -109,7 +109,10 @@ fn normalize_safari_frame(frame: &SafariFrameInput) -> NormalizedFrame {
     };
 
     NormalizedFrame {
-        key: format!("{}:{}:{}:{}", frame.name, frame.url, frame.line, frame.column),
+        key: serde_json::Value::String(format!(
+            "{}:{}:{}:{}",
+            frame.name, frame.url, frame.line, frame.column
+        )),
         name,
         file: Some(frame.url.clone()),
         line: Some(frame.line),
@@ -212,7 +215,7 @@ pub fn normalize_stackprof_profile(profile: JsValue) -> Result<JsValue, JsValue>
                 .unwrap_or_else(|| "(unknown)".to_string());
 
             stack.push(NormalizedFrame {
-                key: frame_id.to_string(),
+                key: serde_json::Value::Number(serde_json::Number::from(frame_id)),
                 name,
                 file: frame.file.clone(),
                 line: frame.line,

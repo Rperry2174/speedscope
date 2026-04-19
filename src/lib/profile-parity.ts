@@ -54,6 +54,14 @@ export async function compareFixtureParity(
     optimizedForEachCall: false,
     deferDemangle: false,
     rustFuzzyFind: false,
+    rustBase64Decode: false,
+    rustProfileSearch: false,
+    rustTextUtils: false,
+    rustPprofImport: false,
+    rustHaskellImport: false,
+    rustInstrumentsDeepCopy: false,
+    rustCallgrindImport: false,
+    rustV8ProfLog: false,
     rustImportParsers: false,
   })
   const experimental = await importFixtureWithExperiment(fixturePath, overrides)

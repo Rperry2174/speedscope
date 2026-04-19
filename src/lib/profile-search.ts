@@ -1,6 +1,11 @@
+import initRustProfileSearch, {
+  exact_match_strings_batch as exactMatchStringsBatchRust,
+} from '../../rust/profile-search/pkg/profile_search.js'
+import wasmBinaryPath from '../../rust/profile-search/pkg/profile_search_bg.wasm'
 import {Profile, Frame, CallTreeNode} from './profile'
 import {Flamechart, FlamechartFrame} from './flamechart'
 import {Rect, Vec2} from './math'
+import {isExperimentEnabled} from './runtime-config'
 
 export enum FlamechartType {
   CHRONO_FLAME_CHART,
@@ -20,7 +25,14 @@ export enum FlamechartType {
 // See https://github.com/jlfwong/speedscope/issues/352
 //
 // Return ranges for all matches in order to highlight them.
-export function exactMatchStrings(text: string, pattern: string): [number, number][] {
+export type ExactMatchRanges = [number, number][]
+export type ExactMatchBatchResult = Array<ExactMatchRanges | null>
+
+export function exactMatchStringsTs(text: string, pattern: string): ExactMatchRanges {
+  if (pattern.length === 0) {
+    return []
+  }
+
   const lowerText = text.toLocaleLowerCase()
   const lowerPattern = pattern.toLocaleLowerCase()
 
@@ -36,6 +48,111 @@ export function exactMatchStrings(text: string, pattern: string): [number, numbe
   }
 }
 
+export function exactMatchStrings(text: string, pattern: string): ExactMatchRanges {
+  return exactMatchStringsTs(text, pattern)
+}
+
+export function exactMatchStringsBatchTs(texts: string[], pattern: string): ExactMatchBatchResult {
+  return texts.map(text => {
+    const match = exactMatchStringsTs(text, pattern)
+    return match.length === 0 ? null : match
+  })
+}
+
+let modulePromise: Promise<void> | null = null
+let rustBatchMatcher: ((texts: string[], pattern: string) => ExactMatchBatchResult) | null = null
+
+async function initializeModule(): Promise<void> {
+  await initRustProfileSearch({module_or_path: wasmBinaryPath as unknown as string})
+}
+
+function isAscii(text: string): boolean {
+  for (let i = 0; i < text.length; i++) {
+    if (text.charCodeAt(i) > 0x7f) {
+      return false
+    }
+  }
+  return true
+}
+
+function shouldUseRustExactMatcher(texts: string[], pattern: string): boolean {
+  return isAscii(pattern) && texts.every(isAscii)
+}
+
+function normalizeExactMatchBatchResult(result: unknown): ExactMatchBatchResult {
+  if (!Array.isArray(result)) {
+    throw new Error('Rust profile search returned a non-array result')
+  }
+
+  return result.map(entry => {
+    if (entry == null) {
+      return null
+    }
+    if (!Array.isArray(entry)) {
+      throw new Error('Rust profile search returned an invalid match list')
+    }
+
+    return entry.map(range => {
+      if (!Array.isArray(range) || range.length !== 2) {
+        throw new Error('Rust profile search returned an invalid range')
+      }
+      const [start, end] = range
+      if (typeof start !== 'number' || typeof end !== 'number') {
+        throw new Error('Rust profile search returned a non-numeric range')
+      }
+      return [start, end] as [number, number]
+    })
+  })
+}
+
+export async function loadRustExactMatchBatchMatcher(): Promise<
+  (texts: string[], pattern: string) => ExactMatchBatchResult
+> {
+  if (!modulePromise) {
+    modulePromise = initializeModule()
+  }
+  await modulePromise
+
+  const matcher = (texts: string[], pattern: string) => {
+    if (!shouldUseRustExactMatcher(texts, pattern)) {
+      return exactMatchStringsBatchTs(texts, pattern)
+    }
+
+    try {
+      return normalizeExactMatchBatchResult(exactMatchStringsBatchRust(texts, pattern))
+    } catch {
+      return exactMatchStringsBatchTs(texts, pattern)
+    }
+  }
+  rustBatchMatcher = matcher
+  return matcher
+}
+
+function preloadRustExactMatchBatchMatcher() {
+  if (rustBatchMatcher != null || modulePromise != null) return
+  loadRustExactMatchBatchMatcher()
+    .then(matcher => {
+      rustBatchMatcher = matcher
+    })
+    .catch(() => {
+      rustBatchMatcher = null
+    })
+}
+
+function getExactMatchBatchMatcher(): (texts: string[], pattern: string) => ExactMatchBatchResult {
+  if (isExperimentEnabled('rustProfileSearch')) {
+    preloadRustExactMatchBatchMatcher()
+    if (rustBatchMatcher) {
+      return rustBatchMatcher
+    }
+  }
+  return exactMatchStringsBatchTs
+}
+
+export function exactMatchStringsBatch(texts: string[], pattern: string): ExactMatchBatchResult {
+  return getExactMatchBatchMatcher()(texts, pattern)
+}
+
 // A utility class for storing cached search results to avoid recomputation when
 // the search results & profile did not change.
 export class ProfileSearchResults {
@@ -48,9 +165,16 @@ export class ProfileSearchResults {
   getMatchForFrame(frame: Frame): [number, number][] | null {
     if (!this.matches) {
       this.matches = new Map()
+      const frames: Frame[] = []
       this.profile.forEachFrame(frame => {
-        const match = exactMatchStrings(frame.name, this.searchQuery)
-        this.matches!.set(frame, match.length === 0 ? null : match)
+        frames.push(frame)
+      })
+      const matches = exactMatchStringsBatch(
+        frames.map(frame => frame.name),
+        this.searchQuery,
+      )
+      frames.forEach((frame, index) => {
+        this.matches!.set(frame, matches[index] || null)
       })
     }
     return this.matches.get(frame) || null

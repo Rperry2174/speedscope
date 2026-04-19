@@ -11,6 +11,14 @@ export interface ExperimentFlags {
   optimizedForEachCall: boolean
   rustFuzzyFind: boolean
   rustImportParsers: boolean
+  rustBase64Decode: boolean
+  rustProfileSearch: boolean
+  rustTextUtils: boolean
+  rustPprofImport: boolean
+  rustHaskellImport: boolean
+  rustInstrumentsDeepCopy: boolean
+  rustCallgrindImport: boolean
+  rustV8ProfLog: boolean
 }
 
 export interface ExperimentRunOptions {

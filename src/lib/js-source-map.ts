@@ -1,8 +1,15 @@
 // This file contains code to allow profiles to be remapped by JavaScript source maps.
 //
+// This remains TypeScript-owned for now. The work here is mostly glue around the
+// JS source-map library plus browser-specific heuristics for frame/file matching
+// and name recovery from embedded source content. Unlike the fuzzy-find proof
+// point, there is not a clean, self-contained hot path that benefits from a Rust
+// boundary without also pulling in a second source-map implementation and extra
+// compatibility risk.
+//
 // As of writing, this is using an out-of-date version of source-map, because the
 // source-map library migrated to using web-assembly. This requires loading the
-// web-assembly ball. The easiest way to do this is to load it from a third-party
+// web-assembly blob. The easiest way to do this is to load it from a third-party
 // URL, but I want speedscope to work standalone offline. This means that the remaining
 // options require some way of having a local URL that corresponds the .wasm file.
 //

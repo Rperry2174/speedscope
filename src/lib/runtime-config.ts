@@ -3,6 +3,14 @@ export interface ExperimentFlags {
   optimizedForEachCall: boolean
   rustFuzzyFind: boolean
   rustImportParsers: boolean
+  rustBase64Decode: boolean
+  rustProfileSearch: boolean
+  rustTextUtils: boolean
+  rustPprofImport: boolean
+  rustHaskellImport: boolean
+  rustInstrumentsDeepCopy: boolean
+  rustCallgrindImport: boolean
+  rustV8ProfLog: boolean
 }
 
 const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
@@ -10,6 +18,14 @@ const DEFAULT_EXPERIMENT_FLAGS: ExperimentFlags = {
   optimizedForEachCall: false,
   rustFuzzyFind: false,
   rustImportParsers: false,
+  rustBase64Decode: false,
+  rustProfileSearch: false,
+  rustTextUtils: false,
+  rustPprofImport: false,
+  rustHaskellImport: false,
+  rustInstrumentsDeepCopy: false,
+  rustCallgrindImport: false,
+  rustV8ProfLog: false,
 }
 
 let experimentOverrides: Partial<ExperimentFlags> | null = null

@@ -6,7 +6,7 @@ import wasmBinaryPath from '../../rust/import-parsers/pkg/import_parsers_bg.wasm
 import {isExperimentEnabled} from '../lib/runtime-config'
 
 export interface RustNormalizedFrame {
-  key: string
+  key: string | number
   name: string
   file?: string
   line?: number

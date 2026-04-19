@@ -13,12 +13,13 @@ import {importFromBGFlameGraph} from './bg-flamegraph'
 import {importFromFirefox} from './firefox'
 import {importSpeedscopeProfiles} from '../lib/file-format'
 import {importFromV8ProfLog} from './v8proflog'
+import {importFromV8ProfLogBuffer} from './v8-prof-log-rust'
 import {importFromLinuxPerf} from './linux-tools-perf'
 import {importFromHaskell} from './haskell'
 import {importFromSafari} from './safari'
 import {ProfileDataSource, TextProfileDataSource, MaybeCompressedDataReader} from './utils'
 import {importAsPprofProfile} from './pprof'
-import {decodeBase64} from '../lib/utils'
+import {decodeBase64WithBestAvailableImplementation} from '../lib/base64-decoder-rust'
 import {importFromChromeHeapProfile} from './v8heapalloc'
 import {isTraceEventFormatted, importTraceEvents} from './trace-event'
 import {importFromCallgrind} from './callgrind'
@@ -35,6 +36,7 @@ async function loadJfrModule(): Promise<JfrModule> {
   return jfrModulePromise
 }
 import {annotatePerfRun, notePerfMilestone, timePerfAsync, timePerfSync} from '../lib/perf'
+import {isExperimentEnabled} from '../lib/runtime-config'
 
 export async function importProfileGroupFromText(
   fileName: string,
@@ -47,10 +49,11 @@ export async function importProfileGroupFromBase64(
   fileName: string,
   b64contents: string,
 ): Promise<ProfileGroup | null> {
+  const decodedBytes = await decodeBase64WithBestAvailableImplementation(b64contents)
   return await importProfileGroup(
     MaybeCompressedDataReader.fromArrayBuffer(
       fileName,
-      decodeBase64(b64contents).buffer as ArrayBuffer,
+      decodedBytes.buffer as ArrayBuffer,
     ),
   )
 }
@@ -91,6 +94,22 @@ async function importProfileGroup(dataSource: ProfileDataSource): Promise<Profil
 function toGroup(profile: Profile | null): ProfileGroup | null {
   if (!profile) return null
   return {name: profile.getName(), indexToView: 0, profiles: [profile]}
+}
+
+async function importV8ProfLogWithBestAvailablePath(
+  buffer: ArrayBuffer,
+  parsed?: ReturnType<typeof parseJSON>,
+) {
+  if (isExperimentEnabled('rustV8ProfLog')) {
+    return await importFromV8ProfLogBuffer(
+      buffer,
+      parsed || (() => parseJSON(new TextProfileDataSource('unknown.v8log.json', '').readAsText as never))(),
+    )
+  }
+  if (!parsed) {
+    throw new Error('Expected parsed V8 prof log when Rust importer is disabled')
+  }
+  return importFromV8ProfLog(parsed)
 }
 
 function updateFormatGuess(fileName: string) {
@@ -135,7 +154,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   const buffer = await timePerfAsync('read_array_buffer', () => dataSource.readAsArrayBuffer())
 
   {
-    const profile = timePerfSync('import_pprof_probe', () => importAsPprofProfile(buffer))
+    const profile = await timePerfAsync('import_pprof_probe', () => importAsPprofProfile(buffer))
     if (profile) {
       console.log('Importing as protobuf encoded pprof file')
       annotatePerfRun('detected_format', 'pprof')
@@ -181,8 +200,10 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.instruments.txt')) {
     console.log('Importing as Instruments.app deep copy')
     annotatePerfRun('detected_format', 'instruments-deep-copy')
-    const result = timePerfSync('import_instruments_deep_copy', () =>
-      toGroup(importFromInstrumentsDeepCopy(contents)),
+    const result = toGroup(
+      await timePerfAsync('import_instruments_deep_copy', () =>
+        importFromInstrumentsDeepCopy(contents, buffer),
+      ),
     )
     notePerfMilestone('import_parse_finished')
     return result
@@ -203,7 +224,10 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.v8log.json')) {
     console.log('Importing as --prof-process v8 log')
     annotatePerfRun('detected_format', 'v8log')
-    const result = timePerfSync('import_v8log', () => toGroup(importFromV8ProfLog(parseJSON(contents))))
+    const parsed = parseJSON(contents)
+    const result = await timePerfAsync('import_v8log', async () =>
+      toGroup(await importV8ProfLogWithBestAvailablePath(buffer, parsed)),
+    )
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.heapprofile')) {
@@ -225,7 +249,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.startsWith('callgrind.')) {
     console.log('Importing as Callgrind profile')
     annotatePerfRun('detected_format', 'callgrind')
-    const result = timePerfSync('import_callgrind', () => importFromCallgrind(contents, fileName))
+    const result = await timePerfAsync('import_callgrind', () =>
+      importFromCallgrind(contents, fileName, buffer),
+    )
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.pmcstat.graph')) {
@@ -312,7 +338,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if ('code' in parsed && 'functions' in parsed && 'ticks' in parsed) {
       console.log('Importing as --prof-process v8 log')
       annotatePerfRun('detected_format', 'v8log')
-      const result = timePerfSync('import_v8log', () => toGroup(importFromV8ProfLog(parsed)))
+      const result = await timePerfAsync('import_v8log', async () =>
+        toGroup(await importV8ProfLogWithBestAvailablePath(buffer, parsed)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     } else if ('head' in parsed && 'selfSize' in parsed['head']) {
@@ -326,7 +354,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if ('rts_arguments' in parsed && 'initial_capabilities' in parsed) {
       console.log('Importing as Haskell GHC JSON Profile')
       annotatePerfRun('detected_format', 'haskell')
-      const result = timePerfSync('import_haskell', () => importFromHaskell(parsed))
+      const result = await timePerfAsync('import_haskell', () => importFromHaskell(parsed))
       notePerfMilestone('import_parse_finished')
       return result
     } else if ('recording' in parsed && 'sampleStackTraces' in parsed.recording) {
@@ -349,7 +377,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     ) {
       console.log('Importing as Callgrind profile')
       annotatePerfRun('detected_format', 'callgrind')
-      const result = timePerfSync('import_callgrind', () => importFromCallgrind(contents, fileName))
+      const result = await timePerfAsync('import_callgrind', () =>
+        importFromCallgrind(contents, fileName, buffer),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     }
@@ -359,8 +389,10 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     if (/^[\w \t\(\)]*\tSymbol Name/.exec(contents.firstChunk())) {
       console.log('Importing as Instruments.app deep copy')
       annotatePerfRun('detected_format', 'instruments-deep-copy')
-      const result = timePerfSync('import_instruments_deep_copy', () =>
-        toGroup(importFromInstrumentsDeepCopy(contents)),
+      const result = toGroup(
+        await timePerfAsync('import_instruments_deep_copy', () =>
+          importFromInstrumentsDeepCopy(contents, buffer),
+        ),
       )
       notePerfMilestone('import_parse_finished')
       return result

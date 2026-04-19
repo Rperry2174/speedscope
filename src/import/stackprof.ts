@@ -54,7 +54,7 @@ function importFromStackprofWithTsFallback(stackprofProfile: StackprofProfile): 
         frameName = '(unknown)'
       }
       const frame = {
-        key: `${id}`,
+        key: id,
         ...frames[id],
         name: frameName,
       }

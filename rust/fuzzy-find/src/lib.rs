@@ -1,3 +1,4 @@
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 const CHAR_CODE_LOWER_A: u32 = 'a' as u32;
@@ -15,6 +16,13 @@ const FZF_BONUS_NON_WORD: i32 = FZF_SCORE_MATCH / 2;
 const FZF_BONUS_CAMEL123: i32 = FZF_BONUS_BOUNDARY + FZF_SCORE_GAP_EXTENSION;
 const FZF_BONUS_CONSECUTIVE: i32 = -(FZF_SCORE_GAP_START + FZF_SCORE_GAP_EXTENSION);
 const FZF_BONUS_FIRST_CHAR_MULTIPLIER: i32 = 2;
+
+#[derive(Serialize)]
+struct FuzzyMatchResult {
+    #[serde(rename = "matchedRanges")]
+    matched_ranges: Vec<[usize; 2]>,
+    score: i32,
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum FzfCharClass {
@@ -192,20 +200,37 @@ fn fuzzy_match_impl(text: &str, pattern: &str) -> Option<(i32, Vec<(usize, usize
     None
 }
 
+fn into_fuzzy_match_result(score: i32, ranges: Vec<(usize, usize)>) -> FuzzyMatchResult {
+    FuzzyMatchResult {
+        matched_ranges: ranges.into_iter().map(|(start, end)| [start, end]).collect(),
+        score,
+    }
+}
+
+#[wasm_bindgen]
+pub fn fuzzy_match_strings(text: &str, pattern: &str) -> Result<JsValue, JsValue> {
+    match fuzzy_match_impl(text, pattern) {
+        None => Ok(JsValue::NULL),
+        Some((score, ranges)) => serde_wasm_bindgen::to_value(&into_fuzzy_match_result(score, ranges))
+            .map_err(|err| JsValue::from_str(&err.to_string())),
+    }
+}
+
 #[wasm_bindgen]
 pub fn fuzzy_match_strings_json(text: &str, pattern: &str) -> String {
     match fuzzy_match_impl(text, pattern) {
         None => "null".to_string(),
         Some((score, ranges)) => {
-            let mut json = format!("{{\"score\":{},\"matchedRanges\":[", score);
-            for (index, (start, end)) in ranges.iter().enumerate() {
+            let fuzzy_match = into_fuzzy_match_result(score, ranges);
+            let mut json = format!("{{\"score\":{},\"matchedRanges\":[", fuzzy_match.score);
+            for (index, range) in fuzzy_match.matched_ranges.iter().enumerate() {
                 if index > 0 {
                     json.push(',');
                 }
                 json.push('[');
-                json.push_str(&start.to_string());
+                json.push_str(&range[0].to_string());
                 json.push(',');
-                json.push_str(&end.to_string());
+                json.push_str(&range[1].to_string());
                 json.push(']');
             }
             json.push_str("]}");
@@ -227,7 +252,7 @@ mod tests {
     #[test]
     fn full_match() {
         let result = fuzzy_match_impl("hello", "hello").unwrap();
-        assert_eq!(result.0 > 0, true);
+        assert!(result.0 > 0);
         assert_eq!(result.1, vec![(0, 5)]);
     }
 
