@@ -18,7 +18,7 @@ import {importFromHaskell} from './haskell'
 import {importFromSafari} from './safari'
 import {ProfileDataSource, TextProfileDataSource, MaybeCompressedDataReader} from './utils'
 import {importAsPprofProfile} from './pprof'
-import {decodeBase64} from '../lib/utils'
+import {decodeBase64WithBestAvailableImplementation} from '../lib/base64-decoder-rust'
 import {importFromChromeHeapProfile} from './v8heapalloc'
 import {isTraceEventFormatted, importTraceEvents} from './trace-event'
 import {importFromCallgrind} from './callgrind'
@@ -47,10 +47,11 @@ export async function importProfileGroupFromBase64(
   fileName: string,
   b64contents: string,
 ): Promise<ProfileGroup | null> {
+  const decodedBytes = await decodeBase64WithBestAvailableImplementation(b64contents)
   return await importProfileGroup(
     MaybeCompressedDataReader.fromArrayBuffer(
       fileName,
-      decodeBase64(b64contents).buffer as ArrayBuffer,
+      decodedBytes.buffer as ArrayBuffer,
     ),
   )
 }
