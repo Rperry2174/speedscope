@@ -173,7 +173,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.stackprof.json')) {
     console.log('Importing as stackprof profile')
     annotatePerfRun('detected_format', 'stackprof')
-    const result = timePerfSync('import_stackprof', () => toGroup(importFromStackprof(parseJSON(contents))))
+    const result = await timePerfAsync('import_stackprof', async () =>
+      toGroup(await importFromStackprof(parseJSON(contents))),
+    )
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.instruments.txt')) {
@@ -215,7 +217,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('-recording.json')) {
     console.log('Importing as Safari profile')
     annotatePerfRun('detected_format', 'safari')
-    const result = timePerfSync('import_safari', () => toGroup(importFromSafari(parseJSON(contents))))
+    const result = await timePerfAsync('import_safari', async () =>
+      toGroup(await importFromSafari(parseJSON(contents))),
+    )
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.startsWith('callgrind.')) {
@@ -300,7 +304,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if ('mode' in parsed && 'frames' in parsed && 'raw_timestamp_deltas' in parsed) {
       console.log('Importing as stackprof profile')
       annotatePerfRun('detected_format', 'stackprof')
-      const result = timePerfSync('import_stackprof', () => toGroup(importFromStackprof(parsed)))
+      const result = await timePerfAsync('import_stackprof', async () =>
+        toGroup(await importFromStackprof(parsed)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     } else if ('code' in parsed && 'functions' in parsed && 'ticks' in parsed) {
@@ -326,7 +332,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if ('recording' in parsed && 'sampleStackTraces' in parsed.recording) {
       console.log('Importing as Safari profile')
       annotatePerfRun('detected_format', 'safari')
-      const result = timePerfSync('import_safari', () => toGroup(importFromSafari(parsed)))
+      const result = await timePerfAsync('import_safari', async () =>
+        toGroup(await importFromSafari(parsed)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     }

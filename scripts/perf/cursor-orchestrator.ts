@@ -223,6 +223,7 @@ function toSummaryReport(
         deferDemangle: false,
         optimizedForEachCall: false,
         rustFuzzyFind: false,
+        rustImportParsers: false,
       },
     },
     results: [],
@@ -233,6 +234,7 @@ function toSummaryReport(
       deferDemangle: false,
       optimizedForEachCall: false,
       rustFuzzyFind: false,
+      rustImportParsers: false,
     },
     fixtures: [],
   }
@@ -266,10 +268,11 @@ async function main() {
   ensureRequestedModelFamilies(models, ['composer-2', 'gpt-5.4', 'opus-4.6'])
 
   const experimentFlags: ExperimentFlags[] = [
-    {deferDemangle: false, optimizedForEachCall: false, rustFuzzyFind: false},
-    {deferDemangle: true, optimizedForEachCall: false, rustFuzzyFind: false},
-    {deferDemangle: false, optimizedForEachCall: true, rustFuzzyFind: false},
-    {deferDemangle: false, optimizedForEachCall: false, rustFuzzyFind: true},
+    {deferDemangle: false, optimizedForEachCall: false, rustFuzzyFind: false, rustImportParsers: false},
+    {deferDemangle: true, optimizedForEachCall: false, rustFuzzyFind: false, rustImportParsers: false},
+    {deferDemangle: false, optimizedForEachCall: true, rustFuzzyFind: false, rustImportParsers: false},
+    {deferDemangle: false, optimizedForEachCall: false, rustFuzzyFind: true, rustImportParsers: false},
+    {deferDemangle: false, optimizedForEachCall: false, rustFuzzyFind: false, rustImportParsers: true},
   ]
 
   const specialistOutputs = await Promise.all(

@@ -1,7 +1,9 @@
 // https://github.com/tmm1/stackprof
 
-import {Profile, FrameInfo, StackListProfileBuilder} from '../lib/profile'
+import {Profile, StackListProfileBuilder} from '../lib/profile'
+import {isExperimentEnabled} from '../lib/runtime-config'
 import {RawValueFormatter, TimeFormatter} from '../lib/value-formatters'
+import type {RustNormalizedFrame, RustWeightedStack} from './import-parsers-rust'
 
 interface StackprofFrame {
   name?: string
@@ -13,24 +15,38 @@ export interface StackprofProfile {
   frames: {[number: string]: StackprofFrame}
   mode: string
   raw: number[]
-  raw_timestamp_deltas: number[]
+  raw_timestamp_deltas?: number[]
   samples: number
   interval: number
 }
 
-export function importFromStackprof(stackprofProfile: StackprofProfile): Profile {
-  const {frames, mode, raw, raw_timestamp_deltas, interval} = stackprofProfile
+function buildProfileFromWeightedStacks(mode: string, samples: RustWeightedStack[]): Profile {
   const profile = new StackListProfileBuilder()
   profile.setValueFormatter(new TimeFormatter('microseconds')) // default to time format unless we're in object mode
 
+  for (const sample of samples) {
+    profile.appendSampleWithWeight(sample.frames, sample.weight)
+  }
+
+  if (mode === 'object') {
+    profile.setValueFormatter(new RawValueFormatter())
+  }
+
+  return profile.build()
+}
+
+function importFromStackprofWithTsFallback(stackprofProfile: StackprofProfile): Profile {
+  const {frames, mode, raw, raw_timestamp_deltas, interval} = stackprofProfile
+  const weightedSamples: RustWeightedStack[] = []
+
   let sampleIndex = 0
 
-  let prevStack: FrameInfo[] = []
+  let prevStack: RustNormalizedFrame[] = []
 
   for (let i = 0; i < raw.length; ) {
     const stackHeight = raw[i++]
 
-    let stack: FrameInfo[] = []
+    let stack: RustNormalizedFrame[] = []
     for (let j = 0; j < stackHeight; j++) {
       const id = raw[i++]
       let frameName = frames[id].name
@@ -38,7 +54,7 @@ export function importFromStackprof(stackprofProfile: StackprofProfile): Profile
         frameName = '(unknown)'
       }
       const frame = {
-        key: id,
+        key: `${id}`,
         ...frames[id],
         name: frameName,
       }
@@ -51,22 +67,38 @@ export function importFromStackprof(stackprofProfile: StackprofProfile): Profile
 
     switch (mode) {
       case 'object':
-        profile.appendSampleWithWeight(stack, nSamples)
-        profile.setValueFormatter(new RawValueFormatter())
+        weightedSamples.push({frames: stack, weight: nSamples})
         break
       case 'cpu':
-        profile.appendSampleWithWeight(stack, nSamples * interval)
+        weightedSamples.push({frames: stack, weight: nSamples * interval})
         break
       default:
+        if (!raw_timestamp_deltas) {
+          throw new Error(
+            'Malformed stackprof profile: raw_timestamp_deltas is required for non-cpu/object modes',
+          )
+        }
         let sampleDuration = 0
         for (let j = 0; j < nSamples; j++) {
           sampleDuration += raw_timestamp_deltas[sampleIndex++]
         }
-        profile.appendSampleWithWeight(stack, sampleDuration)
+        weightedSamples.push({frames: stack, weight: sampleDuration})
     }
 
     prevStack = stack
   }
 
-  return profile.build()
+  return buildProfileFromWeightedStacks(mode, weightedSamples)
+}
+
+export async function importFromStackprof(stackprofProfile: StackprofProfile): Promise<Profile> {
+  if (isExperimentEnabled('rustImportParsers')) {
+    const {normalizeStackprofProfileWithRust} = await import('./import-parsers-rust')
+    const rustProfile = await normalizeStackprofProfileWithRust(stackprofProfile)
+    if (rustProfile) {
+      return buildProfileFromWeightedStacks(rustProfile.mode, rustProfile.samples)
+    }
+  }
+
+  return importFromStackprofWithTsFallback(stackprofProfile)
 }

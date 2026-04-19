@@ -1,0 +1,265 @@
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use wasm_bindgen::prelude::*;
+
+#[derive(Serialize)]
+struct WeightedStack {
+    frames: Vec<NormalizedFrame>,
+    weight: f64,
+}
+
+#[derive(Clone, Serialize)]
+struct NormalizedFrame {
+    key: String,
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    file: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    line: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    col: Option<u32>,
+}
+
+#[derive(Serialize)]
+struct SafariImport {
+    profile_duration: f64,
+    display_name: String,
+    samples: Vec<WeightedStack>,
+}
+
+#[derive(Serialize)]
+struct StackprofImport {
+    mode: String,
+    interval: f64,
+    samples: Vec<WeightedStack>,
+}
+
+#[derive(Deserialize)]
+struct SafariProfileInput {
+    recording: SafariRecordingInput,
+}
+
+#[derive(Deserialize)]
+struct SafariRecordingInput {
+    #[serde(rename = "displayName")]
+    display_name: String,
+    #[serde(rename = "sampleStackTraces")]
+    sample_stack_traces: Vec<SafariSampleInput>,
+    #[serde(rename = "sampleDurations")]
+    sample_durations: Vec<f64>,
+}
+
+#[derive(Deserialize)]
+struct SafariSampleInput {
+    timestamp: f64,
+    #[serde(rename = "stackFrames")]
+    stack_frames: Vec<SafariFrameInput>,
+}
+
+#[derive(Deserialize)]
+struct SafariFrameInput {
+    name: String,
+    line: u32,
+    column: u32,
+    url: String,
+}
+
+#[derive(Deserialize)]
+struct StackprofProfileInput {
+    frames: HashMap<String, StackprofFrameInput>,
+    mode: String,
+    raw: Vec<u64>,
+    raw_timestamp_deltas: Option<Vec<f64>>,
+    interval: f64,
+}
+
+#[derive(Deserialize, Clone)]
+struct StackprofFrameInput {
+    name: Option<String>,
+    file: Option<String>,
+    line: Option<u32>,
+}
+
+fn js_error(message: impl Into<String>) -> JsValue {
+    JsValue::from_str(&message.into())
+}
+
+fn take_raw_value(raw: &[u64], index: &mut usize, label: &str) -> Result<u64, JsValue> {
+    let value = raw
+        .get(*index)
+        .copied()
+        .ok_or_else(|| js_error(format!("Malformed stackprof profile: missing {label}")))?;
+    *index += 1;
+    Ok(value)
+}
+
+fn last_path_segment(path: &str) -> &str {
+    path.rsplit('/').next().unwrap_or(path)
+}
+
+fn normalize_safari_frame(frame: &SafariFrameInput) -> NormalizedFrame {
+    let name = if frame.name.is_empty() {
+        if frame.url.is_empty() {
+            "(anonymous)".to_string()
+        } else {
+            format!("(anonymous {}:{})", last_path_segment(&frame.url), frame.line)
+        }
+    } else {
+        frame.name.clone()
+    };
+
+    NormalizedFrame {
+        key: format!("{}:{}:{}:{}", frame.name, frame.url, frame.line, frame.column),
+        name,
+        file: Some(frame.url.clone()),
+        line: Some(frame.line),
+        col: Some(frame.column),
+    }
+}
+
+fn convert_js_value<T>(value: T) -> Result<JsValue, JsValue>
+where
+    T: Serialize,
+{
+    serde_wasm_bindgen::to_value(&value)
+        .map_err(|error| js_error(format!("Failed to serialize Rust import parser result: {error}")))
+}
+
+#[wasm_bindgen]
+pub fn normalize_safari_profile(profile: JsValue) -> Result<JsValue, JsValue> {
+    let input: SafariProfileInput = serde_wasm_bindgen::from_value(profile)
+        .map_err(|error| js_error(format!("Failed to deserialize Safari profile: {error}")))?;
+
+    let samples = input.recording.sample_stack_traces;
+    let durations = input.recording.sample_durations;
+    if samples.is_empty() {
+        return convert_js_value(SafariImport {
+            profile_duration: 0.0,
+            display_name: input.recording.display_name,
+            samples: Vec::new(),
+        });
+    }
+
+    let profile_duration = samples
+        .last()
+        .map(|sample| sample.timestamp)
+        .unwrap_or(0.0)
+        - samples[0].timestamp
+        + durations[0];
+
+    let mut normalized_samples = Vec::new();
+    let mut previous_end_time = f64::MAX;
+
+    for (index, sample) in samples.iter().enumerate() {
+        let duration = *durations.get(index).ok_or_else(|| {
+            js_error("Malformed Safari profile: sampleDurations is shorter than sampleStackTraces")
+        })?;
+        let end_time = sample.timestamp;
+        let start_time = end_time - duration;
+        let idle_duration_before = start_time - previous_end_time;
+
+        if idle_duration_before > 0.002 {
+            normalized_samples.push(WeightedStack {
+                frames: Vec::new(),
+                weight: idle_duration_before,
+            });
+        }
+
+        let frames = sample
+            .stack_frames
+            .iter()
+            .rev()
+            .map(normalize_safari_frame)
+            .collect();
+        normalized_samples.push(WeightedStack {
+            frames,
+            weight: duration,
+        });
+        previous_end_time = end_time;
+    }
+
+    convert_js_value(SafariImport {
+        profile_duration,
+        display_name: input.recording.display_name,
+        samples: normalized_samples,
+    })
+}
+
+#[wasm_bindgen]
+pub fn normalize_stackprof_profile(profile: JsValue) -> Result<JsValue, JsValue> {
+    let input: StackprofProfileInput = serde_wasm_bindgen::from_value(profile)
+        .map_err(|error| js_error(format!("Failed to deserialize stackprof profile: {error}")))?;
+
+    let mut raw_index = 0usize;
+    let mut sample_index = 0usize;
+    let mut previous_stack: Vec<NormalizedFrame> = Vec::new();
+    let mut normalized_samples = Vec::new();
+
+    while raw_index < input.raw.len() {
+        let stack_height = take_raw_value(&input.raw, &mut raw_index, "stack height")? as usize;
+        let mut stack = Vec::with_capacity(stack_height);
+
+        for _ in 0..stack_height {
+            let frame_id = take_raw_value(&input.raw, &mut raw_index, "frame id")?;
+            let frame = input
+                .frames
+                .get(&frame_id.to_string())
+                .ok_or_else(|| js_error(format!("Malformed stackprof profile: unknown frame {frame_id}")))?;
+            let name = frame
+                .name
+                .clone()
+                .filter(|name| !name.is_empty())
+                .unwrap_or_else(|| "(unknown)".to_string());
+
+            stack.push(NormalizedFrame {
+                key: frame_id.to_string(),
+                name,
+                file: frame.file.clone(),
+                line: frame.line,
+                col: None,
+            });
+        }
+
+        if stack.len() == 1 && stack[0].name == "(garbage collection)" {
+            let mut gc_stack = previous_stack.clone();
+            gc_stack.extend(stack.into_iter());
+            stack = gc_stack;
+        }
+
+        let n_samples = take_raw_value(&input.raw, &mut raw_index, "sample count")? as usize;
+        let weight = match input.mode.as_str() {
+            "object" => n_samples as f64,
+            "cpu" => n_samples as f64 * input.interval,
+            _ => {
+                let deltas = input.raw_timestamp_deltas.as_ref().ok_or_else(|| {
+                    js_error(
+                        "Malformed stackprof profile: raw_timestamp_deltas is required for non-cpu/object modes",
+                    )
+                })?;
+                let mut sample_duration = 0.0;
+                for _ in 0..n_samples {
+                    let delta = deltas.get(sample_index).copied().ok_or_else(|| {
+                        js_error(
+                            "Malformed stackprof profile: raw_timestamp_deltas is shorter than raw samples",
+                        )
+                    })?;
+                    sample_duration += delta;
+                    sample_index += 1;
+                }
+                sample_duration
+            }
+        };
+
+        normalized_samples.push(WeightedStack {
+            frames: stack.clone(),
+            weight,
+        });
+        previous_stack = stack;
+    }
+
+    convert_js_value(StackprofImport {
+        mode: input.mode,
+        interval: input.interval,
+        samples: normalized_samples,
+    })
+}

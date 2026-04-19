@@ -15,6 +15,7 @@ function getExperimentFlags(): ExperimentFlags {
     deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
     optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
     rustFuzzyFind: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FUZZY_FIND),
+    rustImportParsers: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_IMPORT_PARSERS),
   }
 }
 

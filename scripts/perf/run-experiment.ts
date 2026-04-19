@@ -32,6 +32,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       deferDemangle: false,
       optimizedForEachCall: false,
       rustFuzzyFind: false,
+      rustImportParsers: false,
     },
   },
   {
@@ -42,6 +43,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       deferDemangle: false,
       optimizedForEachCall: true,
       rustFuzzyFind: false,
+      rustImportParsers: false,
     },
   },
   {
@@ -52,6 +54,7 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       deferDemangle: true,
       optimizedForEachCall: false,
       rustFuzzyFind: false,
+      rustImportParsers: false,
     },
   },
   {
@@ -62,6 +65,19 @@ const EXPERIMENTS: ExperimentDefinition[] = [
       deferDemangle: false,
       optimizedForEachCall: false,
       rustFuzzyFind: true,
+      rustImportParsers: false,
+    },
+  },
+  {
+    id: 'rust-import-parsers',
+    label: 'Rust import parsers',
+    description:
+      'Experimental path that routes Safari and Stackprof normalization through Rust/WASM with a TS fallback.',
+    flags: {
+      deferDemangle: false,
+      optimizedForEachCall: false,
+      rustFuzzyFind: false,
+      rustImportParsers: true,
     },
   },
 ]
