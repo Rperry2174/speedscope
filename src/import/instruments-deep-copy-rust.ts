@@ -1,7 +1,6 @@
 import initRustInstrumentsDeepCopy, {
   parse_instruments_deep_copy_json as parseInstrumentsDeepCopyJson,
 } from '../../rust/instruments-deep-copy/pkg/instruments_deep_copy.js'
-import wasmBinaryPath from '../../rust/instruments-deep-copy/pkg/instruments_deep_copy_bg.wasm'
 import {CallTreeProfileBuilder, FrameInfo, Profile} from '../lib/profile'
 import {isExperimentEnabled} from '../lib/runtime-config'
 import {ByteFormatter, TimeFormatter} from '../lib/value-formatters'
@@ -25,8 +24,37 @@ interface FrameInfoWithWeight extends FrameInfo {
 
 let modulePromise: Promise<void> | null = null
 
-function initializeModule(): Promise<void> {
-  return initRustInstrumentsDeepCopy({module_or_path: wasmBinaryPath as unknown as string})
+function isNodeRuntime(): boolean {
+  return typeof process !== 'undefined' && !!process.versions?.node
+}
+
+async function getWasmModuleOrPath(): Promise<BufferSource | string | undefined> {
+  if (isNodeRuntime()) {
+    const {readFileSync} = await import('fs')
+    const path = await import('path')
+    const wasmModule = readFileSync(
+      path.join(
+        process.cwd(),
+        'rust',
+        'instruments-deep-copy',
+        'pkg',
+        'instruments_deep_copy_bg.wasm',
+      ),
+    )
+    return wasmModule.buffer.slice(wasmModule.byteOffset, wasmModule.byteOffset + wasmModule.byteLength)
+  }
+
+  const wasmBinaryModule = await import('../../rust/instruments-deep-copy/pkg/instruments_deep_copy_bg.wasm')
+  return wasmBinaryModule.default as unknown as string
+}
+
+async function initializeModule(): Promise<void> {
+  const moduleOrPath = await getWasmModuleOrPath()
+  if (moduleOrPath == null) {
+    await initRustInstrumentsDeepCopy()
+    return
+  }
+  await initRustInstrumentsDeepCopy({module_or_path: moduleOrPath as any})
 }
 
 async function ensureModuleReady() {
