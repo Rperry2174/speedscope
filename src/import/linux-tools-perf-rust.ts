@@ -1,8 +1,8 @@
-import fs from 'fs'
 import initLinuxPerf, {
   initSync as initLinuxPerfSync,
   parse_linux_perf_bytes_js as parseLinuxPerfBytesJs,
 } from '../../rust/linux-perf/pkg/linux_perf.js'
+import {readNodeFileSync} from '../lib/node-shim'
 
 interface RawRustPerfStackFrame {
   address: string
@@ -38,7 +38,7 @@ let modulePromise: Promise<void> | null = null
 
 async function initializeModule(): Promise<void> {
   if (typeof window === 'undefined') {
-    initLinuxPerfSync(fs.readFileSync('rust/linux-perf/pkg/linux_perf_bg.wasm'))
+    initLinuxPerfSync(readNodeFileSync('rust/linux-perf/pkg/linux_perf_bg.wasm'))
     return
   }
   await initLinuxPerf()

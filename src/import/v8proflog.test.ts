@@ -4,7 +4,7 @@ import {dumpProfile} from '../lib/test-utils'
 import {importProfilesFromArrayBuffer} from './index'
 import {loadRustV8ProfLogImporter} from './v8-prof-log-rust'
 import {importFromV8ProfLogTs, V8LogProfile} from './v8proflog'
-import {setExperimentOverridesForTesting} from '../lib/runtime-config'
+import {compareProfileGroups} from '../lib/profile-parity'
 
 test('importFromV8ProfLog', async () => {
   const fixturePath = './sample/profiles/node/fixture.v8log.json'
@@ -38,15 +38,12 @@ test('array buffer import stays aligned when rust v8 prof log experiment is enab
     fileBuffer.byteOffset + fileBuffer.byteLength,
   )
 
-  const legacy = await importProfilesFromArrayBuffer('fixture.v8log.json', arrayBuffer)
+  const legacy = await importProfilesFromArrayBuffer('fixture.v8log.json', arrayBuffer, {engine: 'legacy'})
+  const experimental = await importProfilesFromArrayBuffer('fixture.v8log.json', arrayBuffer, {
+    engine: 'experimental',
+  })
 
-  setExperimentOverridesForTesting({rustV8ProfLog: true})
-  try {
-    const experimental = await importProfilesFromArrayBuffer('fixture.v8log.json', arrayBuffer)
-    expect(experimental).not.toBeNull()
-    expect(legacy).not.toBeNull()
-    expect(dumpProfile(experimental!.profiles[0])).toEqual(dumpProfile(legacy!.profiles[0]))
-  } finally {
-    setExperimentOverridesForTesting(null)
-  }
+  expect(experimental).not.toBeNull()
+  expect(legacy).not.toBeNull()
+  expect(compareProfileGroups(experimental!, legacy!)).toEqual([])
 })

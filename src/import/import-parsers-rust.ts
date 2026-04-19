@@ -4,6 +4,7 @@ import initRustImportParsers, {
   parse_papyrus_json as parsePapyrusJson,
   parse_pmcstat_json as parsePMCStatJson,
 } from '../../rust/import-parsers/pkg/import_parsers.js'
+import {getNodeFsAndPath} from '../lib/node-shim'
 import {isExperimentEnabled} from '../lib/runtime-config'
 import type {TextFileContent} from './utils'
 
@@ -50,8 +51,7 @@ let modulePromise: Promise<void> | null = null
 
 async function resolveWasmModuleOrPath(): Promise<BufferSource | string> {
   if (typeof window === 'undefined') {
-    const fs = await import('fs')
-    const path = await import('path')
+    const {fs, path} = getNodeFsAndPath()
     return fs.readFileSync(
       path.join(process.cwd(), 'rust', 'import-parsers', 'pkg', 'import_parsers_bg.wasm'),
     )

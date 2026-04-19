@@ -1,4 +1,5 @@
 import {Profile, FrameInfo, StackListProfileBuilder} from '../lib/profile'
+import {isExperimentEnabled} from '../lib/runtime-config'
 import {parsePMCStatWithRust} from './import-parsers-rust'
 import {TextFileContent} from './utils'
 
@@ -48,7 +49,10 @@ function buildPMCStatProfile(parsedLines: PMCStatLine[]): Profile | null {
   return profile.build()
 }
 
-export function importFromPMCStatCallGraph(contents: TextFileContent): Profile | null {
+export async function importFromPMCStatCallGraph(contents: TextFileContent): Promise<Profile | null> {
+  if (isExperimentEnabled('rustImportParsers')) {
+    return importFromPMCStatCallGraphWithRust(contents)
+  }
   return importFromPMCStatCallGraphTs(contents)
 }
 

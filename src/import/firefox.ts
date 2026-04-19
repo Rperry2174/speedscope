@@ -200,6 +200,24 @@ function parseFirefoxFrameLocation(
   }))
 }
 
+function frameInfoToFirefoxImportFrame(frameInfo: FrameInfo): FirefoxImportFrame {
+  return {
+    key: `${frameInfo.key}`,
+    name: frameInfo.name,
+    file: frameInfo.file,
+    line: frameInfo.line,
+    col: frameInfo.col,
+  }
+}
+
+export function normalizeFirefoxImportFrame(location: string): FirefoxImportFrame | null {
+  const frameInfo = parseFirefoxFrameLocation(location, new Map())
+  if (!frameInfo) {
+    return null
+  }
+  return frameInfoToFirefoxImportFrame(frameInfo)
+}
+
 export function extractFirefoxImportPayload(firefoxProfile: FirefoxProfile): FirefoxImportPayload {
   const cpuProfile = firefoxProfile.profile
 
@@ -230,13 +248,7 @@ export function extractFirefoxImportPayload(firefoxProfile: FirefoxProfile): Fir
         const frameInfo = parseFirefoxFrameLocation(location, frameKeyToFrameInfo)
         if (!frameInfo) return null
         return getOrInsert(frameKeyToPayloadIndex, frameInfo.key, () => {
-          payloadFrames.push({
-            key: `${frameInfo.key}`,
-            name: frameInfo.name,
-            file: frameInfo.file,
-            line: frameInfo.line,
-            col: frameInfo.col,
-          })
+          payloadFrames.push(frameInfoToFirefoxImportFrame(frameInfo))
           return payloadFrames.length - 1
         })
       })

@@ -1,8 +1,9 @@
 import * as path from 'path'
 
 import {compareFixtureParity} from '../../src/lib/profile-parity'
+import {ImportEngine} from '../../src/experimental/contracts'
 import {FIXTURES, PerfFixture, resolveFixturePath} from './fixtures'
-import {ParityReport, ParityFixtureResult, ExperimentFlags} from './types'
+import {EngineRunOptions, ParityReport, ParityFixtureResult} from './types'
 import {writeJson} from './report'
 
 function parseBooleanFlag(value: string | undefined): boolean {
@@ -10,33 +11,24 @@ function parseBooleanFlag(value: string | undefined): boolean {
   return ['1', 'true', 'yes', 'on'].indexOf(value.toLowerCase()) !== -1
 }
 
-function getExperimentFlags(): ExperimentFlags {
+function getEngineRunOptions(): EngineRunOptions {
+  const importEngine: ImportEngine = parseBooleanFlag(process.env.SPEEDSCOPE_EXPERIMENTAL_IMPORT)
+    ? 'experimental'
+    : 'legacy'
   return {
-    deferDemangle: parseBooleanFlag(process.env.SPEEDSCOPE_DEFER_DEMANGLE),
-    optimizedForEachCall: parseBooleanFlag(process.env.SPEEDSCOPE_OPTIMIZED_FOR_EACH_CALL),
-    rustFuzzyFind: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FUZZY_FIND),
-    rustImportParsers: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_IMPORT_PARSERS),
-    rustFirefoxImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_FIREFOX_IMPORT),
-    rustBase64Decode: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_BASE64_DECODE),
-    rustProfileSearch: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PROFILE_SEARCH),
-    rustTextUtils: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TEXT_UTILS),
-    rustPprofImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_PPROF_IMPORT),
-    rustV8CpuFormatter: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_CPU_FORMATTER),
-    rustCallgrindImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_CALLGRIND_IMPORT),
-    rustHaskellImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_HASKELL_IMPORT),
-    rustInstrumentsDeepCopy: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_INSTRUMENTS_DEEP_COPY),
-    rustV8ProfLog: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_V8_PROF_LOG),
-    rustLinuxPerf: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_LINUX_PERF),
-    rustTraceEventImport: parseBooleanFlag(process.env.SPEEDSCOPE_RUST_TRACE_EVENT_IMPORT),
+    name: process.env.SPEEDSCOPE_EXPERIMENT_NAME || importEngine,
+    importEngine,
+    compareImport: parseBooleanFlag(process.env.SPEEDSCOPE_COMPARE_IMPORT),
+    visibleImportEngine: parseBooleanFlag(process.env.SPEEDSCOPE_COMPARE_IMPORT) ? 'legacy' : importEngine,
   }
 }
 
 async function runFixtureParityCheck(
   fixture: PerfFixture,
-  experiment: ExperimentFlags,
+  _experiment: EngineRunOptions,
 ): Promise<ParityFixtureResult> {
   const fixturePath = resolveFixturePath(process.cwd(), fixture)
-  const comparison = await compareFixtureParity(fixturePath, experiment)
+  const comparison = await compareFixtureParity(fixturePath)
   return {
     fixtureId: fixture.id,
     fixturePath: fixture.relativePath,
@@ -48,11 +40,11 @@ async function runFixtureParityCheck(
 export async function runParityCheck({
   fixtures = FIXTURES,
   outputPath,
-  experiment = getExperimentFlags(),
+  experiment = getEngineRunOptions(),
 }: {
   fixtures?: PerfFixture[]
   outputPath?: string
-  experiment?: ExperimentFlags
+  experiment?: EngineRunOptions
 } = {}): Promise<ParityReport> {
   const results: ParityFixtureResult[] = []
   for (const fixture of fixtures) {

@@ -2,7 +2,6 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import {exportProfileGroup} from '../lib/file-format'
-import {setExperimentOverridesForTesting} from '../lib/runtime-config'
 import {importProfileGroupFromText, importProfilesFromArrayBuffer} from '.'
 
 test('importProfileGroup', async () => {
@@ -21,13 +20,10 @@ test('rust Haskell importer matches TypeScript fallback', async () => {
   const buffer = fs.readFileSync(fixturePath)
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
 
-  setExperimentOverridesForTesting({rustHaskellImport: false})
-  const legacy = await importProfilesFromArrayBuffer('simple.prof', arrayBuffer)
-
-  setExperimentOverridesForTesting({rustHaskellImport: true})
-  const experimental = await importProfilesFromArrayBuffer('simple.prof', arrayBuffer)
-
-  setExperimentOverridesForTesting(null)
+  const legacy = await importProfilesFromArrayBuffer('simple.prof', arrayBuffer, {engine: 'legacy'})
+  const experimental = await importProfilesFromArrayBuffer('simple.prof', arrayBuffer, {
+    engine: 'experimental',
+  })
 
   expect(legacy).not.toBeNull()
   expect(experimental).not.toBeNull()

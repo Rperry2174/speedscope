@@ -40,6 +40,7 @@ declare global {
 let activeRun: PerfRun | null = null
 let runs: PerfRun[] = []
 let nextRunId = 1
+let perfInstrumentationSuspensionDepth = 0
 
 function now() {
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
@@ -92,6 +93,7 @@ function cloneRun(run: PerfRun): PerfRun {
 
 function ensureActiveRun() {
   if (!isPerfInstrumentationEnabled()) return null
+  if (perfInstrumentationSuspensionDepth > 0) return null
   if (!activeRun) return null
   return activeRun
 }
@@ -227,6 +229,15 @@ export function completePerfRun(status: 'completed' | 'error' = 'completed') {
   run.finishedAt = now()
   commitActiveRun()
   activeRun = null
+}
+
+export async function runWithoutPerfInstrumentation<T>(cb: () => Promise<T> | T): Promise<T> {
+  perfInstrumentationSuspensionDepth++
+  try {
+    return await cb()
+  } finally {
+    perfInstrumentationSuspensionDepth--
+  }
 }
 
 export async function afterNextPaint(cb: () => void | Promise<void>) {

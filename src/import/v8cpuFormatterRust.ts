@@ -1,6 +1,7 @@
 import initV8CpuFormatter, {
   chrome_tree_to_nodes as chromeTreeToNodesWasm,
 } from '../../rust/v8-cpu-formatter/pkg/v8_cpu_formatter.js'
+import {readNodeFileSync, resolveNodePath} from '../lib/node-shim'
 import type {CPUProfile} from './chrome'
 import type {OldCPUProfile} from './v8cpuFormatter'
 
@@ -12,9 +13,8 @@ function isNodeRuntime() {
 
 async function initializeModule(): Promise<void> {
   if (isNodeRuntime()) {
-    const [{default: fs}, {default: path}] = await Promise.all([import('fs'), import('path')])
-    const wasmBinary = fs.readFileSync(
-      path.join(process.cwd(), 'rust', 'v8-cpu-formatter', 'pkg', 'v8_cpu_formatter_bg.wasm'),
+    const wasmBinary = readNodeFileSync(
+      resolveNodePath('rust', 'v8-cpu-formatter', 'pkg', 'v8_cpu_formatter_bg.wasm'),
     )
     await initV8CpuFormatter(wasmBinary)
     return

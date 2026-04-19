@@ -12,10 +12,16 @@ import {viewModeAtom} from '../app-state'
 import {ProfileGroupState} from '../app-state/profile-group'
 import {colorSchemeAtom} from '../app-state/color-scheme'
 import {useAtom} from '../lib/atom'
+import {ImportEngine} from '../experimental/contracts'
 
 interface ToolbarProps extends ApplicationProps {
   browseForFile(): void
   saveFile(): void
+  importEngine: ImportEngine
+  visibleImportEngine: ImportEngine
+  compareImport: boolean
+  setImportEngine(importEngine: ImportEngine): void
+  setCompareImport(compareImport: boolean): void
 }
 
 function useSetViewMode(setViewMode: (viewMode: ViewMode) => void, viewMode: ViewMode) {
@@ -147,6 +153,44 @@ function ToolbarRightContent(props: ToolbarProps) {
   const style = getStyle(useTheme())
   const colorScheme = useAtom(colorSchemeAtom)
 
+  const setLegacyEngine = useCallback(() => {
+    props.setImportEngine('legacy')
+  }, [props.setImportEngine])
+
+  const setExperimentalEngine = useCallback(() => {
+    props.setImportEngine('experimental')
+  }, [props.setImportEngine])
+
+  const toggleCompareImport = useCallback(() => {
+    props.setCompareImport(!props.compareImport)
+  }, [props.compareImport, props.setCompareImport])
+
+  const importEngineControls = (
+    <div className={css(style.toolbarEngineControls)}>
+      <div
+        className={css(style.toolbarTab, props.importEngine === 'legacy' && style.toolbarTabActive)}
+        onClick={setLegacyEngine}
+      >
+        Legacy
+      </div>
+      <div
+        className={css(
+          style.toolbarTab,
+          props.importEngine === 'experimental' && style.toolbarTabActive,
+        )}
+        onClick={setExperimentalEngine}
+      >
+        Experimental
+      </div>
+      <div
+        className={css(style.toolbarTab, props.compareImport && style.toolbarTabActive)}
+        onClick={toggleCompareImport}
+      >
+        Compare
+      </div>
+    </div>
+  )
+
   const exportFile = (
     <div className={css(style.toolbarTab)} onClick={props.saveFile}>
       <span className={css(style.emoji)}>⤴️</span>Export
@@ -181,6 +225,12 @@ function ToolbarRightContent(props: ToolbarProps) {
 
   return (
     <div className={css(style.toolbarRight)}>
+      {importEngineControls}
+      {props.compareImport && (
+        <div className={css(style.toolbarEngineStatus)}>
+          visible: <strong>{props.visibleImportEngine}</strong>
+        </div>
+      )}
       {props.activeProfileState && exportFile}
       {importFile}
       {colorSchemeToggle}
@@ -234,6 +284,17 @@ const getStyle = withTheme(theme =>
       right: 0,
       marginRight: 2,
       textAlign: 'right',
+    },
+    toolbarEngineControls: {
+      display: 'inline-block',
+    },
+    toolbarEngineStatus: {
+      display: 'inline-block',
+      marginLeft: 8,
+      color: theme.altFgSecondaryColor,
+      fontSize: FontSize.LABEL,
+      lineHeight: `${Sizes.TOOLBAR_HEIGHT}px`,
+      verticalAlign: 'top',
     },
     toolbarProfileIndex: {
       color: theme.altFgSecondaryColor,

@@ -1,4 +1,5 @@
 import {isExperimentEnabled} from '../lib/runtime-config'
+import {readNodeFileSync, resolveFromCwd} from '../lib/node-shim'
 
 export interface RustImportableTraceEvent {
   pid: number
@@ -31,16 +32,8 @@ async function initializeModule(): Promise<void> {
   const isNodeRuntime =
     typeof process !== 'undefined' && process.versions != null && process.versions.node != null
   if (isNodeRuntime) {
-    const fs = await import('fs')
-    const path = await import('path')
-    const wasmPath = path.join(
-      process.cwd(),
-      'rust',
-      'trace-event-import',
-      'pkg',
-      'trace_event_import_bg.wasm',
-    )
-    await rustModule.default(fs.readFileSync(wasmPath))
+    const wasmPath = resolveFromCwd('rust', 'trace-event-import', 'pkg', 'trace_event_import_bg.wasm')
+    await rustModule.default(readNodeFileSync(wasmPath))
     return
   }
 

@@ -30,6 +30,12 @@ viewModeAtom.subscribe(() => {
 const hashParams = getHashParams()
 export const hashParamsAtom = new Atom<HashParams>(hashParams, 'hashParams')
 
+if (typeof window !== 'undefined') {
+  window.addEventListener('hashchange', () => {
+    hashParamsAtom.set(getHashParams())
+  })
+}
+
 // The <canvas> element used for WebGL
 export const glCanvasAtom = new Atom<HTMLCanvasElement | null>(null, 'glCanvas')
 

@@ -1,6 +1,5 @@
 import {checkProfileSnapshot} from '../lib/test-utils'
 import {importAsPprofProfileTs} from './pprof-format'
-import {setExperimentOverridesForTesting} from '../lib/runtime-config'
 import {importProfilesFromArrayBuffer} from './index'
 import {compareProfileGroups} from '../lib/profile-parity'
 import * as fs from 'fs'
@@ -18,16 +17,12 @@ test('importAsPprofProfile rust path matches TypeScript fallback', async () => {
   const directTsProfile = importAsPprofProfileTs(arrayBuffer)
   expect(directTsProfile).toBeNull()
 
-  setExperimentOverridesForTesting({rustPprofImport: false})
-  try {
-    const legacyGroup = await importProfilesFromArrayBuffer('simple.prof', arrayBuffer)
-    expect(legacyGroup).not.toBeNull()
+  const legacyGroup = await importProfilesFromArrayBuffer('simple.prof', arrayBuffer, {engine: 'legacy'})
+  expect(legacyGroup).not.toBeNull()
 
-    setExperimentOverridesForTesting({rustPprofImport: true})
-    const rustGroup = await importProfilesFromArrayBuffer('simple.prof', arrayBuffer)
-    expect(rustGroup).not.toBeNull()
-    expect(compareProfileGroups(legacyGroup!, rustGroup!)).toEqual([])
-  } finally {
-    setExperimentOverridesForTesting(null)
-  }
+  const rustGroup = await importProfilesFromArrayBuffer('simple.prof', arrayBuffer, {
+    engine: 'experimental',
+  })
+  expect(rustGroup).not.toBeNull()
+  expect(compareProfileGroups(legacyGroup!, rustGroup!)).toEqual([])
 })

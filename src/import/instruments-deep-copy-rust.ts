@@ -1,9 +1,9 @@
-import fs from 'fs'
 import initRustInstrumentsDeepCopy, {
   initSync as initRustInstrumentsDeepCopySync,
   parse_instruments_deep_copy_json as parseInstrumentsDeepCopyJson,
 } from '../../rust/instruments-deep-copy/pkg/instruments_deep_copy.js'
 import {CallTreeProfileBuilder, FrameInfo, Profile} from '../lib/profile'
+import {readNodeFileSync} from '../lib/node-shim'
 import {isExperimentEnabled} from '../lib/runtime-config'
 import {ByteFormatter, TimeFormatter} from '../lib/value-formatters'
 
@@ -29,7 +29,7 @@ let modulePromise: Promise<void> | null = null
 async function initializeModule(): Promise<void> {
   if (typeof window === 'undefined') {
     initRustInstrumentsDeepCopySync(
-      fs.readFileSync('rust/instruments-deep-copy/pkg/instruments_deep_copy_bg.wasm'),
+      readNodeFileSync('rust/instruments-deep-copy/pkg/instruments_deep_copy_bg.wasm'),
     )
     return
   }

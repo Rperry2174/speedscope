@@ -3,30 +3,60 @@ import {Profile, ProfileGroup} from '../lib/profile'
 import {
   importFromChromeCPUProfile,
   importFromChromeTimeline,
-  isChromeTimeline,
   importFromOldV8CPUProfile,
+  isChromeTimeline,
   isChromeTimelineObject,
 } from './chrome'
 import {importFromStackprof} from './stackprof'
 import {importFromInstrumentsDeepCopy, importFromInstrumentsTrace} from './instruments'
 import {importFromBGFlameGraph} from './bg-flamegraph'
-import {importFromFirefox} from './firefox'
+import {importFromFirefoxBuffer} from './firefox'
 import {importSpeedscopeProfiles} from '../lib/file-format'
 import {importFromV8ProfLog} from './v8proflog'
 import {importFromV8ProfLogBuffer} from './v8-prof-log-rust'
 import {importFromLinuxPerf} from './linux-tools-perf'
 import {importFromHaskell} from './haskell'
 import {importFromSafari} from './safari'
-import {ProfileDataSource, TextProfileDataSource, MaybeCompressedDataReader} from './utils'
+import {MaybeCompressedDataReader, ProfileDataSource, TextProfileDataSource} from './utils'
 import {importAsPprofProfile} from './pprof'
 import {decodeBase64WithBestAvailableImplementation} from '../lib/base64-decoder-rust'
 import {importFromChromeHeapProfile} from './v8heapalloc'
-import {isTraceEventFormatted, importTraceEvents} from './trace-event'
+import {importTraceEvents, isTraceEventFormatted} from './trace-event'
 import {loadRustTraceEventImporter, shouldUseRustTraceEventImporter} from './trace-event-rust'
 import {importFromCallgrind} from './callgrind'
 import {importFromPapyrus} from './papyrus'
 import {importFromPMCStatCallGraph, importFromPMCStatCallGraphTs} from './pmcstat-callgraph'
+import {annotatePerfRun, notePerfMilestone, timePerfAsync, timePerfSync} from '../lib/perf'
+import {isExperimentEnabled} from '../lib/runtime-config'
+import {
+  getVisibleImportEngine,
+  resolveImportProfileOptions,
+  type ImportEngine,
+  type ImportProfileOptions,
+  type ImportRunResult,
+} from '../experimental/contracts'
+import {
+  runImportEngine as runImportEngineControl,
+  runWithImportEngine,
+} from '../experimental/engine'
+
+export type {
+  ImportComparisonResult,
+  ImportEngine,
+  ImportProfileOptions,
+  ImportRunResult,
+} from '../experimental/contracts'
+export {
+  getDefaultImportComparisonMode,
+  getDefaultImportEngine,
+  normalizeCompareImport,
+  normalizeImportEngine,
+} from '../experimental/contracts'
+export {canonicalizeImportedProfileGroup, getImportEngineExperimentOverrides} from '../experimental/engine'
+
 type JfrModule = typeof import('./java-flight-recorder')
+type ProfileDataSourceFactory = () => ProfileDataSource | Promise<ProfileDataSource>
+type ProfileGroupFactory = (engine: ImportEngine) => Promise<ProfileGroup | null>
 
 let jfrModulePromise: Promise<JfrModule> | null = null
 
@@ -36,47 +66,171 @@ async function loadJfrModule(): Promise<JfrModule> {
   }
   return jfrModulePromise
 }
-import {annotatePerfRun, notePerfMilestone, timePerfAsync, timePerfSync} from '../lib/perf'
-import {isExperimentEnabled} from '../lib/runtime-config'
+
+function cloneUint8ArrayToArrayBuffer(contents: Uint8Array): ArrayBuffer {
+  return contents.buffer.slice(
+    contents.byteOffset,
+    contents.byteOffset + contents.byteLength,
+  ) as ArrayBuffer
+}
+
+function fireAndForgetDeferredComparison(result: ImportRunResult) {
+  const deferredComparison = result.deferredComparison
+  if (!deferredComparison) {
+    return
+  }
+
+  const runDeferredComparison = () => {
+    void deferredComparison().catch(error => {
+      console.warn('Background import comparison failed', error)
+    })
+  }
+
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(runDeferredComparison)
+    })
+    return
+  }
+
+  if (typeof setTimeout === 'function') {
+    setTimeout(runDeferredComparison, 0)
+    return
+  }
+
+  runDeferredComparison()
+}
+
+async function settleImportRun(resultPromise: Promise<ImportRunResult>): Promise<ProfileGroup | null> {
+  const result = await resultPromise
+  fireAndForgetDeferredComparison(result)
+  return result.profileGroup
+}
+
+async function runImportFlow(
+  runEngine: ProfileGroupFactory,
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  const resolvedOptions = resolveImportProfileOptions(options)
+  const visibleEngine = getVisibleImportEngine(resolvedOptions.engine, resolvedOptions.compare)
+
+  annotatePerfRun('import_engine_requested', resolvedOptions.engine)
+  annotatePerfRun('import_engine_visible', visibleEngine)
+  annotatePerfRun('compare_import', resolvedOptions.compare)
+  annotatePerfRun('import_comparison_mode', resolvedOptions.comparisonMode)
+
+  return runImportEngineControl(runEngine, resolvedOptions)
+}
+
+export async function importWithEngine(
+  createDataSource: ProfileDataSourceFactory,
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return runImportFlow(
+    engine =>
+      runWithImportEngine(engine, async () => {
+        const dataSource = await createDataSource()
+        return importLegacyProfileGroup(dataSource)
+      }),
+    options,
+  )
+}
+
+export async function runImportProfileGroupFromText(
+  fileName: string,
+  contents: string,
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return importWithEngine(() => new TextProfileDataSource(fileName, contents), options)
+}
 
 export async function importProfileGroupFromText(
   fileName: string,
   contents: string,
+  options?: ImportProfileOptions | null,
 ): Promise<ProfileGroup | null> {
-  return await importProfileGroup(new TextProfileDataSource(fileName, contents))
+  return settleImportRun(runImportProfileGroupFromText(fileName, contents, options))
+}
+
+export async function runImportProfileGroupFromBase64(
+  fileName: string,
+  b64contents: string,
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return importWithEngine(async () => {
+    const decodedBytes = await decodeBase64WithBestAvailableImplementation(b64contents)
+    return MaybeCompressedDataReader.fromArrayBuffer(
+      fileName,
+      cloneUint8ArrayToArrayBuffer(decodedBytes),
+    )
+  }, options)
 }
 
 export async function importProfileGroupFromBase64(
   fileName: string,
   b64contents: string,
+  options?: ImportProfileOptions | null,
 ): Promise<ProfileGroup | null> {
-  const decodedBytes = await decodeBase64WithBestAvailableImplementation(b64contents)
-  return await importProfileGroup(
-    MaybeCompressedDataReader.fromArrayBuffer(
-      fileName,
-      decodedBytes.buffer as ArrayBuffer,
-    ),
-  )
+  return settleImportRun(runImportProfileGroupFromBase64(fileName, b64contents, options))
 }
 
-export async function importProfilesFromFile(file: File): Promise<ProfileGroup | null> {
-  return importProfileGroup(MaybeCompressedDataReader.fromFile(file))
+export async function runImportProfilesFromFile(
+  file: File,
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return importWithEngine(() => MaybeCompressedDataReader.fromFile(file), options)
+}
+
+export async function importProfilesFromFile(
+  file: File,
+  options?: ImportProfileOptions | null,
+): Promise<ProfileGroup | null> {
+  return settleImportRun(runImportProfilesFromFile(file, options))
+}
+
+export async function runImportProfilesFromArrayBuffer(
+  fileName: string,
+  buffer: ArrayBuffer,
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return importWithEngine(() => MaybeCompressedDataReader.fromArrayBuffer(fileName, buffer), options)
 }
 
 export async function importProfilesFromArrayBuffer(
   fileName: string,
   buffer: ArrayBuffer,
+  options?: ImportProfileOptions | null,
 ): Promise<ProfileGroup | null> {
-  return importProfileGroup(MaybeCompressedDataReader.fromArrayBuffer(fileName, buffer))
+  return settleImportRun(runImportProfilesFromArrayBuffer(fileName, buffer, options))
 }
 
-async function importProfileGroup(dataSource: ProfileDataSource): Promise<ProfileGroup | null> {
+export async function runImportFromFileSystemDirectoryEntry(
+  entry: FileSystemDirectoryEntry,
+  options?: ImportProfileOptions | null,
+): Promise<ImportRunResult> {
+  return runImportFlow(engine => runWithImportEngine(engine, () => importFromInstrumentsTrace(entry)), options)
+}
+
+export async function importFromFileSystemDirectoryEntry(
+  entry: FileSystemDirectoryEntry,
+  options?: ImportProfileOptions | null,
+) {
+  const profileGroup = await settleImportRun(runImportFromFileSystemDirectoryEntry(entry, options))
+  if (!profileGroup) {
+    throw new Error('Instruments trace import unexpectedly returned null')
+  }
+  return profileGroup
+}
+
+export async function importLegacyProfileGroup(
+  dataSource: ProfileDataSource,
+): Promise<ProfileGroup | null> {
   const fileName = await dataSource.name()
   annotatePerfRun('file_name', fileName)
   updateFormatGuess(fileName)
 
   const profileGroup = await timePerfAsync('import_profile_group_total', () =>
-    _importProfileGroup(dataSource),
+    _importLegacyProfileGroup(dataSource),
   )
   if (profileGroup) {
     if (!profileGroup.name) {
@@ -90,6 +244,12 @@ async function importProfileGroup(dataSource: ProfileDataSource): Promise<Profil
     return profileGroup
   }
   return null
+}
+
+export async function importExperimentalProfileGroup(
+  dataSource: ProfileDataSource,
+): Promise<ProfileGroup | null> {
+  return runWithImportEngine('experimental', () => importLegacyProfileGroup(dataSource))
 }
 
 function toGroup(profile: Profile | null): ProfileGroup | null {
@@ -149,7 +309,7 @@ function parseJSON(contents: ReturnType<ProfileDataSource['readAsText']> extends
   return timePerfSync('parse_json_dispatch', () => contents.parseAsJSON())
 }
 
-async function _importProfileGroup(dataSource: ProfileDataSource): Promise<ProfileGroup | null> {
+async function _importLegacyProfileGroup(dataSource: ProfileDataSource): Promise<ProfileGroup | null> {
   const fileName = await dataSource.name()
 
   const buffer = await timePerfAsync('read_array_buffer', () => dataSource.readAsArrayBuffer())
@@ -211,7 +371,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   } else if (fileName.endsWith('.linux-perf.txt')) {
     console.log('Importing as output of linux perf script')
     annotatePerfRun('detected_format', 'linux-perf')
-    const result = timePerfSync('import_linux_perf', () => importFromLinuxPerf(contents))
+    const result = await timePerfAsync('import_linux_perf', () => importFromLinuxPerf(contents, buffer))
     notePerfMilestone('import_parse_finished')
     return result
   } else if (fileName.endsWith('.collapsedstack.txt')) {
@@ -289,7 +449,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
     } else if (parsed['systemHost'] && parsed['systemHost']['name'] == 'Firefox') {
       console.log('Importing as Firefox profile')
       annotatePerfRun('detected_format', 'firefox')
-      const result = timePerfSync('import_firefox', () => toGroup(importFromFirefox(parsed)))
+      const result = await timePerfAsync('import_firefox', async () =>
+        toGroup(await importFromFirefoxBuffer(parsed, buffer)),
+      )
       notePerfMilestone('import_parse_finished')
       return result
     } else if (isChromeTimeline(parsed)) {
@@ -423,7 +585,9 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
       return result
     }
 
-    const fromLinuxPerf = timePerfSync('import_linux_perf_probe', () => importFromLinuxPerf(contents))
+    const fromLinuxPerf = await timePerfAsync('import_linux_perf_probe', () =>
+      importFromLinuxPerf(contents, buffer),
+    )
     if (fromLinuxPerf) {
       console.log('Importing from linux perf script output')
       annotatePerfRun('detected_format', 'linux-perf')
@@ -454,8 +618,4 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
 
   // Unrecognized format
   return null
-}
-
-export async function importFromFileSystemDirectoryEntry(entry: FileSystemDirectoryEntry) {
-  return importFromInstrumentsTrace(entry)
 }
