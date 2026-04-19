@@ -3,7 +3,7 @@ import * as path from 'path'
 
 import {exportProfileGroup} from './file-format'
 import {dumpProfile} from './test-utils'
-import {setExperimentOverridesForTesting} from './runtime-config'
+import {ExperimentFlags, setExperimentOverridesForTesting} from './runtime-config'
 import {importProfilesFromArrayBuffer} from '../import'
 import {ProfileGroup} from './profile'
 
@@ -34,7 +34,7 @@ export function compareProfileGroups(a: ProfileGroup, b: ProfileGroup): string[]
 
 async function importFixtureWithExperiment(
   fixturePath: string,
-  overrides: {optimizedForEachCall?: boolean; deferDemangle?: boolean} | null,
+  overrides: Partial<ExperimentFlags> | null,
 ) {
   const buffer = fs.readFileSync(fixturePath)
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
@@ -48,7 +48,7 @@ async function importFixtureWithExperiment(
 
 export async function compareFixtureParity(
   fixturePath: string,
-  overrides: {optimizedForEachCall?: boolean; deferDemangle?: boolean},
+  overrides: Partial<ExperimentFlags>,
 ): Promise<ProfileParityResult> {
   const legacy = await importFixtureWithExperiment(fixturePath, {
     optimizedForEachCall: false,

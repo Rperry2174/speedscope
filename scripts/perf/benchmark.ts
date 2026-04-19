@@ -68,6 +68,7 @@ function buildQueryString(options: ExperimentRunOptions): string {
   const experimentEntries: [keyof ExperimentFlags, boolean][] = [
     ['deferDemangle', options.experiments.deferDemangle],
     ['optimizedForEachCall', options.experiments.optimizedForEachCall],
+    ['rustFuzzyFind', options.experiments.rustFuzzyFind],
   ]
   for (const [name, enabled] of experimentEntries) {
     if (enabled) enabledExperiments.push(name)

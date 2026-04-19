@@ -39,6 +39,7 @@ Flags:
 
 - deferDemangle: ${report.experiment.experiments.deferDemangle}
 - optimizedForEachCall: ${report.experiment.experiments.optimizedForEachCall}
+- rustFuzzyFind: ${report.experiment.experiments.rustFuzzyFind}
 
 ## Fixture results
 
