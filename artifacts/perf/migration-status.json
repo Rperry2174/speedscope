@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-04-19T13:08:34.195Z",
+  "generatedAt": "2026-04-19T14:10:17.659Z",
   "counts": {
-    "ts": 121,
+    "ts": 124,
     "tsx": 23,
     "rs": 1,
     "wasm": 1
   },
   "lineCounts": {
-    "ts": 17877,
+    "ts": 18656,
     "tsx": 5544,
     "rs": 240
   },
@@ -15,7 +15,12 @@
     "src/lib/fuzzy-find.ts",
     "rust/fuzzy-find/src/lib.rs",
     "rust/fuzzy-find/pkg/fuzzy_find.js",
-    "rust/fuzzy-find/pkg/fuzzy_find_bg.wasm"
+    "rust/fuzzy-find/pkg/fuzzy_find_bg.wasm",
+    "src/lib/profile-search.ts",
+    "src/lib/profile-search-rust.ts",
+    "rust/profile-search/src/lib.rs",
+    "rust/profile-search/pkg/profile_search.js",
+    "rust/profile-search/pkg/profile_search_bg.wasm"
   ],
   "shardSummary": [
     {

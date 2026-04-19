@@ -69,20 +69,33 @@ Takeaway: on representative supported fixtures, the common user-visible cost is 
    - Moved demangling out of the blocking pre-render path behind an experiment flag.
    - First meaningful paint is allowed to occur before symbol demangling completes.
 
-### First concrete TypeScript -> Rust migration
+### First concrete TypeScript -> Rust migrations
 
 - Added a Rust/WASM implementation of `src/lib/fuzzy-find.ts` as the first actual migration that fit the repo's constraints well.
-- The Rust code lives in:
-  - `rust/fuzzy-find/`
-- The browser/runtime wrapper lives in:
-  - `src/lib/fuzzy-find-rust.ts`
-- The shared/public API remains stable for callers:
-  - `src/lib/fuzzy-find.ts`
-- The migration is gated behind:
-  - `rustFuzzyFind=1`
-  - `SPEEDSCOPE_RUSTFUZZYFIND=1`
-- Verified parity against the TypeScript implementation in:
-  - `src/lib/fuzzy-find.test.ts`
+  - Rust crate:
+    - `rust/fuzzy-find/`
+  - Browser/runtime wrapper:
+    - `src/lib/fuzzy-find-rust.ts`
+  - Public API:
+    - `src/lib/fuzzy-find.ts`
+  - Gated behind:
+    - `rustFuzzyFind=1`
+    - `SPEEDSCOPE_RUSTFUZZYFIND=1`
+  - Verified in:
+    - `src/lib/fuzzy-find.test.ts`
+
+- Added a second Rust/WASM migration for the exact substring search core in `src/lib/profile-search.ts`.
+  - Rust crate:
+    - `rust/profile-search/`
+  - Browser/runtime wrapper:
+    - `src/lib/profile-search-rust.ts`
+  - Public API remains stable for callers:
+    - `src/lib/profile-search.ts`
+  - Gated behind:
+    - `rustProfileSearch=1`
+    - `SPEEDSCOPE_RUSTPROFILESEARCH=1`
+  - Verified in:
+    - `src/lib/profile-search.test.ts`
 
 ### Supporting fix
 
@@ -144,7 +157,7 @@ The current measured wins came from:
 - reducing traversal overhead in JS
 - reducing blocking work before first render
 - tightening the experiment boundary and benchmark visibility
-- migrating a small, self-contained algorithmic module (`fuzzy-find`) where the boundary was low-risk and testable
+- migrating small, self-contained algorithmic modules (`fuzzy-find` and `profile-search` exact substring matching) where the boundary was low-risk and testable
 
 That is enough to say the initial hypothesis of needing a broader rewrite is not yet supported by the browser-end-to-end data collected so far. The evidence supports selective Rust migration for isolated algorithmic modules, not a blanket rewrite.
 
@@ -172,9 +185,9 @@ In ship/experimental/stop terms:
 2. Investigate why `deferDemangle` regresses the Instruments deep-copy fixture before making it default.
 3. Use the new shard map in `docs/perf/rust-migration-strategy.md` and `scripts/perf/migration-plan.ts` to delegate Rust migration across many cloud agents rather than attempting a monolithic rewrite.
 4. Prioritize the next Rust candidates by low coupling and high algorithmic density:
-   - profile search / fuzzy-find-adjacent search code
    - import/parser stages
    - flamechart construction helpers
+   - profile core traversal
 5. Add one more render-focused candidate for the heaviest CPU profile path:
    - lazy flamechart construction
    - incremental renderer setup
