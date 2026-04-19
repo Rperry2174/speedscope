@@ -26,6 +26,11 @@ latency in SpeedScope and organize TypeScript -> Rust migration work.
 - `npm run perf:delegate-migration`
   - Launches one cloud agent per migration task shard and records agent/run URLs and
     statuses under `artifacts/perf/migration-delegation.json`
+- `npm run perf:recursive-rust-migrate`
+  - Recursively walks the repo, classifies files into Rust candidates vs keep-in-TS
+    review tasks, batches them, launches cloud agents in parallel, and writes:
+    - `artifacts/perf/recursive-migration-plan.json`
+    - `artifacts/perf/recursive-migration-dispatch.json`
 - `npm run build:rust:fuzzy-find`
   - Builds the first concrete Rust/WASM migration in this branch:
     `src/lib/fuzzy-find.ts` -> `rust/fuzzy-find/`

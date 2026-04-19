@@ -21,6 +21,7 @@
     "perf:bench": "tsx scripts/perf/benchmark.ts",
     "perf:delegate-migration": "tsx scripts/perf/delegate-migration.ts",
     "perf:migration-status": "tsx scripts/perf/migration-status.ts",
+    "perf:recursive-rust-migrate": "tsx scripts/perf/recursive-rust-migrate.ts",
     "perf:parity": "tsx scripts/perf/parity.ts",
     "perf:run": "tsx scripts/perf/run-experiment.ts",
     "perf:orchestrate": "tsx scripts/perf/cursor-orchestrator.ts"

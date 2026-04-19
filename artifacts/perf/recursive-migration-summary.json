@@ -1,0 +1,1357 @@
+{
+  "generatedAt": "2026-04-19T13:20:01.451Z",
+  "repoUrl": "https://github.com/Rperry2174/speedscope",
+  "startingRef": "cursor/speedscope-perf-orchestration-bc66",
+  "taskCount": 42,
+  "tasks": [
+    {
+      "id": "proof-point-fuzzy-find",
+      "title": "Validate Rust fuzzy-find proof point",
+      "mode": "proof-point",
+      "modelFamily": "gpt-5.4",
+      "rationale": "Use the existing Rust fuzzy-find migration as a known-good proof point and reference boundary.",
+      "verification": [
+        "npm run build:rust:fuzzy-find",
+        "npm run jest -- src/lib/fuzzy-find.test.ts"
+      ],
+      "files": [
+        "src/lib/fuzzy-find.ts",
+        "src/lib/fuzzy-find-rust.ts",
+        "rust/fuzzy-find/**"
+      ]
+    },
+    {
+      "id": "scripts-keep-ts-review-1",
+      "title": "Review keep-in-TS: scripts",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is part of the Node/SDK control plane and is better kept as TypeScript orchestration code.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "scripts/build-release.ts",
+        "scripts/dev-server.ts",
+        "scripts/esbuild-shared.ts"
+      ]
+    },
+    {
+      "id": "scripts-perf-keep-ts-review-1",
+      "title": "Review keep-in-TS: scripts/perf",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is part of the Node/SDK control plane and is better kept as TypeScript orchestration code.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "scripts/perf/benchmark.ts",
+        "scripts/perf/cursor-api.ts",
+        "scripts/perf/cursor-orchestrator.ts",
+        "scripts/perf/delegate-migration.ts",
+        "scripts/perf/fixtures.ts",
+        "scripts/perf/migration-plan.ts"
+      ]
+    },
+    {
+      "id": "scripts-perf-keep-ts-review-2",
+      "title": "Review keep-in-TS: scripts/perf",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is part of the Node/SDK control plane and is better kept as TypeScript orchestration code.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "scripts/perf/migration-status.ts",
+        "scripts/perf/parity.ts",
+        "scripts/perf/recursive-rust-migrate.ts",
+        "scripts/perf/report.ts",
+        "scripts/perf/run-experiment.ts",
+        "scripts/perf/types.ts"
+      ]
+    },
+    {
+      "id": "src-keep-ts-review-1",
+      "title": "Review keep-in-TS: src",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/speedscope.tsx"
+      ]
+    },
+    {
+      "id": "src-app-state-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/app-state",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/app-state/active-profile-state.ts",
+        "src/app-state/color-scheme.ts",
+        "src/app-state/getters.ts",
+        "src/app-state/index.ts",
+        "src/app-state/profile-group.ts"
+      ]
+    },
+    {
+      "id": "src-gl-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/gl",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/gl/canvas-context.ts",
+        "src/gl/flamechart-color-pass-renderer.ts",
+        "src/gl/flamechart-renderer.ts",
+        "src/gl/graphics.ts",
+        "src/gl/overlay-rectangle-renderer.ts",
+        "src/gl/rectangle-batch-renderer.ts"
+      ]
+    },
+    {
+      "id": "src-gl-keep-ts-review-2",
+      "title": "Review keep-in-TS: src/gl",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/gl/row-atlas.ts",
+        "src/gl/texture-renderer.ts",
+        "src/gl/utils.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-1",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/bg-flamegraph.test.ts",
+        "src/import/bg-flamegraph.ts",
+        "src/import/callgrind.test.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-2",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/callgrind.ts",
+        "src/import/chrome.test.ts",
+        "src/import/chrome.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-3",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/firefox.test.ts",
+        "src/import/firefox.ts",
+        "src/import/haskell.test.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-4",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/haskell.ts",
+        "src/import/index.test.ts",
+        "src/import/index.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-5",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/instruments.test.ts",
+        "src/import/instruments.ts",
+        "src/import/java-flight-record.mock.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-6",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/java-flight-recorder.test.ts",
+        "src/import/linux-tools-perf.test.ts",
+        "src/import/linux-tools-perf.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-7",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/papyrus.test.ts",
+        "src/import/papyrus.ts",
+        "src/import/pmcstat-callgraph.test.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-8",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/pmcstat-callgraph.ts",
+        "src/import/pprof.test.ts",
+        "src/import/profile.proto.d.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-9",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/safari.test.ts",
+        "src/import/safari.ts",
+        "src/import/stackprof.test.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-10",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/stackprof.ts",
+        "src/import/trace-event.test.ts",
+        "src/import/trace-event.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-11",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/utils.ts",
+        "src/import/v8cpuFormatter.ts",
+        "src/import/v8heapalloc.test.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-12",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This importer/parser stage is a good Rust candidate while keeping browser File/ArrayBuffer integration in TypeScript.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/v8heapalloc.ts",
+        "src/import/v8proflog.test.ts",
+        "src/import/v8proflog.ts"
+      ]
+    },
+    {
+      "id": "src-import-migrate-rust-1",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelFamily": "opus-4.6",
+      "rationale": "This file is a compute-heavy or binary-boundary core module and is a strong Rust/WASM migration candidate.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/import/java-flight-recorder.ts",
+        "src/import/pprof.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-1",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/atom.test.ts",
+        "src/lib/atom.ts",
+        "src/lib/canvas-2d-batch-renderers.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-2",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/color.test.ts",
+        "src/lib/color.ts",
+        "src/lib/emscripten.test.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-3",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/emscripten.ts",
+        "src/lib/file-format-spec.ts",
+        "src/lib/file-format.test.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-4",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/file-format.ts",
+        "src/lib/fuzzy-find-rust.ts",
+        "src/lib/fuzzy-find-rust.wasm.mock.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-5",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/fuzzy-find-types.ts",
+        "src/lib/fuzzy-find.test.ts",
+        "src/lib/hash-params.test.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-6",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/hash-params.ts",
+        "src/lib/js-source-map.test.ts",
+        "src/lib/js-source-map.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-7",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/lru-cache.test.ts",
+        "src/lib/lru-cache.ts",
+        "src/lib/math.test.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-8",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/math.ts",
+        "src/lib/perf.ts",
+        "src/lib/profile-parity.test.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-9",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/profile-parity.ts",
+        "src/lib/profile-search.test.ts",
+        "src/lib/profile-search.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-10",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/profile.test.ts",
+        "src/lib/runtime-config.ts",
+        "src/lib/stats.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-11",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/test-utils.ts",
+        "src/lib/text-utils.test.ts",
+        "src/lib/text-utils.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-12",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/utils.test.ts",
+        "src/lib/utils.ts",
+        "src/lib/value-formatters.test.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-13",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "gpt-5.4",
+      "rationale": "This library file looks algorithmic enough to evaluate as a Rust/WASM boundary with a TypeScript fallback.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/value-formatters.ts",
+        "src/lib/view-mode.ts"
+      ]
+    },
+    {
+      "id": "src-lib-migrate-rust-1",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelFamily": "opus-4.6",
+      "rationale": "This file is a compute-heavy or binary-boundary core module and is a strong Rust/WASM migration candidate.",
+      "verification": [
+        "npm run typecheck",
+        "npm run perf:parity"
+      ],
+      "files": [
+        "src/lib/flamechart.ts",
+        "src/lib/profile.ts"
+      ]
+    },
+    {
+      "id": "src-lib-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/lib",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/preact-helpers.tsx"
+      ]
+    },
+    {
+      "id": "src-lib-demangle-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/lib/demangle",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file should be reviewed before migration and likely kept in TypeScript unless a narrower boundary emerges.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/lib/demangle/demangle.test.ts",
+        "src/lib/demangle/demangle.ts",
+        "src/lib/demangle/demangle.wasm.d.ts",
+        "src/lib/demangle/index.ts"
+      ]
+    },
+    {
+      "id": "src-views-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/views",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/views/application-container.tsx",
+        "src/views/application.tsx",
+        "src/views/callee-flamegraph-view.tsx",
+        "src/views/color-chit.tsx",
+        "src/views/flamechart-detail-view.tsx",
+        "src/views/flamechart-minimap-view.tsx"
+      ]
+    },
+    {
+      "id": "src-views-keep-ts-review-2",
+      "title": "Review keep-in-TS: src/views",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/views/flamechart-pan-zoom-view.tsx",
+        "src/views/flamechart-search-view.tsx",
+        "src/views/flamechart-style.ts",
+        "src/views/flamechart-view-container.tsx",
+        "src/views/flamechart-view.tsx",
+        "src/views/flamechart-wrapper.tsx"
+      ]
+    },
+    {
+      "id": "src-views-keep-ts-review-3",
+      "title": "Review keep-in-TS: src/views",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/views/hovertip.tsx",
+        "src/views/inverted-caller-flamegraph-view.tsx",
+        "src/views/profile-select.tsx",
+        "src/views/profile-table-view.tsx",
+        "src/views/sandwich-search-view.tsx",
+        "src/views/sandwich-view.tsx"
+      ]
+    },
+    {
+      "id": "src-views-keep-ts-review-4",
+      "title": "Review keep-in-TS: src/views",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/views/scrollable-list-view.tsx",
+        "src/views/search-view.tsx",
+        "src/views/style.ts",
+        "src/views/toolbar.tsx"
+      ]
+    },
+    {
+      "id": "src-views-themes-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/views/themes",
+      "mode": "keep-ts-review",
+      "modelFamily": "composer-2",
+      "rationale": "This file is tightly coupled to browser UI, DOM, canvas, or Preact rendering and should usually remain in TypeScript.",
+      "verification": [
+        "npm run typecheck"
+      ],
+      "files": [
+        "src/views/themes/dark-theme.ts",
+        "src/views/themes/light-theme.ts",
+        "src/views/themes/theme.tsx"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "taskId": "proof-point-fuzzy-find",
+      "title": "Validate Rust fuzzy-find proof point",
+      "mode": "proof-point",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/fuzzy-find.ts",
+        "src/lib/fuzzy-find-rust.ts",
+        "rust/fuzzy-find/**"
+      ],
+      "agentId": "bc-054b26f9-c43a-463b-b270-006e63418523",
+      "agentUrl": "https://cursor.com/agents/bc-054b26f9-c43a-463b-b270-006e63418523",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-bed1e4b2-1401-48fa-bb3c-6c69c73f5430",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "scripts-keep-ts-review-1",
+      "title": "Review keep-in-TS: scripts",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "scripts/build-release.ts",
+        "scripts/dev-server.ts",
+        "scripts/esbuild-shared.ts"
+      ],
+      "agentId": "bc-55008333-01d3-40dd-907d-409b69c11e6c",
+      "agentUrl": "https://cursor.com/agents/bc-55008333-01d3-40dd-907d-409b69c11e6c",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-b0d0f34b-576c-4de3-ab71-8d2474a10f3c",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "scripts-perf-keep-ts-review-1",
+      "title": "Review keep-in-TS: scripts/perf",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "scripts/perf/benchmark.ts",
+        "scripts/perf/cursor-api.ts",
+        "scripts/perf/cursor-orchestrator.ts",
+        "scripts/perf/delegate-migration.ts",
+        "scripts/perf/fixtures.ts",
+        "scripts/perf/migration-plan.ts"
+      ],
+      "agentId": "bc-62f9e5f9-7748-4bd0-aaa3-852ac71859b3",
+      "agentUrl": "https://cursor.com/agents/bc-62f9e5f9-7748-4bd0-aaa3-852ac71859b3",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-fbb2209a-cbb7-4903-bb46-514e78125d51",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "scripts-perf-keep-ts-review-2",
+      "title": "Review keep-in-TS: scripts/perf",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "scripts/perf/migration-status.ts",
+        "scripts/perf/parity.ts",
+        "scripts/perf/recursive-rust-migrate.ts",
+        "scripts/perf/report.ts",
+        "scripts/perf/run-experiment.ts",
+        "scripts/perf/types.ts"
+      ],
+      "agentId": "bc-88b881a2-ba7f-4f3b-8744-fb6a6a9dd9b3",
+      "agentUrl": "https://cursor.com/agents/bc-88b881a2-ba7f-4f3b-8744-fb6a6a9dd9b3",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-02a01e81-dc9d-4cca-bc1f-affb65a47886",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-keep-ts-review-1",
+      "title": "Review keep-in-TS: src",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/speedscope.tsx"
+      ],
+      "agentId": "bc-001b7fd3-5200-4a16-927e-b6fb6a1cf72c",
+      "agentUrl": "https://cursor.com/agents/bc-001b7fd3-5200-4a16-927e-b6fb6a1cf72c",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-d46f6fe9-2510-42b8-b208-00753608a082",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-app-state-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/app-state",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/app-state/active-profile-state.ts",
+        "src/app-state/color-scheme.ts",
+        "src/app-state/getters.ts",
+        "src/app-state/index.ts",
+        "src/app-state/profile-group.ts"
+      ],
+      "agentId": "bc-f1df3975-8707-4102-a292-29c55c26b130",
+      "agentUrl": "https://cursor.com/agents/bc-f1df3975-8707-4102-a292-29c55c26b130",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-80a46684-68d3-4136-9a57-cf726e58bcc6",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-gl-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/gl",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/gl/canvas-context.ts",
+        "src/gl/flamechart-color-pass-renderer.ts",
+        "src/gl/flamechart-renderer.ts",
+        "src/gl/graphics.ts",
+        "src/gl/overlay-rectangle-renderer.ts",
+        "src/gl/rectangle-batch-renderer.ts"
+      ],
+      "agentId": "bc-184b67aa-f279-4103-9d45-81a8296be8bd",
+      "agentUrl": "https://cursor.com/agents/bc-184b67aa-f279-4103-9d45-81a8296be8bd",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-75aac961-8ebc-4218-8dd5-2ea1f0942382",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-gl-keep-ts-review-2",
+      "title": "Review keep-in-TS: src/gl",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/gl/row-atlas.ts",
+        "src/gl/texture-renderer.ts",
+        "src/gl/utils.ts"
+      ],
+      "agentId": "bc-c4d446b1-d8c0-4bab-bc6b-a1eb1139fe6d",
+      "agentUrl": "https://cursor.com/agents/bc-c4d446b1-d8c0-4bab-bc6b-a1eb1139fe6d",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-35d5067e-0050-4437-83bf-188bf76ddb09",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-1",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/bg-flamegraph.test.ts",
+        "src/import/bg-flamegraph.ts",
+        "src/import/callgrind.test.ts"
+      ],
+      "agentId": "bc-b70e0d4d-8e9e-4572-ad91-c9168835b135",
+      "agentUrl": "https://cursor.com/agents/bc-b70e0d4d-8e9e-4572-ad91-c9168835b135",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-5b488c7b-cf71-4191-9749-5b5895da6cfc",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-2",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/callgrind.ts",
+        "src/import/chrome.test.ts",
+        "src/import/chrome.ts"
+      ],
+      "agentId": "bc-6eab609e-3491-4a22-9f1b-efefd80e552b",
+      "agentUrl": "https://cursor.com/agents/bc-6eab609e-3491-4a22-9f1b-efefd80e552b",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-f9601aa4-43a6-47b6-8be5-59f2a6cd8225",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-3",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/firefox.test.ts",
+        "src/import/firefox.ts",
+        "src/import/haskell.test.ts"
+      ],
+      "agentId": "bc-36ad628d-566b-4576-89ee-759a00c7814a",
+      "agentUrl": "https://cursor.com/agents/bc-36ad628d-566b-4576-89ee-759a00c7814a",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-1c1495e1-befc-450e-809e-0039b47505bf",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-4",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/haskell.ts",
+        "src/import/index.test.ts",
+        "src/import/index.ts"
+      ],
+      "agentId": "bc-7f279795-2efd-49bd-9517-8ba76f60b53c",
+      "agentUrl": "https://cursor.com/agents/bc-7f279795-2efd-49bd-9517-8ba76f60b53c",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-7b45b9e3-7756-4399-a636-6eee0edfd35e",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-5",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/instruments.test.ts",
+        "src/import/instruments.ts",
+        "src/import/java-flight-record.mock.ts"
+      ],
+      "agentId": "bc-314e39b5-7b62-45ee-9617-02a8f6a682c6",
+      "agentUrl": "https://cursor.com/agents/bc-314e39b5-7b62-45ee-9617-02a8f6a682c6",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-266dd159-c6a0-4302-bb9a-2ded654ac147",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-6",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/java-flight-recorder.test.ts",
+        "src/import/linux-tools-perf.test.ts",
+        "src/import/linux-tools-perf.ts"
+      ],
+      "agentId": "bc-69308715-5d7b-429f-aaaa-21cc4d45c30c",
+      "agentUrl": "https://cursor.com/agents/bc-69308715-5d7b-429f-aaaa-21cc4d45c30c",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-3de61330-4b0a-4fef-ab51-47808706f1dd",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-7",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/papyrus.test.ts",
+        "src/import/papyrus.ts",
+        "src/import/pmcstat-callgraph.test.ts"
+      ],
+      "agentId": "bc-7266d376-338b-4bb3-abd7-13326d2c14d5",
+      "agentUrl": "https://cursor.com/agents/bc-7266d376-338b-4bb3-abd7-13326d2c14d5",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-f5492282-71e2-43cc-be2f-50ff2637875e",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-8",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/pmcstat-callgraph.ts",
+        "src/import/pprof.test.ts",
+        "src/import/profile.proto.d.ts"
+      ],
+      "agentId": "bc-b8d27b4e-6b76-4e16-9d1b-d7c9da848193",
+      "agentUrl": "https://cursor.com/agents/bc-b8d27b4e-6b76-4e16-9d1b-d7c9da848193",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-b4bc4172-bd3c-423f-bf01-9b30c4babe7b",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-9",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/safari.test.ts",
+        "src/import/safari.ts",
+        "src/import/stackprof.test.ts"
+      ],
+      "agentId": "bc-ee5e2c1d-41c4-4da4-b15f-cea60d58b166",
+      "agentUrl": "https://cursor.com/agents/bc-ee5e2c1d-41c4-4da4-b15f-cea60d58b166",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-db26241a-932f-45db-a434-23e00c229d91",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-10",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/stackprof.ts",
+        "src/import/trace-event.test.ts",
+        "src/import/trace-event.ts"
+      ],
+      "agentId": "bc-0ef48549-5788-46a6-a30a-624502108cc7",
+      "agentUrl": "https://cursor.com/agents/bc-0ef48549-5788-46a6-a30a-624502108cc7",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-e165fee5-f782-4c4c-9fc2-998b3122efb8",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-11",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/utils.ts",
+        "src/import/v8cpuFormatter.ts",
+        "src/import/v8heapalloc.test.ts"
+      ],
+      "agentId": "bc-33a899a7-b846-4b77-894d-cf2499af6f96",
+      "agentUrl": "https://cursor.com/agents/bc-33a899a7-b846-4b77-894d-cf2499af6f96",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-46a9c66e-c601-4839-a86f-424045d9a4bb",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-12",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/import/v8heapalloc.ts",
+        "src/import/v8proflog.test.ts",
+        "src/import/v8proflog.ts"
+      ],
+      "agentId": "bc-37dd4512-d876-41a2-8e43-269c7c36a7e0",
+      "agentUrl": "https://cursor.com/agents/bc-37dd4512-d876-41a2-8e43-269c7c36a7e0",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-e1497e08-a970-4b3f-97e0-bb1a1f029ce0",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-import-migrate-rust-1",
+      "title": "Migrate to Rust: src/import",
+      "mode": "migrate-rust",
+      "modelId": "claude-4.6-opus-high-thinking-fast",
+      "files": [
+        "src/import/java-flight-recorder.ts",
+        "src/import/pprof.ts"
+      ],
+      "agentId": "bc-221c4225-bea9-43cd-865c-b07f71815585",
+      "agentUrl": "https://cursor.com/agents/bc-221c4225-bea9-43cd-865c-b07f71815585",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-00b65891-9b54-4d88-9327-d9c6e8619363",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-1",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/atom.test.ts",
+        "src/lib/atom.ts",
+        "src/lib/canvas-2d-batch-renderers.ts"
+      ],
+      "agentId": "bc-8468ebd2-b7dc-4d7c-b08a-69f54ddca432",
+      "agentUrl": "https://cursor.com/agents/bc-8468ebd2-b7dc-4d7c-b08a-69f54ddca432",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-e8e335ae-ace5-4a5c-96dd-a3e792f2a676",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-2",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/color.test.ts",
+        "src/lib/color.ts",
+        "src/lib/emscripten.test.ts"
+      ],
+      "agentId": "bc-a7ae2c91-eb0d-44a8-949d-29663419f8a7",
+      "agentUrl": "https://cursor.com/agents/bc-a7ae2c91-eb0d-44a8-949d-29663419f8a7",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-bd77c11c-557e-4461-9ec8-643c88466270",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-3",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/emscripten.ts",
+        "src/lib/file-format-spec.ts",
+        "src/lib/file-format.test.ts"
+      ],
+      "agentId": "bc-457eee51-4b4b-48e6-9f2b-2f5017743b5d",
+      "agentUrl": "https://cursor.com/agents/bc-457eee51-4b4b-48e6-9f2b-2f5017743b5d",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-512c4490-2e0e-484c-a8cf-e3fcf1ea7167",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-4",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/file-format.ts",
+        "src/lib/fuzzy-find-rust.ts",
+        "src/lib/fuzzy-find-rust.wasm.mock.ts"
+      ],
+      "agentId": "bc-9967e8c6-aa84-4e24-b88d-a191142dca27",
+      "agentUrl": "https://cursor.com/agents/bc-9967e8c6-aa84-4e24-b88d-a191142dca27",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-a14f9fb7-9d9a-4596-a6c4-a9687229d0ef",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-5",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/fuzzy-find-types.ts",
+        "src/lib/fuzzy-find.test.ts",
+        "src/lib/hash-params.test.ts"
+      ],
+      "agentId": "bc-8cb471f6-b7d6-4c7d-8e14-89ac4e01f083",
+      "agentUrl": "https://cursor.com/agents/bc-8cb471f6-b7d6-4c7d-8e14-89ac4e01f083",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-01097cbb-ac19-46e6-9b66-36e1dd21457e",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-6",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/hash-params.ts",
+        "src/lib/js-source-map.test.ts",
+        "src/lib/js-source-map.ts"
+      ],
+      "agentId": "bc-93270531-7757-41a8-a0df-699d3d8ef07c",
+      "agentUrl": "https://cursor.com/agents/bc-93270531-7757-41a8-a0df-699d3d8ef07c",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-ae125de9-9790-40f1-8777-119d0d49b615",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-7",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/lru-cache.test.ts",
+        "src/lib/lru-cache.ts",
+        "src/lib/math.test.ts"
+      ],
+      "agentId": "bc-3c46e525-e30a-40a6-b072-879647591fbd",
+      "agentUrl": "https://cursor.com/agents/bc-3c46e525-e30a-40a6-b072-879647591fbd",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-e1efe44e-91cb-43c5-b425-410d5a2c6935",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-8",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/math.ts",
+        "src/lib/perf.ts",
+        "src/lib/profile-parity.test.ts"
+      ],
+      "agentId": "bc-2d79f2ea-33e3-4451-8bf1-46d3a1daf124",
+      "agentUrl": "https://cursor.com/agents/bc-2d79f2ea-33e3-4451-8bf1-46d3a1daf124",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-c9a7ec37-f670-4e33-b03d-ae95e642468d",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-9",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/profile-parity.ts",
+        "src/lib/profile-search.test.ts",
+        "src/lib/profile-search.ts"
+      ],
+      "agentId": "bc-aac7de8e-e416-4bdf-ae86-0bfb16303d73",
+      "agentUrl": "https://cursor.com/agents/bc-aac7de8e-e416-4bdf-ae86-0bfb16303d73",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-f3e17934-893a-4815-9bcb-fb59cb4b30b5",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-10",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/profile.test.ts",
+        "src/lib/runtime-config.ts",
+        "src/lib/stats.ts"
+      ],
+      "agentId": "bc-5e66d9af-7c48-4391-84ce-cfb886f5d67b",
+      "agentUrl": "https://cursor.com/agents/bc-5e66d9af-7c48-4391-84ce-cfb886f5d67b",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-93c201af-e6cd-414b-bcd7-97fceb4a50c1",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-11",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/test-utils.ts",
+        "src/lib/text-utils.test.ts",
+        "src/lib/text-utils.ts"
+      ],
+      "agentId": "bc-d0b1ab98-7e85-4233-94d8-e3b4d86cfe6f",
+      "agentUrl": "https://cursor.com/agents/bc-d0b1ab98-7e85-4233-94d8-e3b4d86cfe6f",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-b36e3835-a534-4adf-a25c-4b5135300b45",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-12",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/utils.test.ts",
+        "src/lib/utils.ts",
+        "src/lib/value-formatters.test.ts"
+      ],
+      "agentId": "bc-68c9d383-d248-4225-b460-3a527ef63793",
+      "agentUrl": "https://cursor.com/agents/bc-68c9d383-d248-4225-b460-3a527ef63793",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-7c2d9e60-2b6e-4102-9c1a-82dc4c05b531",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-13",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "gpt-5.4-high",
+      "files": [
+        "src/lib/value-formatters.ts",
+        "src/lib/view-mode.ts"
+      ],
+      "agentId": "bc-0d9ac9e5-cd69-4593-a5b8-afc229d6254a",
+      "agentUrl": "https://cursor.com/agents/bc-0d9ac9e5-cd69-4593-a5b8-afc229d6254a",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-95ca27ab-5140-4901-882d-ee7223091c46",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-migrate-rust-1",
+      "title": "Migrate to Rust: src/lib",
+      "mode": "migrate-rust",
+      "modelId": "claude-4.6-opus-high-thinking-fast",
+      "files": [
+        "src/lib/flamechart.ts",
+        "src/lib/profile.ts"
+      ],
+      "agentId": "bc-ea0ca89d-3891-4b8c-84ef-d2aa259668a5",
+      "agentUrl": "https://cursor.com/agents/bc-ea0ca89d-3891-4b8c-84ef-d2aa259668a5",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-2b3c572e-92f8-4569-90b0-c711ef094d1c",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/lib",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/lib/preact-helpers.tsx"
+      ],
+      "agentId": "bc-913328c7-1cf6-4b4a-b04a-e5c91807a63f",
+      "agentUrl": "https://cursor.com/agents/bc-913328c7-1cf6-4b4a-b04a-e5c91807a63f",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-eb6210fe-ea2a-4335-83c6-38612f136c8b",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-lib-demangle-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/lib/demangle",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/lib/demangle/demangle.test.ts",
+        "src/lib/demangle/demangle.ts",
+        "src/lib/demangle/demangle.wasm.d.ts",
+        "src/lib/demangle/index.ts"
+      ],
+      "agentId": "bc-c70d568e-f478-4f31-ae68-3e84edbee4e1",
+      "agentUrl": "https://cursor.com/agents/bc-c70d568e-f478-4f31-ae68-3e84edbee4e1",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-baac6c48-0d4c-4d1c-ad0f-64a5163f1b3f",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-views-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/views",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/views/application-container.tsx",
+        "src/views/application.tsx",
+        "src/views/callee-flamegraph-view.tsx",
+        "src/views/color-chit.tsx",
+        "src/views/flamechart-detail-view.tsx",
+        "src/views/flamechart-minimap-view.tsx"
+      ],
+      "agentId": "bc-454e3665-6658-4648-950b-afc41c32f06f",
+      "agentUrl": "https://cursor.com/agents/bc-454e3665-6658-4648-950b-afc41c32f06f",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-98bd9ba0-4c82-4928-8113-acf0bce619cb",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-views-keep-ts-review-2",
+      "title": "Review keep-in-TS: src/views",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/views/flamechart-pan-zoom-view.tsx",
+        "src/views/flamechart-search-view.tsx",
+        "src/views/flamechart-style.ts",
+        "src/views/flamechart-view-container.tsx",
+        "src/views/flamechart-view.tsx",
+        "src/views/flamechart-wrapper.tsx"
+      ],
+      "agentId": "bc-56cb72d0-41e8-4b4c-ac85-d575cc035170",
+      "agentUrl": "https://cursor.com/agents/bc-56cb72d0-41e8-4b4c-ac85-d575cc035170",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-31c6f01b-d088-425f-ba90-28af1b37cc04",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-views-keep-ts-review-3",
+      "title": "Review keep-in-TS: src/views",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/views/hovertip.tsx",
+        "src/views/inverted-caller-flamegraph-view.tsx",
+        "src/views/profile-select.tsx",
+        "src/views/profile-table-view.tsx",
+        "src/views/sandwich-search-view.tsx",
+        "src/views/sandwich-view.tsx"
+      ],
+      "agentId": "bc-79bc927f-3421-48ae-bf96-3ca17244cf9c",
+      "agentUrl": "https://cursor.com/agents/bc-79bc927f-3421-48ae-bf96-3ca17244cf9c",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-0fdb4816-253c-4782-9941-466bea887fc6",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-views-keep-ts-review-4",
+      "title": "Review keep-in-TS: src/views",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/views/scrollable-list-view.tsx",
+        "src/views/search-view.tsx",
+        "src/views/style.ts",
+        "src/views/toolbar.tsx"
+      ],
+      "agentId": "bc-d505551d-8260-4723-8096-6633676e260c",
+      "agentUrl": "https://cursor.com/agents/bc-d505551d-8260-4723-8096-6633676e260c",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-055479a8-dd37-40b0-a91a-bbddfcfdb669",
+      "status": "CREATING"
+    },
+    {
+      "taskId": "src-views-themes-keep-ts-review-1",
+      "title": "Review keep-in-TS: src/views/themes",
+      "mode": "keep-ts-review",
+      "modelId": "composer-2",
+      "files": [
+        "src/views/themes/dark-theme.ts",
+        "src/views/themes/light-theme.ts",
+        "src/views/themes/theme.tsx"
+      ],
+      "agentId": "bc-14a05749-766c-4283-ae34-05ac4b9167cb",
+      "agentUrl": "https://cursor.com/agents/bc-14a05749-766c-4283-ae34-05ac4b9167cb",
+      "branchName": "cursor/speedscope-perf-orchestration-bc66",
+      "runId": "run-37954727-9724-467c-becf-d3e7116a3190",
+      "status": "CREATING"
+    }
+  ]
+}
