@@ -1,7 +1,33 @@
+import fs from 'fs'
+import path from 'path'
 import {fuzzyMatchStrings, fuzzyMatchStringsTs} from './fuzzy-find'
-import {loadRustFuzzyMatcher} from './fuzzy-find-rust'
+import {
+  fuzzy_match_strings_json as fuzzyMatchStringsJsonFromRust,
+  initSync as initRustFuzzyFindSync,
+} from '../../rust/fuzzy-find/pkg/fuzzy_find.js'
+import {
+  loadRustFuzzyMatcher,
+  resetRustFuzzyMatcherForTesting,
+  setRustFuzzyMatcherTestingHooks,
+} from './fuzzy-find-rust'
 import {setExperimentOverridesForTesting} from './runtime-config'
 import {sortBy} from './utils'
+
+function loadDirectRustMatcher() {
+  const wasmModule = fs.readFileSync(
+    path.join(process.cwd(), 'rust', 'fuzzy-find', 'pkg', 'fuzzy_find_bg.wasm'),
+  )
+  const wasmBytes = wasmModule.buffer.slice(
+    wasmModule.byteOffset,
+    wasmModule.byteOffset + wasmModule.byteLength,
+  )
+  initRustFuzzyFindSync(wasmBytes)
+  return (text: string, pattern: string) => {
+    const result = fuzzyMatchStringsJsonFromRust(text, pattern)
+    if (!result || result === 'null') return null
+    return JSON.parse(result)
+  }
+}
 
 function assertMatches(texts: string[], pattern: string, expectedResults: string[]) {
   const results: {score: number; highlighted: string}[] = []
@@ -84,11 +110,12 @@ describe('fuzzyMatchStrings', () => {
 
 describe('rust fuzzy matcher parity', () => {
   afterEach(() => {
+    resetRustFuzzyMatcherForTesting()
     setExperimentOverridesForTesting(null)
   })
 
-  test('matches TypeScript implementation for representative cases', async () => {
-    const rustMatcher = await loadRustFuzzyMatcher()
+  test('generated Rust/WASM matcher matches the TypeScript implementation for representative cases', () => {
+    const rustMatcher = loadDirectRustMatcher()
     const cases: Array<{text: string; pattern: string}> = [
       {text: 'hello', pattern: 'hello'},
       {text: 'HELLO', pattern: 'hello'},
@@ -124,5 +151,28 @@ describe('rust fuzzy matcher parity', () => {
 
   test('public API stays aligned with the TypeScript fallback when rust flag is off', () => {
     expect(fuzzyMatchStrings('hello world', 'hw')).toEqual(fuzzyMatchStringsTs('hello world', 'hw'))
+  })
+
+  test('falls back to TypeScript when wasm initialization fails', () => {
+    setExperimentOverridesForTesting({rustFuzzyFind: true})
+    setRustFuzzyMatcherTestingHooks({
+      initializeModule: async () => {
+        throw new Error('init failed')
+      },
+    })
+
+    expect(fuzzyMatchStrings('hello world', 'hw')).toEqual(fuzzyMatchStringsTs('hello world', 'hw'))
+  })
+
+  test('falls back to TypeScript when wasm execution throws after initialization', async () => {
+    setRustFuzzyMatcherTestingHooks({
+      initializeModule: async () => {},
+      fuzzyMatchStringsJson: () => {
+        throw new Error('execution failed')
+      },
+    })
+
+    const rustMatcher = await loadRustFuzzyMatcher()
+    expect(rustMatcher('hello world', 'hw')).toEqual(fuzzyMatchStringsTs('hello world', 'hw'))
   })
 })
