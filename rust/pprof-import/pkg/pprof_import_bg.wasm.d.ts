@@ -1,8 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
-export const import_pprof_json: (a: number, b: number) => [number, number];
-export const __wbindgen_export_0: WebAssembly.Table;
-export const __wbindgen_malloc: (a: number, b: number) => number;
-export const __wbindgen_free: (a: number, b: number, c: number) => void;
-export const __wbindgen_start: () => void;
+export function decode_pprof_to_json(a: number, b: number, c: number): void;
+export function __wbindgen_add_to_stack_pointer(a: number): number;
+export function __wbindgen_malloc(a: number, b: number): number;
+export function __wbindgen_free(a: number, b: number, c: number): void;

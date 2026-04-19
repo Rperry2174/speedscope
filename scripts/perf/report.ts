@@ -40,6 +40,7 @@ Flags:
 - deferDemangle: ${report.experiment.experiments.deferDemangle}
 - optimizedForEachCall: ${report.experiment.experiments.optimizedForEachCall}
 - rustFuzzyFind: ${report.experiment.experiments.rustFuzzyFind}
+- rustPprofImport: ${report.experiment.experiments.rustPprofImport}
 - rustHaskellImport: ${report.experiment.experiments.rustHaskellImport}
 - rustInstrumentsDeepCopy: ${report.experiment.experiments.rustInstrumentsDeepCopy}
 

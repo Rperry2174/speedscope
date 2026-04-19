@@ -136,7 +136,7 @@ async function _importProfileGroup(dataSource: ProfileDataSource): Promise<Profi
   const buffer = await timePerfAsync('read_array_buffer', () => dataSource.readAsArrayBuffer())
 
   {
-    const profile = timePerfSync('import_pprof_probe', () => importAsPprofProfile(buffer))
+    const profile = await timePerfAsync('import_pprof_probe', () => importAsPprofProfile(buffer))
     if (profile) {
       console.log('Importing as protobuf encoded pprof file')
       annotatePerfRun('detected_format', 'pprof')

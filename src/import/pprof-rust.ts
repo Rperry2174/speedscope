@@ -1,99 +1,59 @@
-import initPprofWasm, {
-  import_pprof_json as importPprofJson,
-} from '../../rust/pprof-import/pkg/pprof_import.js'
-import wasmBinaryPath from '../../rust/pprof-import/pkg/pprof_import_bg.wasm'
-import {FrameInfo, StackListProfileBuilder, Profile} from '../lib/profile'
-import {TimeFormatter, ByteFormatter} from '../lib/value-formatters'
 import {isExperimentEnabled} from '../lib/runtime-config'
-import {importAsPprofProfile as importAsPprofProfileTs} from './pprof'
-
-interface PprofFrameInfo {
-  key: string
-  name: string
-  file?: string
-  line?: number
-}
-
-interface PprofSample {
-  stack: number[]
-  weight: number
-}
-
-interface PprofResult {
-  frames: PprofFrameInfo[]
-  samples: PprofSample[]
-  sample_unit: string | null
-  sample_type: string | null
-}
+import {PprofImportPayload} from './pprof-format'
 
 let modulePromise: Promise<void> | null = null
+let rustDecoder: ((rawProfile: ArrayBuffer) => PprofImportPayload | null) | null = null
 
 async function initializeModule(): Promise<void> {
-  await initPprofWasm({module_or_path: wasmBinaryPath as unknown as string})
+  if (typeof window === 'undefined') {
+    throw new Error('Rust pprof decoder is only available in browser-like environments')
+  }
+
+  const [{default: initRustPprofImport, decode_pprof_to_json: decodePprofToJson}, wasmModule] =
+    await Promise.all([
+      import('../../rust/pprof-import/pkg/pprof_import.js'),
+      import('../../rust/pprof-import/pkg/pprof_import_bg.wasm'),
+    ])
+
+  await initRustPprofImport({module_or_path: wasmModule.default as unknown as string})
+
+  rustDecoder = (rawProfile: ArrayBuffer) => {
+    const result = decodePprofToJson(new Uint8Array(rawProfile))
+    if (!result || result === 'null') return null
+    return JSON.parse(result) as PprofImportPayload
+  }
 }
 
-async function ensureModule(): Promise<void> {
+export async function loadRustPprofDecoder(): Promise<(rawProfile: ArrayBuffer) => PprofImportPayload | null> {
   if (!modulePromise) {
     modulePromise = initializeModule()
   }
   await modulePromise
+  if (!rustDecoder) {
+    throw new Error('Rust pprof decoder failed to initialize')
+  }
+  return rustDecoder
 }
 
-function buildProfileFromResult(result: PprofResult): Profile {
-  const profileBuilder = new StackListProfileBuilder()
-
-  if (result.sample_unit) {
-    switch (result.sample_unit) {
-      case 'nanoseconds':
-      case 'microseconds':
-      case 'milliseconds':
-      case 'seconds':
-        profileBuilder.setValueFormatter(new TimeFormatter(result.sample_unit))
-        break
-      case 'bytes':
-        profileBuilder.setValueFormatter(new ByteFormatter())
-        break
-    }
-  }
-
-  const frames = result.frames
-
-  for (const sample of result.samples) {
-    const stack: FrameInfo[] = []
-    for (const frameIdx of sample.stack) {
-      if (frameIdx < frames.length) {
-        const f = frames[frameIdx]
-        const fi: FrameInfo = {key: f.key, name: f.name}
-        if (f.file != null) fi.file = f.file
-        if (f.line != null) fi.line = f.line
-        stack.push(fi)
-      }
-    }
-    profileBuilder.appendSampleWithWeight(stack, sample.weight)
-  }
-
-  return profileBuilder.build()
+function preloadRustPprofDecoder() {
+  if (rustDecoder != null || modulePromise != null) return
+  loadRustPprofDecoder()
+    .then(decoder => {
+      rustDecoder = decoder
+    })
+    .catch(() => {
+      rustDecoder = null
+    })
 }
 
-export async function importAsPprofProfileRust(rawProfile: ArrayBuffer): Promise<Profile | null> {
-  await ensureModule()
-
-  const jsonStr = importPprofJson(new Uint8Array(rawProfile))
-  if (!jsonStr || jsonStr === 'null') return null
-
-  const result: PprofResult = JSON.parse(jsonStr)
-  return buildProfileFromResult(result)
+export function shouldUseRustPprofDecoder() {
+  return isExperimentEnabled('rustPprofImport')
 }
 
-export async function importAsPprofProfileWithFallback(
-  rawProfile: ArrayBuffer,
-): Promise<Profile | null> {
-  if (isExperimentEnabled('rustPprofImport')) {
-    try {
-      return await importAsPprofProfileRust(rawProfile)
-    } catch {
-      return importAsPprofProfileTs(rawProfile)
-    }
+export function getLoadedRustPprofDecoder(): ((rawProfile: ArrayBuffer) => PprofImportPayload | null) | null {
+  if (!shouldUseRustPprofDecoder()) {
+    return null
   }
-  return importAsPprofProfileTs(rawProfile)
+  preloadRustPprofDecoder()
+  return rustDecoder
 }
